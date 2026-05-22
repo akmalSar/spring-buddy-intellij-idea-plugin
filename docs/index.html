@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spring Buddy Feature Tour</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #07111f;
+            --panel: #101c2a;
+            --panel-2: #142435;
+            --line: #284057;
+            --text: #f2fff6;
+            --muted: #b7c7d4;
+            --green: #78d64b;
+            --green-2: #1f8f3a;
+            --blue: #35c5ff;
+            --blue-2: #2d68ff;
+            --yellow: #ffd166;
+            --red: #ff6b6b;
+            --purple: #8b5cf6;
+            --teal: #14b8a6;
+            --shadow: 0 28px 70px rgba(0, 0, 0, 0.34);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background:
+                radial-gradient(circle at 84% 8%, rgba(53, 197, 255, 0.16), transparent 30%),
+                radial-gradient(circle at 12% 88%, rgba(120, 214, 75, 0.14), transparent 34%),
+                linear-gradient(135deg, #07111f 0%, #102018 56%, #071b2c 100%);
+            color: var(--text);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+        }
+
+        .deck {
+            display: grid;
+            gap: 32px;
+            padding: 32px;
+        }
+
+        .slide {
+            position: relative;
+            width: min(1280px, calc(100vw - 64px));
+            min-height: 720px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid rgba(141, 235, 255, 0.18);
+            border-radius: 34px;
+            background:
+                linear-gradient(160deg, rgba(16, 28, 42, 0.98), rgba(8, 19, 31, 0.96)),
+                radial-gradient(circle at 92% 14%, rgba(53, 197, 255, 0.16), transparent 24%);
+            box-shadow: var(--shadow);
+            padding: 58px 64px;
+            page-break-after: always;
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            right: -90px;
+            top: -90px;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(120, 214, 75, 0.16), transparent 70%);
+        }
+
+        .slide.blocker {
+            border-color: rgba(255, 107, 107, 0.35);
+            background:
+                linear-gradient(160deg, rgba(16, 28, 42, 0.98), rgba(8, 19, 31, 0.96)),
+                radial-gradient(circle at 92% 14%, rgba(255, 107, 107, 0.12), transparent 28%);
+        }
+
+        .slide.blocker::before {
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.14), transparent 70%);
+        }
+
+        .gate-flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 34px;
+            align-items: stretch;
+        }
+
+        .gate-step {
+            position: relative;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: rgba(20, 36, 53, 0.9);
+            padding: 26px 22px;
+            min-height: 180px;
+        }
+
+        .gate-step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: -22px;
+            width: 28px;
+            height: 16px;
+            background: linear-gradient(90deg, var(--red), transparent);
+            clip-path: polygon(0 36%, 60% 36%, 60% 0, 100% 50%, 60% 100%, 60% 64%, 0 64%);
+            z-index: 3;
+            transform: translateY(-50%);
+        }
+
+        .gate-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--red), rgba(255, 107, 107, 0.4));
+            color: #fff;
+            font-weight: 900;
+            font-size: 20px;
+        }
+
+        .gate-step h3 {
+            margin: 0 0 10px;
+            font-size: 20px;
+        }
+
+        .gate-step p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #dfffea;
+            background: rgba(120, 214, 75, 0.11);
+            border: 1px solid rgba(120, 214, 75, 0.34);
+            border-radius: 999px;
+            padding: 9px 16px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(42px, 5.5vw, 72px);
+            font-weight: 900; letter-spacing: -.045em; line-height: .97;
+            margin: 18px 0 14px; max-width: 920px;
+        }
+        h2 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: clamp(30px, 4.2vw, 52px);
+            font-weight: 900; letter-spacing: -.04em; line-height: .97;
+            margin: 16px 0 12px; max-width: 920px;
+        }
+        h3 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 18px; font-weight: 800; line-height: 1.1;
+            margin-bottom: 8px; color: var(--text);
+        }
+
+        p.lead {
+            max-width: 900px;
+            margin: 0 0 30px;
+            color: var(--muted);
+            font-size: 25px;
+            line-height: 1.36;
+            font-weight: 520;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            min-height: 132px;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: linear-gradient(160deg, rgba(20, 36, 53, 0.92), rgba(13, 25, 38, 0.94));
+            padding: 24px;
+        }
+
+        .card.compact {
+            min-height: 104px;
+            padding: 19px 20px;
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            color: var(--text);
+            font-size: 23px;
+            line-height: 1.08;
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.35;
+            font-weight: 520;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 26px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 9px 13px;
+            color: #effff4;
+            background: rgba(53, 197, 255, 0.12);
+            border: 1px solid rgba(53, 197, 255, 0.28);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .badge.green {
+            background: rgba(120, 214, 75, 0.13);
+            border-color: rgba(120, 214, 75, 0.34);
+        }
+
+        .badge.yellow {
+            background: rgba(255, 209, 102, 0.13);
+            border-color: rgba(255, 209, 102, 0.34);
+        }
+
+        .badge.red {
+            background: rgba(255, 107, 107, 0.13);
+            border-color: rgba(255, 107, 107, 0.34);
+            color: #ffe0e0;
+        }
+
+        .tour-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            padding: 15px 22px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--green), var(--blue));
+            color: #07111f;
+            font-weight: 900;
+            text-decoration: none;
+            box-shadow: 0 16px 38px rgba(53, 197, 255, 0.2);
+        }
+
+        .tour-link:hover {
+            transform: translateY(-1px);
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-top: 34px;
+            align-items: stretch;
+        }
+
+        .flow-step {
+            position: relative;
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: rgba(20, 36, 53, 0.9);
+            padding: 22px 18px;
+            min-height: 168px;
+        }
+
+        .flow-step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 76px;
+            right: -19px;
+            width: 28px;
+            height: 16px;
+            background: linear-gradient(90deg, var(--blue), transparent);
+            clip-path: polygon(0 36%, 60% 36%, 60% 0, 100% 50%, 60% 100%, 60% 64%, 0 64%);
+            z-index: 3;
+        }
+
+        .num {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--blue));
+            color: #07111f;
+            font-weight: 900;
+        }
+
+        .flow-step h3 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .flow-step p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .code {
+            border: 1px solid rgba(141, 235, 255, 0.18);
+            border-radius: 24px;
+            background: #07111f;
+            padding: 24px;
+            font: 600 16px/1.55 "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace;
+            color: #d9fde6;
+            white-space: pre-wrap;
+        }
+
+        .warn {
+            color: var(--yellow);
+        }
+
+        .ok {
+            color: var(--green);
+        }
+
+        .blue {
+            color: var(--blue);
+        }
+
+        .red {
+            color: var(--red);
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-top: 34px;
+        }
+
+        .stat {
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            background: rgba(20, 36, 53, 0.82);
+            padding: 22px;
+        }
+
+        .stat strong {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 18px; font-weight: 800; line-height: 1.1;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--green);
+            font-size: 34px;
+            letter-spacing: -0.04em;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        .callout {
+            margin-top: 26px;
+            border-left: 5px solid var(--green);
+            border-radius: 18px;
+            background: rgba(120, 214, 75, 0.09);
+            padding: 20px 24px;
+            color: #dcffe7;
+            font-size: 21px;
+            line-height: 1.36;
+            font-weight: 720;
+        }
+
+        .footer {
+            position: absolute;
+            left: 64px;
+            right: 64px;
+            bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            color: rgba(199, 213, 223, 0.72);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .deck {
+                gap: 0;
+                padding: 0;
+            }
+
+            .slide {
+                width: 100vw;
+                min-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="deck">
+    <section class="slide">
+        <span class="eyebrow">Spring Buddy</span>
+        <h1>The Spring plugin that makes invisible runtime behavior visible in the IDE.</h1>
+        <p class="lead">Spring Buddy is not just a style checker. It combines 218 registered inspections, Spring Java Format conventions, Lombok Buddy rules, test migration support, transaction proxy pitfall detection, persistence DataFlow analysis, eight flow diagrams, quick fixes, inlay hints, and a commit-time safety gate.</p>
+        <div class="badge-row">
+            <span class="badge green">218 inspections</span>
+            <span class="badge red">84 ERROR checks</span>
+            <span class="badge red">Pre-Commit Gate</span>
+            <span class="badge green">IDE-time feedback</span>
+            <span class="badge">Spring-aware inspections</span>
+            <span class="badge yellow">Transaction visualization</span>
+            <span class="badge yellow">8 flow diagrams</span>
+            <span class="badge">Safe quick fixes</span>
+            <span class="badge">Lombok Buddy</span>
+            <span class="badge yellow">AI refactor safety net</span>
+            <span class="badge green">Before CI pipeline</span>
+            <span class="badge blue" style="background:rgba(53,197,255,0.12);border-color:rgba(53,197,255,0.34);">DataFlow taint engine</span>
+        </div>
+        <div class="stat-row">
+            <div class="stat"><strong>218</strong><span>Registered inspections across Spring runtime pitfalls, style, tests, Lombok, persistence, and configuration.</span></div>
+            <div class="stat"><strong>84</strong><span>ERROR-level checks for definite runtime breakage that can block commits before broken code enters history.</span></div>
+            <div class="stat"><strong>8</strong><span>Dedicated flow views for transactions, Ghost Save, boundary escape, lazy init, self-invocation, SQL injection, bag problems, and N+1.</span></div>
+            <div class="stat"><strong>IDE</strong><span>Precise editor warnings, quick fixes, inlay hints, runner actions, and commit checks with no context switch.</span></div>
+        </div>
+        <a class="tour-link" href="inspections-list.html">See all 218 inspections</a>
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">Why It Is Unique</span>
+        <h2>Most tools see syntax. Spring Buddy models Spring consequences.</h2>
+        <p class="lead">The plugin focuses on bugs caused by framework behavior that is legal Java but wrong Spring: proxy bypasses, transaction boundaries, lifecycle timing, repository semantics, lazy loading, Jackson DTO traps, Lombok-generated method hazards, test false positives, and style drift.</p>
+        <div class="grid-3">
+            <article class="card">
+                <h3>Spring proxy awareness</h3>
+                <p>Flags private, final, static, self-invoked, CGLIB-blocked, constructor-triggered, async, and interface transaction patterns that Spring AOP cannot apply as expected.</p>
+            </article>
+            <article class="card">
+                <h3>Runtime risk, editor timing</h3>
+                <p>Surfaces production-class issues while the file is open: missing transactions, ignored annotations, broken Mockito calls, and lifecycle traps.</p>
+            </article>
+            <article class="card">
+                <h3>Developer-safe fixes</h3>
+                <p>Adds targeted fixes only when the edit is unambiguous: add @Transactional, remove proxy-blocking modifiers, add EnumType.STRING, add auditing listeners, wrap Streams, migrate assertions, and repair Lombok defaults.</p>
+            </article>
+            <article class="card">
+                <h3>Runtime flow diagrams</h3>
+                <p>Shows clickable inlay hints and tool windows for transaction paths, Ghost Saves, transaction-boundary escapes, lazy-init risks, self-invocation, SQL injection flow, bag problems, and N+1 paths.</p>
+            </article>
+            <article class="card">
+                <h3>Inter-procedural taint analysis</h3>
+                <p>DataFlow engine tracks detached entities and tainted strings through aliases, Optional unwraps, casts, ternaries, loops, stream lambdas, and helper methods — finding Ghost Saves, SQL injection, lazy-init leaks, boundary escapes, and N+1 paths across call boundaries.</p>
+            </article>
+            <article class="card">
+                <h3>Test ecosystem support</h3>
+                <p>Understands AssertJ, Mockito, MockMvc, ArchUnit, and helper-method assertion patterns instead of applying a single naive assertion rule.</p>
+            </article>
+            <article class="card">
+                <h3>Bundled inspection pass</h3>
+                <p>Runs Spring Buddy or Lombok Buddy after large refactors, generated code changes, or AI-assisted rewrites to catch hidden framework regressions.</p>
+            </article>
+            <article class="card">
+                <h3><span class="red">Pre-Commit Gate</span></h3>
+                <p>Git commit dialog blocks ERROR-level runtime-breaking Spring errors before they enter version control. No manual hooks, no CI delay.</p>
+            </article>
+        </div>
+
+    </section>
+
+    <section class="slide blocker">
+        <span class="eyebrow" style="background:rgba(255,107,107,0.11);border-color:rgba(255,107,107,0.34);color:#ffe0e0;">Pre-Commit Safety Gate</span>
+        <h2>Block commits that contain runtime-breaking Spring errors.</h2>
+        <p class="lead">Spring Buddy registers a Git pre-commit handler that runs ERROR-level inspections synchronously before a commit is allowed. Proxy bypasses, transaction failures, missing boundaries, and persistence crashes are surfaced as a file-oriented summary — preventing broken code from ever reaching the repository.</p>
+        <div class="gate-flow">
+            <div class="gate-step">
+                <div class="gate-icon">1</div>
+                <h3>Developer clicks Commit</h3>
+                <p>IntelliJ's Commit dialog triggers the Spring Buddy checkin handler automatically.</p>
+            </div>
+            <div class="gate-step">
+                <div class="gate-icon">2</div>
+                <h3>ERROR inspections run</h3>
+                <p>Every ERROR-level inspection is executed across the changed files in a read-action with progress.</p>
+            </div>
+            <div class="gate-step">
+                <div class="gate-icon">3</div>
+                <h3>File-oriented summary</h3>
+                <p>Violations are grouped by source file and inspection name, showing exactly what will break at runtime.</p>
+            </div>
+            <div class="gate-step">
+                <div class="gate-icon" style="background:linear-gradient(135deg,var(--green),var(--green-2));">OK</div>
+                <h3>Commit proceeds</h3>
+                <p>Only when no ERROR-level violations remain. Warnings are surfaced but never block the commit.</p>
+            </div>
+        </div>
+        <div class="callout" style="border-left-color:var(--red);background:rgba(255,107,107,0.09);color:#ffe0e0;">Runtime-breaking Spring errors are caught at commit time, not during CI or production deployment. Zero configuration required.</div>
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">How The Analysis Runs</span>
+        <h2>From code edit to actionable feedback.</h2>
+        <p class="lead">Spring Buddy plugs into IntelliJ's inspection infrastructure. Each inspection receives structured Java PSI, resolves relevant symbols, avoids brittle name guessing where possible, applies Spring-specific rules, and reports precise problems back to the editor.</p>
+        <div class="flow">
+            <div class="flow-step"><div class="num">1</div><h3>Developer edits Java</h3><p>Spring services, controllers, repositories, tests, configuration, and entities.</p></div>
+            <div class="flow-step"><div class="num">2</div><h3>IDE builds PSI</h3><p>IntelliJ exposes syntax nodes, annotations, modifiers, calls, classes, and references.</p></div>
+            <div class="flow-step"><div class="num">3</div><h3>Rules inspect nodes</h3><p>Local inspections walk methods, fields, annotations, and call chains. DataFlow engine seeds taint, propagates aliases, and follows inter-procedural boundaries.</p></div>
+            <div class="flow-step"><div class="num">4</div><h3>Spring semantics added</h3><p>Rules interpret proxy limits, transaction propagation, persistence access, lifecycle order, taint flow, and test intent.</p></div>
+            <div class="flow-step"><div class="num">5</div><h3>Feedback appears</h3><p>Errors, warnings, quick fixes, tooltips, inlay hints, and runner output guide the developer.</p></div>
+        </div>
+        <div class="callout">The key difference: the warning is connected to the Spring behavior that will happen at runtime, not only to how the Java code looks.</div>
+
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">Inspection Coverage</span>
+        <h2>One plugin, multiple Spring failure modes.</h2>
+        <p class="lead">218 registered checks cover 84 ERROR, 130 WARNING, and 4 WEAK WARNING findings. Style checks, test improvements, lifecycle traps, transaction failures, Lombok pitfalls, and Spring-specific persistence issues are flagged in the IDE before they become real problems.</p>
+        <div class="grid-4">
+            <article class="card compact"><h3>Spring Java Format</h3><p>Imports, modifiers, method order, test names, utility constructors, visibility, and ternary style.</p></article>
+            <article class="card compact"><h3>Testing Style</h3><p>AssertJ migration, Mockito style, unused stubbing, matcher mixing, no-assertion and WebTestClient detection.</p></article>
+            <article class="card compact"><h3>Transactions</h3><p>Missing @Transactional on @Modifying, read-only write boundaries, self-invocation, final/private/static proxy failures, constructor traps, and swallowed exceptions.</p></article>
+            <article class="card compact"><h3>Persistence</h3><p>N+1 lazy access (PSI + DataFlow), OSIV, enum ordinal mapping, auditing listeners, OneToMany mappedBy, projection full-load risks, unclosed repository Streams, and Ghost Save detection via inter-procedural taint.</p></article>
+            <article class="card compact"><h3>DataFlow Taint</h3><p>Ghost Save, N+1 prediction, LazyInitializationException prediction, transaction boundary escape, read-only mutation, and SQL injection flow — tracked across aliases, Optional chains, streams, loops, and helper methods.</p></article>
+            <article class="card compact"><h3>Lombok Pitfalls</h3><p>@Data on JPA entities, constructor conflicts, @Builder default value loss, missing @Builder.Default, @NonNull misuse, callSuper gaps, circular @ToString, setter/builder conflicts, and SuperBuilder inheritance gaps.</p></article>
+            <article class="card compact"><h3>Controllers &amp; Security</h3><p>Boundary rules, validation binding order, @RequestMapping without explicit HTTP method, Jackson serialization of lazy entities, and unvalidated file uploads.</p></article>
+            <article class="card compact"><h3>Lifecycle</h3><p>@Transactional on @PostConstruct, constructor work on dependencies, event listeners without transaction boundaries, @EventListener exception swallowing, and scheduled task startup stampede.</p></article>
+            <article class="card compact"><h3>Concurrency</h3><p>Stateful singleton fields, mutable bean caches, @Async shared state, @Async without explicit Executor, and AtomicReference/volatile fixes.</p></article>
+            <article class="card compact"><h3>Configuration</h3><p>@ConfigurationProperties missing @Validated, lite-mode @Bean calls, mutable state in @Configuration classes, conditional property default value traps, and hardcoded secrets in @Value.</p></article>
+            <article class="card compact"><h3>SQL Injection</h3><p>@Query built with string concatenation or String.format instead of parameter placeholders, exposing the application to SQL injection at runtime. DataFlow engine tracks tainted request parameters into JdbcTemplate and EntityManager queries.</p></article>
+            <article class="card compact"><h3>Repository Performance</h3><p>findAll() without Pageable, N+1 lazy access (PSI + DataFlow), projection full-load risks, derived query explosions, and unclosed repository Streams.</p></article>
+            <article class="card compact"><h3>Jakarta Migration</h3><p>Detects jakarta.transaction.Transactional and javax.transaction.Transactional, which are silently ignored by Spring proxy management, and migrates them to Spring's @Transactional with attribute remapping.</p></article>
+            <article class="card compact"><h3>Pre-Commit Gate</h3><p>Git hook blocks commits that contain ERROR-level inspections, showing a file-oriented summary of runtime-breaking issues before they reach the repository.</p></article>
+            <article class="card compact"><h3>Flow Tool Windows</h3><p>Dedicated visual panels explain transaction calls, Ghost Saves, boundary escapes, lazy initialization, self-invocation, SQL injection, bag semantics, and N+1 access paths with source navigation.</p></article>
+        </div>
+
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">Concrete Example</span>
+        <h2>It catches valid Java that Spring will not execute the way it looks.</h2>
+        <div class="split">
+            <div>
+                <p class="lead">A same-class call to a transactional method looks correct in Java, but bypasses the Spring proxy. Final classes, private methods, @PostConstruct, and missing @Transactional boundaries fail for the same reason: Spring behavior is hidden behind framework rules.</p>
+                <div class="card">
+                    <h3>What the developer sees</h3>
+                    <p>Error or warning on the exact call, annotation, method, or class, plus a quick fix when Spring Buddy can apply one safely.</p>
+                </div>
+                <div class="callout">This is unique because the plugin teaches the framework model while identifying the bug.</div>
+            </div>
+            <pre class="code">class OrderService {
+    void placeOrder() {
+        <span class="warn">this.persistOrder();</span>
+    }
+
+    @Transactional
+    void persistOrder() {
+        repository.save(order);
+    }
+}
+
+<span class="red">Error:</span> missing/ignored transaction boundary
+<span class="blue">Hint:</span> Ignored: Self-Invocation</pre>
+        </div>
+
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">Test Intelligence</span>
+        <h2>It avoids naive test warnings by recognizing intent.</h2>
+        <p class="lead">Spring Buddy treats common test frameworks as first-class patterns. It understands assertion-like calls, helper methods with assertions, MockMvc/WebTestClient response assertions, Mockito verification, ArchUnit rule checks, unused stubs, matcher mixing, and @MockBean context-cache costs.</p>
+        <div class="split">
+            <pre class="code">@Test
+void givenClasses_whenRestControllerHasCorrectProduces_thenSuccess() {
+    ArchRuleDefinition.classes()
+        .that()
+        .areAnnotatedWith(RestController.class)
+        .should(PRODUCES_CLASS_CONDITION)
+        .check(CLASSES);
+}
+
+<span class="ok">Recognized:</span> ArchUnit check is the assertion.</pre>
+            <div class="grid-2">
+                <article class="card compact"><h3>AssertJ</h3><p>Detects fluent assertions and migrates common JUnit assertions.</p></article>
+                <article class="card compact"><h3>Mockito</h3><p>Detects verification, matcher mixing errors, style issues, and unused stubbing risks.</p></article>
+                <article class="card compact"><h3>HTTP Tests</h3><p>Recognizes MockMvc and WebTestClient expectations as real assertions.</p></article>
+                <article class="card compact"><h3>Spring Test Cache</h3><p>Flags @MockBean usage that fragments application-context reuse.</p></article>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">Feedback Types</span>
+        <h2>Different problems need different IDE feedback.</h2>
+        <p class="lead">Spring Buddy does not force every finding into one format. It uses <span class="red">errors</span> for definite runtime breakage, <span class="yellow">warnings</span> for likely design risks, quick fixes for safe edits, inlay hints for runtime explanation, and runner actions for broad sweeps.</p>
+        <div class="grid-2">
+            <article class="card"><h3><span class="red">Errors</span></h3><p>Mark definite runtime breakage: ignored proxy advice, @Transactional on private/final/static methods, self-invocation, readOnly transactions with writes, swallowed exceptions, unclosed repository Streams, missing no-arg constructors, cascade delete risks, stale persistence context, SQL injection via @Query concatenation and taint flow, @Async without Executor, Jackson lazy serialization, hardcoded secrets, Jakarta @Transactional migration, transaction boundary escape, LazyInitializationException prediction, and read-only entity mutation.</p></article>
+            <article class="card"><h3><span class="yellow">Warnings</span></h3><p>Flag likely design risks and style drift: import ordering, modifier placement, method visibility, test naming, TODO/FIXME without tickets, collection return nulls, @RequestMapping without HTTP method, fixedRate without initialDelay, findAll without Pageable, unvalidated MultipartFile uploads, mutable @Configuration state, and Ghost Save (detached entity mutation).</p></article>
+            <article class="card"><h3><span class="ok">Quick Fixes</span></h3><p>Add @Transactional, choose REQUIRES_NEW, remove final, add EnumType.STRING, add auditing listeners, add mappedBy, wrap Stream in try-with-resources, convert to contextual orElseThrow, or replace string concatenation with parameter placeholders.</p></article>
+            <article class="card"><h3><span class="blue">Inlay Hints + Flow Views</span></h3><p>Show transaction behavior inline and open navigable flow diagrams for transaction paths, Ghost Save, boundary escape, lazy-init, self-invocation, SQL injection, bag problem, and N+1 findings.</p></article>
+            <article class="card"><h3>Inspection Runners</h3><p>Run Spring Buddy and Lombok Buddy inspection profiles from context menu actions against the current scope.</p></article>
+            <article class="card"><h3>Pre-Commit Blocker</h3><p>Git commit dialog blocks ERROR-level violations and shows a file-oriented summary of runtime-breaking issues before code reaches the repository.</p></article>
+        </div>
+        <div class="badge-row">
+            <span class="badge green">Precise location</span>
+            <span class="badge">Tooltip explanation</span>
+            <span class="badge yellow">Runtime errors vs risks</span>
+            <span class="badge">Project-level pass</span>
+        </div>
+
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">After Big Refactors</span>
+        <h2>Especially useful after broad AI-assisted rewrites.</h2>
+        <p class="lead">Large refactors can keep Java compiling while silently changing Spring behavior. Spring Buddy gives you a second pass focused on the things compilers and ordinary linters miss.</p>
+        <div class="grid-3">
+            <article class="card"><h3>Proxy Semantics</h3><p>Catches final classes, final/private/static advised methods, self-invocation, and ignored @PostConstruct transactions introduced during cleanup.</p></article>
+            <article class="card"><h3>Repository Semantics</h3><p>Finds @Modifying without @Transactional, derived query explosions, Optional.get() without context, and projection methods that force full entity loads.</p></article>
+            <article class="card"><h3>Persistence Drift</h3><p>Flags enum ordinal mappings, missing auditing listeners, @OneToMany join-table surprises, N+1 lazy access, OSIV risks, and Ghost Saves from detached entity mutations introduced by AI rewrites.</p></article>
+            <article class="card"><h3>Test Behavior</h3><p>Recognizes real assertions after test rewrites and catches @MockBean context fragmentation that makes suites slower after refactors.</p></article>
+            <article class="card"><h3>Concurrency Regressions</h3><p>Highlights singleton mutable state, shared caches, @Async writes, and suggests final, volatile, AtomicReference, or ConcurrentHashMap where appropriate.</p></article>
+            <article class="card"><h3>Fast Safety Gate</h3><p>Run bundled Spring Buddy and Lombok Buddy inspection profiles after a migration or generated patch to surface hidden framework bugs before review. DataFlow engine catches cross-method persistence and tainted-query issues that syntax checks miss.</p></article>
+        </div>
+        <div class="callout">A compiling AI refactor is not necessarily a correct Spring refactor. Spring Buddy checks the framework contracts the compiler cannot see.</div>
+
+    </section>
+
+    <section class="slide">
+        <span class="eyebrow">Value Summary</span>
+        <h2>Spring Buddy shortens the loop from hidden framework bug to visible code insight.</h2>
+        <div class="grid-3">
+            <article class="card"><h3>Before commit</h3><p>The Git pre-commit gate blocks ERROR-level runtime-breaking issues from ever entering version control.</p></article>
+            <article class="card"><h3>Before code review</h3><p>Style and test issues are cleaned while editing, reducing review noise.</p></article>
+            <article class="card"><h3>Before CI pipeline</h3><p>Format, assertion, and static analysis issues are caught locally.</p></article>
+            <article class="card"><h3>Before runtime</h3><p>Proxy, lifecycle, transaction, validation, Jackson, Lombok, and persistence pitfalls are highlighted before they become integration or production bugs. DataFlow engine finds Ghost Saves and lazy-loading leaks across helper methods.</p></article>
+            <article class="card"><h3>Before performance incidents</h3><p>N+1, OSIV, query explosion, projection full-load, bag semantics, and context-cache risks appear near the source code that can trigger them. DataFlow N+1 prediction tracks collection sources into loop sinks.</p></article>
+            <article class="card"><h3>Before transaction surprises</h3><p>Propagation and proxy behavior is explained directly in the editor with inlay hints, flow diagrams, and ERROR-level boundaries. Transaction boundary escape and read-only mutation are caught via taint analysis.</p></article>
+        </div>
+        <div class="callout">Unique positioning: Spring Buddy is a Spring correctness companion for IntelliJ, not just another lint profile.</div>
+
+    </section>
+</main>
+</body>
+</html>

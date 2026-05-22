@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <title>Spring Buddy Inspections</title>
+<style>
+    pre.code {
+        border: 1px solid rgba(141,235,255,.18); border-radius: 20px;
+        background: #07111f; padding: 20px 22px;
+        font: 600 13px/1.55 'JetBrains Mono', monospace;
+        color: #d9fde6; white-space: pre-wrap; overflow: auto;
+    }
+:root {
+    --bg: #07111f;
+    --panel: #101c2a;
+    --panel-2: #142435;
+    --line: #284057;
+    --text: #f2fff6;
+    --muted: #b7c7d4;
+    --green: #78d64b;
+    --green-2: #1f8f3a;
+    --blue: #35c5ff;
+    --blue-2: #2d68ff;
+    --yellow: #ffd166;
+    --red: #ff6b6b;
+    --purple: #8b5cf6;
+    --teal: #14b8a6;
+    --shadow: 0 28px 70px rgba(0,0,0,0.34);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at 84% 8%, rgba(53, 197, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 12% 88%, rgba(120, 214, 75, 0.14), transparent 34%),
+        linear-gradient(135deg, #07111f 0%, #102018 56%, #071b2c 100%);
+    color: var(--text);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
+}
+
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 64px 64px;
+}
+
+/* Navigation */
+.nav-bar {
+    position: sticky;
+    top: 0;
+    background: rgba(16, 28, 42, 0.96);
+    padding: 14px 64px;
+    z-index: 1000;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    overflow-x: auto;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+}
+.nav-bar a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-block;
+    margin-right: 6px;
+    border: 1px solid transparent;
+}
+.nav-bar a:hover {
+    background: rgba(53, 197, 255, 0.1);
+    color: var(--text);
+    border-color: rgba(53, 197, 255, 0.25);
+}
+.nav-bar a.active {
+    background: rgba(53, 197, 255, 0.18);
+    color: var(--text);
+    border-color: rgba(53, 197, 255, 0.35);
+}
+.nav-bar .nav-title {
+    color: var(--text);
+    font-weight: 800;
+    margin-right: 24px;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+}
+.nav-bar .nav-count {
+    background: rgba(255,255,255,0.12);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-left: 6px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* Hero */
+.hero {
+    padding-top: 40px;
+    padding-bottom: 10px;
+}
+
+p.lead {
+    margin: 0 0 32px;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 520;
+    max-width: 900px;
+}
+
+/* Stats */
+.stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+    margin: 32px 0 48px;
+}
+.stat {
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: rgba(20, 36, 53, 0.82);
+    padding: 22px;
+    text-align: center;
+}
+.stat strong {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 18px; font-weight: 800; line-height: 1.1;
+    display: block;
+    margin-bottom: 8px;
+    color: var(--green);
+    font-size: 34px;
+    letter-spacing: -0.04em;
+}
+.stat span {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Category sections */
+.category-section {
+    margin-bottom: 60px;
+}
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #dfffea;
+    background: rgba(120, 214, 75, 0.11);
+    border: 1px solid rgba(120, 214, 75, 0.34);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+.eyebrow.pitfalls {
+    background: rgba(255, 107, 107, 0.11);
+    border-color: rgba(255, 107, 107, 0.34);
+    color: #ffe0e0;
+}
+.eyebrow.lombok {
+    background: rgba(139, 92, 246, 0.11);
+    border-color: rgba(139, 92, 246, 0.34);
+    color: #ede9fe;
+}
+.eyebrow.spring-javaformat {
+    background: rgba(53, 197, 255, 0.11);
+    border-color: rgba(53, 197, 255, 0.34);
+    color: #e0f7ff;
+}
+.eyebrow.mockito {
+    background: rgba(20, 184, 166, 0.11);
+    border-color: rgba(20, 184, 166, 0.34);
+    color: #d6f5f1;
+}
+.eyebrow.misc {
+    background: rgba(255, 209, 102, 0.11);
+    border-color: rgba(255, 209, 102, 0.34);
+    color: #fff8e0;
+}
+.eyebrow.spring-framework {
+    background: rgba(59, 130, 246, 0.11);
+    border-color: rgba(59, 130, 246, 0.34);
+    color: #dbeafe;
+}
+h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(42px, 5.5vw, 72px);
+    font-weight: 900; letter-spacing: -.045em; line-height: .97;
+    margin: 18px 0 14px; max-width: 920px;
+}
+h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(30px, 4.2vw, 52px);
+    font-weight: 900; letter-spacing: -.04em; line-height: .97;
+    margin: 16px 0 12px; max-width: 920px;
+}
+h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 18px; font-weight: 800; line-height: 1.1;
+    margin-bottom: 8px; color: var(--text);
+}
+h2 .count {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: 10px;
+    letter-spacing: 0;
+}
+
+/* Inspection cards */
+.grid-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+.card {
+    position: relative;
+    z-index: 1;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: linear-gradient(160deg, rgba(20, 36, 53, 0.92), rgba(13, 25, 38, 0.94));
+    padding: 24px 26px;
+    transition: border-color 0.2s, transform 0.15s;
+}
+.card:hover {
+    border-color: rgba(53, 197, 255, 0.3);
+    transform: translateY(-1px);
+}
+.card .class-name {
+    font-family: "JetBrains Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    opacity: 0.8;
+}
+.card .display-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.25;
+}
+.card .description {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+/* Badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 800;
+    margin-left: 10px;
+    vertical-align: middle;
+    border: 1px solid transparent;
+}
+.badge.red {
+    background: rgba(255, 107, 107, 0.13);
+    border-color: rgba(255, 107, 107, 0.34);
+    color: #ffe0e0;
+}
+.badge.yellow {
+    background: rgba(255, 209, 102, 0.13);
+    border-color: rgba(255, 209, 102, 0.34);
+    color: #fff8e0;
+}
+.badge.weak {
+    background: rgba(149, 165, 166, 0.13);
+    border-color: rgba(149, 165, 166, 0.34);
+    color: #e8e8e8;
+}
+
+/* Back to top */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-2));
+    color: #07111f;
+    padding: 14px 18px;
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+    z-index: 999;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+}
+.back-to-top:hover {
+    transform: scale(1.08);
+    text-decoration: none;
+}
+
+.card.hidden { display: none; }
+.category-section.hidden { display: none; }
+.stat.active-filter {
+    border-color: var(--blue);
+    box-shadow: 0 0 20px rgba(53, 197, 255, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container { padding: 20px 24px 40px; }
+    .nav-bar { padding: 10px 24px; }
+    h1 { font-size: 36px; }
+    h2 { font-size: 28px; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+}
+.badge.fix {
+    background: rgba(120, 214, 75, 0.13);
+    border-color: rgba(120, 214, 75, 0.34);
+    color: #dcffe7;
+}
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+<span class="nav-title">Spring Buddy</span>
+<a href="index.html">Feature Tour</a>
+<a href="#top" class="active">All</a>
+<a href="#async-concurrency">Async & Concurrency<span class="nav-count">8</span></a>
+<a href="#lombok">Lombok<span class="nav-count">25</span></a>
+<a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
+<a href="#mockito">Mockito<span class="nav-count">3</span></a>
+<a href="#pitfalls">Pitfalls<span class="nav-count">106</span></a>
+<a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
+<a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
+</div>
+
+<div id="top" class="container">
+<div class="hero">
+<h1>Spring Buddy Inspections</h1>
+<p class="lead">Complete reference of all Spring Buddy inspections grouped by category. Click a category above to jump to that section, filter by severity, or return to the <a href="index.html">feature tour</a>.</p>
+</div>
+
+<div class="stat-row">
+<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>84</strong><span>ERROR</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>130</strong><span>WARNING</span></div>
+<div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>4</strong><span>WEAK WARNING</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>218</strong><span>Total Inspections</span></div>
+</div>
+<div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
+
+<div class="category-section">
+<div class="eyebrow">Async & Concurrency</div>
+<h2 id="async-concurrency">Async & Concurrency<span class="count">8 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="error">
+<div class="class-name">SpringAsyncReturnIgnoredInspection</div>
+<div class="display-name">@Async return value is discarded<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects call sites where the result of an <pre class="code"> @Async</pre> method that returns a <pre class="code"> Future</pre>/<pre class="code"> CompletableFuture</pre>/<pre class="code"> ListenableFuture</pre> is silently discarded (used as an expression statement). When the returned future is ignored, exceptions thrown inside the async task are swallowed and never surface to the caller. Quick-fix: for <pre class="code"> CompletableFuture</pre>/<pre class="code"> CompletionStage</pre> the fix chains <pre class="code"> .exceptionally(...)</pre> with a <pre class="code"> log.error</pre> handler so failures are visible. For plain <pre class="code"> Future</pre>/<pre class="code"> ListenableFuture</pre> the fix assigns the result to a local variable.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringAsyncWithoutExecutorInspection</div>
+<div class="display-name">@Async without explicit Executor<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects @Async methods that do not specify a custom Executor. Without an explicit executor Spring falls back to SimpleAsyncTaskExecutor, which creates a new thread for every task and can exhaust memory under load.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringAsyncWithoutEnableAsyncInspection</div>
+<div class="display-name">@Async without @EnableAsync configuration<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Async</pre> methods or classes when the project has no <pre class="code"> @EnableAsync</pre> configuration. Without it Spring does not install async proxy infrastructure and async methods run synchronously.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringEventListenerSwallowsExceptionInspection</div>
+<div class="display-name">@EventListener swallows exception<span class="badge red">ERROR</span></div>
+<div class="description">SpringEventListenerSwallowsException: flags an <pre class="code"> @EventListener</pre> (or <pre class="code"> @TransactionalEventListener</pre>) method whose body ends with a <pre class="code"> try/catch</pre> that catches a broad exception type (<pre class="code"> Exception</pre>/<pre class="code"> Throwable</pre>/<pre class="code"> RuntimeException</pre>) and only logs without rethrowing. Spring loses the failure signal — publishers can't react and transactional rollbacks won't trigger.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringEventListenerMissingComponentInspection</div>
+<div class="display-name">@EventListener method in non-Spring-managed class<span class="badge red">ERROR</span></div>
+<div class="description">Detects <pre class="code"> @EventListener</pre> or <pre class="code"> @TransactionalEventListener</pre> methods declared in classes that are not Spring-managed beans. Such listeners are never registered with the application context and will never be invoked at runtime.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringRetryableProxyPitfallInspection</div>
+<div class="display-name">@Retryable method cannot be proxied by Spring<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Retryable</pre> annotations on methods that Spring cannot proxy: <pre class="code"> private</pre>, <pre class="code"> static</pre>, or <pre class="code"> final</pre> methods, as well as methods declared inside a <pre class="code"> final</pre> class. Spring Retry creates CGLIB proxies around Spring beans, just like <pre class="code"> @Transactional</pre>. Private methods are invisible to the proxy, static methods have no <pre class="code"> this</pre> reference to wrap, and final methods/classes cannot be subclassed. In all cases the retry interceptor is silently bypassed and the method executes without any retry logic.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringRetryableWithTransactionalInspection</div>
+<div class="display-name">@Retryable combined with @Transactional causes duplicate side-effects<span class="badge red">ERROR</span></div>
+<div class="description">Detects methods annotated with both <pre class="code"> @Retryable</pre> and <pre class="code"> @Transactional</pre>. When a <pre class="code"> @Transactional</pre> method fails mid-transaction, Spring rolls back the current transaction. Spring Retry then catches the exception, waits/backoff, and calls the method again — starting a brand-new transaction. Any work that succeeded before the failure in the first attempt is already undone by the rollback, yet non-transactional side-effects (external API calls, file writes, message publishes) are not rolled back and will be executed again on each retry. This leads to duplicate side-effects, inconsistent state, and data loss. Safe alternatives: Move retry logic outside the transaction boundary (retry the service call, not the transactional method). Make the transactional method idempotent so retries are harmless. Use a saga/outbox pattern for external side-effects instead of doing them inside the retried transaction.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringRetryableWithoutEnableRetryInspection</div>
+<div class="display-name">@Retryable without @EnableRetry configuration<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Retryable</pre> methods in a project that has no <pre class="code"> @EnableRetry</pre> configuration. Spring Retry requires an explicit <pre class="code"> @EnableRetry</pre> annotation on a <pre class="code"> @Configuration</pre> class to activate its proxy infrastructure; without it, <pre class="code"> @Retryable</pre> is silently ignored and no retry happens at runtime.</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow lombok">Lombok</div>
+<h2 id="lombok">Lombok<span class="count">25 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">LombokAllArgsConstructorRedundancyInspection</div>
+<div class="display-name">Redundant @AllArgsConstructor<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Redundant @AllArgsConstructor</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokBuilderDefaultInspection</div>
+<div class="display-name">Lombok @Builder.Default issues<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects dangerous usage of <pre class="code"> @Builder.Default</pre>. BUILDERDEFAULT-001 — <pre class="code"> @Builder.Default</pre> with <pre class="code"> @AllArgsConstructor</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokBuilderDefaultValueInspection</div>
+<div class="display-name">Field initializer erased by @Builder<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects field initializers that are silently erased by <pre class="code"> @Builder</pre>. Lombok's <pre class="code"> @Builder</pre> ignores field initializers, so a field like <pre class="code"> String role = "GUEST"</pre> in a <pre class="code"> @Builder</pre>-annotated class will result in <pre class="code"> role == null</pre> when the object is built via <pre class="code"> builder().build()</pre>. BUILDERDEFAULT-VALUE-001 — field initializer without <pre class="code"> @Builder.Default</pre> in a <pre class="code"> @Builder</pre> class.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokBuilderOnParentWithSubclassesInspection</div>
+<div class="display-name">@Builder on parent class with subclasses<span class="badge yellow">WARNING</span></div>
+<div class="description">@Builder on parent class with subclasses</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">LombokBuilderOnSubclassWithBuilderParentInspection</div>
+<div class="display-name">@Builder on subclass with @Builder parent<span class="badge red">ERROR</span></div>
+<div class="description">@Builder on subclass with @Builder parent</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokBuilderRedundancyInspection</div>
+<div class="display-name">Redundant @Builder<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects redundant or unused <pre class="code"> @Builder</pre> / <pre class="code"> @SuperBuilder</pre> annotations. Redundant — the class already declares an explicit <pre class="code"> builder()</pre> static method. Lombok would generate one, but the hand-written method shadows it. Unused — the class has zero references anywhere in the project and a textual scan finds no <pre class="code"> ClassName.builder()</pre> call sites. Abstract classes are skipped because subclasses may rely on the parent builder.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokBuilderSubclassWithoutSuperBuilderParentInspection</div>
+<div class="display-name">@Builder subclass should use @SuperBuilder with parent<span class="badge yellow">WARNING</span></div>
+<div class="description">@Builder subclass should use @SuperBuilder with parent</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokBuilderWithPartialConstructorInspection</div>
+<div class="display-name">@Builder with partial constructor<span class="badge yellow">WARNING</span></div>
+<div class="description">@Builder with partial constructor</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokConstructorAnnotationInspection</div>
+<div class="display-name">Lombok constructor annotation issues<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects dangerous or incorrect usage of Lombok constructor annotations. CONSTRUCTOR-001 — <pre class="code"> @AllArgsConstructor</pre> without <pre class="code"> @NoArgsConstructor</pre> on JPA / Jackson classes. CONSTRUCTOR-002 — <pre class="code"> @RequiredArgsConstructor</pre> with no final or <pre class="code"> @NonNull</pre> fields. BUILDER-JPA — <pre class="code"> @Builder</pre> on a JPA entity without <pre class="code"> @NoArgsConstructor</pre>. CONSTRUCTOR-003 — <pre class="code"> @AllArgsConstructor</pre> together with <pre class="code"> @RequiredArgsConstructor</pre> (potentially conflicting constructor generation). PROJECTION-001 — <pre class="code"> @AllArgsConstructor</pre> on a likely JPQL projection class (fragile — field reordering silently breaks <pre class="code"> @Query</pre> expressions).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokConstructorToBuilderInspection</div>
+<div class="display-name">Constructor call can be replaced with Lombok builder<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Constructor call can be replaced with Lombok builder</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokDataOnJpaEntityInspection</div>
+<div class="display-name">@Data on JPA entity<span class="badge yellow">WARNING</span></div>
+<div class="description">@Data on JPA entity</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokDataOnSubclassWithoutCallSuperInspection</div>
+<div class="display-name">@Data on subclass excludes superclass equality<span class="badge yellow">WARNING</span></div>
+<div class="description">@Data on subclass excludes superclass equality</div>
+</article>
+<article class="card" data-level="weak">
+<div class="class-name">LombokDataRedundantRequiredArgsConstructorInspection</div>
+<div class="display-name">@RequiredArgsConstructor is redundant with @Data<span class="badge weak">WEAK WARNING</span></div>
+<div class="description">@RequiredArgsConstructor is redundant with @Data</div>
+</article>
+<article class="card" data-level="weak">
+<div class="class-name">LombokDataWithAllArgsConstructorInspection</div>
+<div class="display-name">@AllArgsConstructor with @Data<span class="badge weak">WEAK WARNING</span></div>
+<div class="description">@AllArgsConstructor with @Data</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokDataWithManualConstructorInspection</div>
+<div class="display-name">@Data with manually declared constructor<span class="badge yellow">WARNING</span></div>
+<div class="description">@Data with manually declared constructor</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokEqualsAndHashCodeOnJpaEntityInspection</div>
+<div class="display-name">@EqualsAndHashCode on JPA entity<span class="badge yellow">WARNING</span></div>
+<div class="description">@EqualsAndHashCode on JPA entity</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokEqualsAndHashCodeWithoutCallSuperInspection</div>
+<div class="display-name">@EqualsAndHashCode missing callSuper=true on subclass<span class="badge yellow">WARNING</span></div>
+<div class="description">@EqualsAndHashCode missing callSuper=true on subclass</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokInheritanceShadowInspection</div>
+<div class="display-name">Lombok inheritance shadowing issues<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects field shadowing and related issues in Lombok inheritance hierarchies. INHERIT-001 — Field in subclass shadows parent field. INHERIT-002 — Shadowing field with <pre class="code"> @Getter</pre> / <pre class="code"> @Setter</pre>. INHERIT-003 — <pre class="code"> @AllArgsConstructor</pre> on subclass with shadowed fields. INHERIT-004 — Validation annotation on shadowing field.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokManualGetterShadowInspection</div>
+<div class="display-name">Manual method shadows Lombok getter<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects manually defined methods that shadow Lombok-generated getters. MANUAL-001 — Manual method matching a Lombok-generated getter signature.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">LombokNonNullInspection</div>
+<div class="display-name">Lombok @NonNull issues<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects incorrect usage of Lombok <pre class="code"> @NonNull</pre>. NONNULL-001 — <pre class="code"> @NonNull</pre> on primitive field. NONNULL-002 — <pre class="code"> @NonNull</pre> together with <pre class="code"> @Builder.Default</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokSetterChainToBuilderInspection</div>
+<div class="display-name">Setter chain can be replaced with Lombok builder<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Setter chain can be replaced with Lombok builder</div>
+</article>
+<article class="card" data-level="weak">
+<div class="class-name">LombokSetterOnBuilderFieldInspection</div>
+<div class="display-name">Lombok @Setter on @Builder field<span class="badge weak">WEAK WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Setter</pre> on fields in a <pre class="code"> @Builder</pre> class. SETTER-001 — <pre class="code"> @Setter</pre> on a field in a <pre class="code"> @Builder</pre> class.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">LombokSuperBuilderMissingParentInspection</div>
+<div class="display-name">@SuperBuilder parent missing @SuperBuilder<span class="badge red">ERROR</span></div>
+<div class="description">@SuperBuilder parent missing @SuperBuilder</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokToStringCircularReferenceInspection</div>
+<div class="display-name">@ToString circular reference risk<span class="badge yellow">WARNING</span></div>
+<div class="description">@ToString circular reference risk</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">LombokToStringWithoutCallSuperInspection</div>
+<div class="display-name">@ToString missing callSuper=true on subclass<span class="badge yellow">WARNING</span></div>
+<div class="description">@ToString missing callSuper=true on subclass</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow misc">Miscellaneous</div>
+<h2 id="misc">Miscellaneous<span class="count">10 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInLoggingPlaceholderCountMatchesArgumentCountInspection</div>
+<div class="display-name">Placeholder count does not match argument count<span class="badge yellow">WARNING</span></div>
+<div class="description">Placeholder count does not match argument count</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringAsyncSharedMutableStateInspection</div>
+<div class="display-name">@Async method mutates unsynchronized bean state<span class="badge red">ERROR</span></div>
+<div class="description">@Async method mutates unsynchronized bean state</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBeanConstructorHeavyWorkInspection</div>
+<div class="display-name">Spring bean constructor performs work on injected dependency<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects Spring bean constructors that perform work on injected dependencies. Constructor initialization happens before dependency injection is complete, so injected collaborators may be partially initialized.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringCollectionReturnsNullInspection</div>
+<div class="display-name">Collection-returning method returns null<span class="badge red">ERROR</span></div>
+<div class="description">SpringCollectionReturnsNull: flags <pre class="code"> return null</pre> inside a method whose declared return type is a collection (<pre class="code"> List</pre>, <pre class="code"> Set</pre>, <pre class="code"> Map</pre>, <pre class="code"> Collection</pre>, <pre class="code"> Iterable</pre>). Quick-fix replaces with the matching empty collection.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringExceptionLoggedAndRethrownInspection</div>
+<div class="display-name">Exception is logged and rethrown (double-logging)<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringExceptionLoggedAndRethrown: catch block that calls `log.error(...)` (or other SLF4J levels) and then rethrows the same exception. Quick-fix removes the log statement (caller will log).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringLoggerNotStaticFinalInspection</div>
+<div class="display-name">SLF4J Logger field should be private static final<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringLoggerNotStaticFinal: SLF4J Logger fields must be `private static final`. Quick-fix adds the missing `private` / `static` / `final` modifiers.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringOrphanedApplicationEventInspection</div>
+<div class="display-name">Orphaned Spring application event or listener<span class="badge yellow">WARNING</span></div>
+<div class="description">Cross-references all <pre class="code"> ApplicationEventPublisher.publishEvent()</pre> call sites against all <pre class="code"> @EventListener</pre> and <pre class="code"> @TransactionalEventListener</pre> parameter types across the project. Flags published events that have no matching listeners, and listeners whose event type is never published anywhere. Spring events are weakly typed — refactoring can silently break the publisher-listener contract.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringOptionalAsFieldOrParameterInspection</div>
+<div class="display-name">Optional used as field or parameter<span class="badge yellow">WARNING</span></div>
+<div class="description">SpringOptionalAsFieldOrParameter: flags <pre class="code"> java.util.Optional</pre> (and primitive variants) used as a field type or method parameter type. Per Brian Goetz, <pre class="code"> Optional</pre> is intended as a return type only.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringOptionalEntityLookupExceptionInspection</div>
+<div class="display-name">Repository Optional lookup should throw contextual exception<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects bare <pre class="code"> Optional.get()</pre> or no-arg <pre class="code"> Optional.orElseThrow()</pre> calls on Spring Data repository find-methods. Without a contextual exception the caller has no information about which entity or id was missing, making production debugging difficult.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringSharedMutableCacheInspection</div>
+<div class="display-name">Shared mutable cache in Spring bean is not thread-safe<span class="badge red">ERROR</span></div>
+<div class="description">Shared mutable cache in Spring bean is not thread-safe</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringStatefulSingletonBeanInspection</div>
+<div class="display-name">Mutable state in singleton Spring bean<span class="badge red">ERROR</span></div>
+<div class="description">Mutable state in singleton Spring bean</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTodoFixmeBlockerInspection</div>
+<div class="display-name">TODO/FIXME without ticket reference in Spring component<span class="badge yellow">WARNING</span></div>
+<div class="description">SpringTodoFixmeBlocker: flags <pre class="code"> TODO</pre> / <pre class="code"> FIXME</pre> comments inside Spring components (<pre class="code"> @Service</pre>, <pre class="code"> @Component</pre>, <pre class="code"> @Repository</pre>, <pre class="code"> @Controller</pre>, <pre class="code"> @RestController</pre>, <pre class="code"> @Configuration</pre>) that don't reference a ticket id (e.g. <pre class="code"> ABC-123</pre> or <pre class="code"> #123</pre>).</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow mockito">Mockito</div>
+<h2 id="mockito">Mockito<span class="count">3 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">SpringMockitoArgumentMatcherMixInspection</div>
+<div class="display-name">Mixing Mockito matchers and raw values in the same call<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringMockitoArgumentMatcherMix: when a Mockito stubbing or verification uses argument matchers (any(), eq(), anyInt(), ...) for some arguments and raw values for others, the call fails at runtime. Reports the raw arguments and suggests wrapping them in eq(...).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMockitoUnusedStubbingInspection</div>
+<div class="display-name">Mockito stubbing for a method that is never invoked in the test<span class="badge yellow">WARNING</span></div>
+<div class="description">SpringMockitoUnusedStubbing: a <pre class="code"> when(mock.method(...))</pre> stubbing inside a <pre class="code"> @Test</pre> method whose stubbed <pre class="code"> method</pre> is never invoked elsewhere in the same test method (under strict-stubbing this would already fail, but is often missed in lenient setups).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTestNoAssertionsInspection</div>
+<div class="display-name">@Test method has no assertion or verify() call<span class="badge yellow">WARNING</span></div>
+<div class="description">SpringTestNoAssertions: a <pre class="code"> @Test</pre> method whose body contains no assertion-like call (AssertJ <pre class="code"> assertThat</pre>, JUnit <pre class="code"> assertX</pre>, Mockito <pre class="code"> verify</pre>, AssertJ <pre class="code"> assertThatThrownBy</pre> / <pre class="code"> assertThatCode</pre>, or Hamcrest <pre class="code"> assertThat</pre>).</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow pitfalls">Pitfalls</div>
+<h2 id="pitfalls">Pitfalls<span class="count">106 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="error">
+<div class="class-name">SpringAsyncProxyPitfallInspection</div>
+<div class="display-name">@Async annotation may be bypassed by proxy limitations<span class="badge red">ERROR</span></div>
+<div class="description">@Async annotation may be bypassed by proxy limitations</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBagProblemInspection</div>
+<div class="display-name">@OneToMany/@ManyToMany with List causes bag semantics<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects <pre class="code"> @OneToMany</pre> and <pre class="code"> @ManyToMany</pre> fields typed as <pre class="code"> List</pre> instead of <pre class="code"> Set</pre>. Hibernate "bag" semantics cause delete-all + re-insert on every change, leading to severe performance issues and lost ordering.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBootTestCouldBeSliceInspection</div>
+<div class="display-name">@SpringBootTest may be broader than needed<span class="badge yellow">WARNING</span></div>
+<div class="description">@SpringBootTest may be broader than needed</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringCacheProxyPitfallInspection</div>
+<div class="display-name">Spring Cache annotation may be bypassed by proxy limitations<span class="badge red">ERROR</span></div>
+<div class="description">Spring Cache annotation may be bypassed by proxy limitations</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringCacheableKeyCollisionInspection</div>
+<div class="display-name">Cache name collision between methods<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects cache key collisions within a single class: two or more methods annotated with <pre class="code"> @Cacheable</pre> or <pre class="code"> @CachePut</pre> that share the same cache name(s). Spring Cache stores entries under a single namespace per cache name. When multiple methods share a cache name they all write into the same underlying cache. If the methods have different parameter signatures (or return types), a key collision can cause one method to read a value written by another, leading to <pre class="code"> ClassCastException</pre>, stale data, or silent corruption. Even when keys differ by default (Spring's <pre class="code"> SimpleKeyGenerator</pre> uses all method arguments), custom key expressions or overlapping argument values make collisions likely in practice.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringCacheableOnVoidInspection</div>
+<div class="display-name">@Cacheable/@CachePut on void method caches nothing<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Cacheable</pre> or <pre class="code"> @CachePut</pre> annotations on <pre class="code"> void</pre> methods. These annotations store the method's return value in a cache; when the return type is <pre class="code"> void</pre> there is nothing to cache, so the annotation is silently ignored at runtime.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringCacheableWithoutEnableCachingInspection</div>
+<div class="display-name">@Cacheable without @EnableCaching configuration<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Cacheable</pre>, <pre class="code"> @CachePut</pre>, or <pre class="code"> @CacheEvict</pre> annotations in a project that has no <pre class="code"> @EnableCaching</pre> configuration. Spring Cache requires an explicit <pre class="code"> @EnableCaching</pre> annotation on a <pre class="code"> @Configuration</pre> class to activate its proxy infrastructure; without it, cache annotations are silently ignored and no caching happens at runtime.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringCglibFinalProxyInspection</div>
+<div class="display-name">Final Spring bean class or method breaks CGLIB proxying<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects final Spring bean classes and methods that cannot be subclass-proxied by CGLIB, which prevents Spring proxy-bound annotations such as <pre class="code"> @Transactional</pre> from working.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringConditionalOnPropertyDefaultValueTrapInspection</div>
+<div class="display-name">@ConditionalOnProperty matchIfMissing contradicts @Value default<span class="badge yellow">WARNING</span></div>
+<div class="description">@ConditionalOnProperty matchIfMissing contradicts @Value default</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringConfigurationLiteModeInspection</div>
+<div class="display-name">@Bean method call in non-@Configuration class uses lite mode<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects <pre class="code"> @Bean</pre> methods calling other <pre class="code"> @Bean</pre> methods inside classes that are not annotated with <pre class="code"> @Configuration</pre>. In Spring's "lite mode" such inter-bean references create a new instance on every call, bypassing the singleton proxy and breaking the container contract.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringConfigurationMutableStateInspection</div>
+<div class="display-name">Mutable instance field in @Configuration class<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects mutable (non-final, non-@Value, non-@Autowired) instance fields in @Configuration classes. @Configuration beans are singletons by default; mutable state can cause race conditions during bean creation or refresh.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringConfigurationPropertiesMissingValidatedInspection</div>
+<div class="display-name">@ConfigurationProperties constraints require @Validated<span class="badge yellow">WARNING</span></div>
+<div class="description">@ConfigurationProperties constraints require @Validated</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringConfigurationPropertiesNotRegisteredInspection</div>
+<div class="display-name">@ConfigurationProperties may not be registered<span class="badge yellow">WARNING</span></div>
+<div class="description">@ConfigurationProperties may not be registered</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringControllerEntityReturnInspection</div>
+<div class="display-name">Controller should not return JPA entities directly<span class="badge yellow">WARNING</span></div>
+<div class="description">Controller should not return JPA entities directly</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringControllerRepositoryInjectionInspection</div>
+<div class="display-name">Controller should not inject repositories directly<span class="badge yellow">WARNING</span></div>
+<div class="description">Controller should not inject repositories directly</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringControllerTransactionalInspection</div>
+<div class="display-name">Controller should not define @Transactional boundaries<span class="badge yellow">WARNING</span></div>
+<div class="description">Controller should not define @Transactional boundaries</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringDataDerivedQueryExplosionInspection</div>
+<div class="display-name">Spring Data derived query is too complex<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects overly complex Spring Data derived query method names in repositories. Methods with many conditions or mixed AND/OR logic are hard to read and can generate inefficient or incorrect queries; explicit <pre class="code"> @Query</pre> is preferred.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringDataProjectionFullLoadInspection</div>
+<div class="display-name">Projection interface may force full entity loading<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects Spring Data projection interfaces that force full entity loading. SpEL <pre class="code"> @Value</pre> expressions and methods returning entity-like types defeat projection optimization and can reintroduce N+1 query problems.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringDirtiesContextPitfallInspection</div>
+<div class="display-name">@DirtiesContext slows test suites<span class="badge yellow">WARNING</span></div>
+<div class="description">@DirtiesContext slows test suites</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringDuplicateRequestMappingInspection</div>
+<div class="display-name">Duplicate Spring MVC request mapping<span class="badge red">ERROR</span></div>
+<div class="description">Detects controller methods with the same HTTP method, path, and mapping conditions. Duplicate mappings make Spring MVC fail application startup with an ambiguous mapping error.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringEntityEqualsHashCodeOnIdInspection</div>
+<div class="display-name">@Entity equals/hashCode references @Id field<span class="badge red">ERROR</span></div>
+<div class="description">SpringEntityEqualsHashCodeOnId: flags an <pre class="code"> @Entity</pre> class whose hand-written <pre class="code"> equals(Object)</pre> or <pre class="code"> hashCode()</pre> references a field annotated with <pre class="code"> @Id</pre> or <pre class="code"> @EmbeddedId</pre>. Generated identifiers are <pre class="code"> null</pre> before persist, which breaks equality contracts when entities are added to <pre class="code"> Set</pre>/<pre class="code"> Map</pre> prior to flush.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringEntityTransactionBoundaryEscapeDataFlowInspection</div>
+<div class="display-name">JPA entity returned from @Transactional is accessed outside transaction boundary<span class="badge red">ERROR</span></div>
+<div class="description">Detects when a JPA entity returned from a @Transactional method is accessed (mutated or lazy-loaded) outside the transaction boundary within the same class. After the proxy method returns, the entity is detached; lazy access causes LazyInitializationException and mutations are silently lost or cause errors. Uses the DataFlow taint engine to track the escaped entity through assignments, Optional unwraps, casts, and ternaries — replacing brittle parent-walk and string-name matching.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringGhostSaveDataFlowInspection</div>
+<div class="display-name">Ghost Save: detached entity mutation outside transaction<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects "Ghost Saves" — mutations of JPA detached entities that are silently ignored because there is no active Hibernate session to flush the changes. ┌─────────────────────────────────────────────────────────────────────────┐ │ SOURCE: any call to a Spring Data repository finder or EntityManager │ │ method outside an active @Transactional context │ │ │ │ SINK: any setter / mutator call on a variable that traces back to │ │ such a source, including through aliases and helper methods │ └─────────────────────────────────────────────────────────────────────────┘ Capabilities: ✅ Zero false positives inside @Transactional contexts (method or class) ✅ Full pointer-alias propagation (fixed-point loop) ✅ Optional unwrap tracking: .get(), .orElseThrow(), .orElse() ✅ Cast passthrough: (User) rawRef ✅ Ternary propagation: condition ? tainted : other ✅ Spring Data interface hierarchy (JpaRepository, CrudRepository, …) ✅ EntityManager.find() / getReference() / merge() as sources ✅ @Query / @NamedQuery annotated methods as sources ✅ Inter-procedural taint: follows entities passed into helper methods ✅ Works on stub classes without backing fields (no PropertyUtil dependency) ✅ Works without full PSI index (stub/demo file fallback via simple names) ✅ Deduplicates problems when multiple entry paths reach the same sink</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJacksonDeserializedFieldAccessInspection</div>
+<div class="display-name">Access to property not available after Jackson deserialization<span class="badge red">ERROR</span></div>
+<div class="description">Detects controller methods that deserialize objects via <pre class="code"> @RequestBody</pre> or <pre class="code"> @Valid</pre> and then access properties that are not available after Jackson deserialization, including through chained getter navigation. Two scenarios are covered: <pre class="code"> @JsonIgnore</pre> / <pre class="code"> @JsonIgnoreProperties</pre> — fields excluded from deserialization yield <pre class="code"> null</pre> or default values at runtime. View-interface deserialization — <pre class="code"> @JsonSerialize(as = View.class)</pre> means only the view-interface properties (plus <pre class="code"> id</pre>) are guaranteed to be available. Accessing any other property throws at runtime when a proxy guard is installed. The inspection tracks the deserialized parameter and every getter call on it recursively, so deep navigation such as <pre class="code"> user.getAddress().getStreet()</pre> is also checked at each level.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJacksonLazyEntitySerializationInspection</div>
+<div class="display-name">Jackson serialization of entity with lazy associations may cause LazyInitializationException<span class="badge red">ERROR</span></div>
+<div class="description">Detects REST controller methods that return JPA entities or collections of entities without @JsonIgnore on lazy-loaded associations (@OneToMany, @ManyToOne, @OneToOne, @ManyToMany). This can trigger LazyInitializationException or N+1 queries during Jackson serialization.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJakartaTransactionalMigrationInspection</div>
+<div class="display-name">Jakarta @Transactional ignored by Spring transaction management<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects usage of <pre class="code"> jakarta.transaction.Transactional</pre> (or <pre class="code"> javax.transaction.Transactional</pre>) and recommends migrating to <pre class="code"> org.springframework.transaction.annotation.Transactional</pre>. Spring's transaction management (e.g. <pre class="code"> @EnableTransactionManagement</pre>) only recognises its own <pre class="code"> @Transactional</pre> annotation. The Jakarta variant is silently ignored at runtime, so no proxy is created and the method executes without a transaction boundary. The quick fix also renames Jakarta-specific attributes: <pre class="code"> rollbackOn</pre> → <pre class="code"> rollbackFor</pre> <pre class="code"> dontRollbackOn</pre> → <pre class="code"> noRollbackFor</pre></div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaAuditingMissingEntityListenerInspection</div>
+<div class="display-name">JPA auditing field missing AuditingEntityListener<span class="badge red">ERROR</span></div>
+<div class="description">JPA auditing field missing AuditingEntityListener</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaCascadeAllOnManyToOneInspection</div>
+<div class="display-name">cascade = ALL on @ManyToOne/@ManyToMany<span class="badge red">ERROR</span></div>
+<div class="description">SpringJpaCascadeAllOnManyToOne: flags <pre class="code"> cascade = CascadeType.ALL</pre> (or a list including ALL) on <pre class="code"> @ManyToOne</pre> or <pre class="code"> @ManyToMany</pre> associations. This is a JPA anti-pattern: the owning side of a many-to-one association should not cascade lifecycle operations to the parent.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringJpaEntityLombokPitfallInspection</div>
+<div class="display-name">JPA entity should avoid broad Lombok-generated methods<span class="badge yellow">WARNING</span></div>
+<div class="description">JPA entity should avoid broad Lombok-generated methods</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaEntityMissingIdInspection</div>
+<div class="display-name">JPA entity missing identifier<span class="badge red">ERROR</span></div>
+<div class="description">Detects <pre class="code"> @Entity</pre> classes without <pre class="code"> @Id</pre> or <pre class="code"> @EmbeddedId</pre> in their hierarchy. Hibernate requires an identifier and fails persistence-unit startup without one.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaEntityNoArgConstructorInspection</div>
+<div class="display-name">JPA entity should declare a protected no-arg constructor<span class="badge red">ERROR</span></div>
+<div class="description">JPA entity should declare a protected no-arg constructor</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaEnumeratedOrdinalInspection</div>
+<div class="display-name">@Enumerated should use EnumType.STRING<span class="badge red">ERROR</span></div>
+<div class="description">@Enumerated should use EnumType.STRING</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaModifyingWithoutClearAutomaticallyInspection</div>
+<div class="display-name">@Modifying without clearAutomatically=true<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringJpaModifyingWithoutClearAutomatically: flags Spring Data JPA <pre class="code"> @Modifying</pre> annotations that don't set <pre class="code"> clearAutomatically = true</pre>. Without it, the persistence context can hold stale entities after the bulk update/delete runs. Quick-fix sets <pre class="code"> clearAutomatically = true</pre>.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaModifyingWithoutTransactionalInspection</div>
+<div class="display-name">@Modifying query method missing @Transactional<span class="badge red">ERROR</span></div>
+<div class="description">Detects Spring Data JPA query methods annotated with <pre class="code"> @Modifying</pre> that are not also annotated with <pre class="code"> @Transactional</pre>. Modifying queries require an active transaction at runtime; without one they throw an exception.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringJpaNPlusOnePredictionDataFlowInspection</div>
+<div class="display-name">N+1 query predicted via DataFlow taint analysis<span class="badge yellow">WARNING</span></div>
+<div class="description">Predicts N+1 query problems by detecting lazy getter calls on JPA entities inside loops or stream operations, where the entities came from a collection returned by a Spring Data repository or EntityManager query. Uses the DataFlow taint engine to track detached entity collections: SOURCE: List&lt;Order&gt; orders = orderRepo.findAll(); ALIAS: for (Order order : orders) — order is tainted SINK: order.getItems().size() — triggers N+1 select per iteration Unlike the PSI-only N+1 inspection, this only flags when the collection variable traces back to a repository/EntityManager source, eliminating false positives on DTO projections or already-fetched join results passed as method parameters.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaInvalidMappedByInspection</div>
+<div class="display-name">Invalid JPA mappedBy reference<span class="badge red">ERROR</span></div>
+<div class="description">Detects <pre class="code"> mappedBy</pre> values on <pre class="code"> @OneToMany</pre> or <pre class="code"> @OneToOne</pre> associations that do not point to a valid owning-side field on the target entity. Invalid mappings fail Hibernate startup.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringJpaOneToManyWithoutMappedByInspection</div>
+<div class="display-name">@OneToMany without mappedBy creates a join table<span class="badge yellow">WARNING</span></div>
+<div class="description">@OneToMany without mappedBy creates a join table</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringJpaPrimitiveRepositoryTypesInspection</div>
+<div class="display-name">Use wrapper types for JPA IDs and repository query values<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects primitive types used for JPA entity IDs or Spring Data repository parameters and return types where wrapper types are safer. Primitives cannot represent <pre class="code"> null</pre>, yet identifiers are null before persist and query results may be absent.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringJpaSaveInLoopInspection</div>
+<div class="display-name">Repository.save() called in a loop<span class="badge yellow">WARNING</span></div>
+<div class="description">SpringJpaSaveInLoop: flags calls to a Spring Data <pre class="code"> repository.save(...)</pre> or <pre class="code"> saveAndFlush(...)</pre> placed inside a loop body. Recommends batching with <pre class="code"> saveAll(...)</pre> instead. Uses DataFlow tracking to follow repository references through local-variable assignments and detect save calls even when the repository was aliased.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringJpaToOneLazyPitfallInspection</div>
+<div class="display-name">JPA to-one association should use FetchType.LAZY<span class="badge yellow">WARNING</span></div>
+<div class="description">JPA to-one association should use FetchType.LAZY</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJsonIgnoreFieldAccessInspection</div>
+<div class="display-name">Access to @JsonIgnore property on deserialized DTO parameter<span class="badge red">ERROR</span></div>
+    <div class="description">Detects accesses to <pre class="code"> @JsonIgnore</pre>'d fields on DTO parameters inside Spring-managed components (services, validators, event listeners, etc.). When a DTO arrives in a Spring component through Jackson deserialization (e.g. from a controller <pre class="code"> @RequestBody</pre> that is then passed to a service or validator), fields annotated with <pre class="code"> @JsonIgnore</pre> or listed in <pre class="code"> @JsonIgnoreProperties</pre> are <pre class="code"> null</pre> or default values. Accessing them silently produces incorrect data. This inspection scans any Spring component method and flags every read access (field reference or getter call) on a parameter whose declared type carries Jackson-excluded properties. False-positive mitigation: the inspection only fires when the parameter type actually has <pre class="code"> @JsonIgnore</pre> annotations or a <pre class="code"> @JsonSerialize(as = View.class)</pre> restriction. Fully-populated JPA entities that happen to carry <pre class="code"> @JsonIgnore</pre> for serialization purposes but are loaded from the database may trigger a warning; in that case the developer should suppress the inspection for that method.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringLazyInitializationPredictionDataFlowInspection</div>
+<div class="display-name">LazyInitializationException predicted on detached entity access<span class="badge red">ERROR</span></div>
+<div class="description">Predicts <pre class="code"> LazyInitializationException</pre> by detecting lazy getter calls on JPA entities that were obtained from a repository or EntityManager source outside an active <pre class="code"> @Transactional</pre> context. Uses the DataFlow taint engine (<pre class="code"> com.sarhan.dataFlow</pre>) to track detached entity references through assignments, <pre class="code"> Optional</pre> unwrapping, casts, and ternary expressions within a single method scope. Architecture: SOURCE: repo.findById(...), em.find(...), @Query methods, etc. ALIAS: fixed-point propagation of tainted references SINK: getXxx() / isXxx() / fetchXxx() on a tainted entity that triggers lazy loading (collection return, @OneToMany, entity return, etc.)</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringLeakyValueInNonBeanInspection</div>
+<div class="display-name">@Value/@Autowired in non-Spring-managed class<span class="badge red">ERROR</span></div>
+<div class="description">@Value/@Autowired in non-Spring-managed class</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMockBeanContextCacheInspection</div>
+<div class="display-name">@MockBean creates additional Spring test contexts<span class="badge yellow">WARNING</span></div>
+<div class="description">@MockBean creates additional Spring test contexts</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMultipartFileUploadMissingValidationInspection</div>
+<div class="display-name">MultipartFile upload should specify size limits or content-type validation<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects controller methods that accept MultipartFile without explicit size limits or content-type validation. Unrestricted file uploads can exhaust disk/storage.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringQuerySqlInjectionInspection</div>
+<div class="display-name">@Query built with string concatenation is vulnerable to SQL injection<span class="badge red">ERROR</span></div>
+<div class="description">Detects potential SQL injection in @Query annotations where the value is built via string concatenation, String.format, or contains a '+' operator. Native queries and SpEL with #{} are harder to analyze statically, but plain string concatenation of query text is a clear runtime risk.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringReadOnlyEntityMutationDataFlowInspection</div>
+<div class="display-name">JPA entity mutation inside @Transactional(readOnly = true)<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects JPA entity mutations inside @Transactional(readOnly = true) methods. Calling setters or collection mutators on managed entities (those loaded from a repository or EntityManager) inside a read-only transaction still triggers dirty checking and may attempt a flush, causing TransactionSystemException or UnexpectedRollbackException at commit time. Uses the DataFlow taint engine to distinguish managed entities from transient ones (<pre class="code"> new Entity()</pre>), eliminating false positives.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringRepositoryFindAllWithoutPageableInspection</div>
+<div class="display-name">Repository.findAll() called without Pageable<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects calls to repository findAll() or methods returning Stream/List without a Pageable parameter. On large tables this can exhaust heap memory.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringRequestMappingMissingMethodInspection</div>
+<div class="display-name">@RequestMapping without explicit HTTP method<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects @RequestMapping used without an explicit HTTP method. When no method is specified, Spring maps the handler to ALL HTTP methods, which can accidentally expose mutation endpoints to GET requests.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringScheduledFixedRateWithoutInitialDelayInspection</div>
+<div class="display-name">@Scheduled fixedRate/fixedDelay without initialDelay<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects @Scheduled with fixedRate or fixedDelay but without initialDelay. Without initialDelay the task starts immediately on context startup, which can cause a startup stampede if the method is I/O heavy.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringScheduledProxyPitfallInspection</div>
+<div class="display-name">@Scheduled method should be proxy-compatible<span class="badge red">ERROR</span></div>
+<div class="description">@Scheduled method should be proxy-compatible</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringScheduledTransactionalLongRunningInspection</div>
+<div class="display-name">Long-running @Scheduled method should not hold transactions<span class="badge red">ERROR</span></div>
+<div class="description">Long-running @Scheduled method should not hold transactions</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringScheduledInvalidSignatureInspection</div>
+<div class="display-name">@Scheduled method has invalid signature<span class="badge red">ERROR</span></div>
+<div class="description">Detects <pre class="code"> @Scheduled</pre> methods that declare parameters. Spring scheduler cannot supply arbitrary arguments, so such methods cannot be invoked correctly.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringScheduledWithoutEnableSchedulingInspection</div>
+<div class="display-name">@Scheduled without @EnableScheduling configuration<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Scheduled</pre> methods when the project has no <pre class="code"> @EnableScheduling</pre> configuration. Without scheduling infrastructure the jobs are never registered or invoked.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringScheduledWithoutLockInspection</div>
+<div class="display-name">@Scheduled method may need a distributed lock<span class="badge yellow">WARNING</span></div>
+<div class="description">@Scheduled method may need a distributed lock</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringSecurityProxyPitfallInspection</div>
+<div class="display-name">Spring Security annotation may be bypassed by proxy limitations<span class="badge red">ERROR</span></div>
+<div class="description">Spring Security annotation may be bypassed by proxy limitations</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringServiceMultipleRepositoriesWithoutTransactionInspection</div>
+<div class="display-name">Service method uses multiple repositories without @Transactional<span class="badge red">ERROR</span></div>
+<div class="description">Service method uses multiple repositories without @Transactional</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringServiceSwallowedExceptionInspection</div>
+<div class="display-name">Service method swallows broad exception<span class="badge red">ERROR</span></div>
+<div class="description">Service method swallows broad exception</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringSqlInjectionTaintFlowInspection</div>
+<div class="display-name">SQL injection through tainted variable flow into query execution<span class="badge red">ERROR</span></div>
+<div class="description">Detects intra-procedural SQL injection taint flow: method parameters annotated with @RequestParam or @PathVariable (or HttpServletRequest access) that are concatenated into strings and passed to query execution methods such as EntityManager.createNativeQuery, JdbcTemplate.query, etc.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalAbstractClassInspection</div>
+<div class="display-name">@Transactional on abstract class creates ambiguous transaction boundaries<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional on abstract class creates ambiguous transaction boundaries</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalAsyncBoundaryInspection</div>
+<div class="display-name">@Async crosses a transaction boundary<span class="badge red">ERROR</span></div>
+<div class="description">@Async crosses a transaction boundary</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalAsyncEventListenerInspection</div>
+<div class="display-name">@Async with @TransactionalEventListener can race transaction commit visibility<span class="badge red">ERROR</span></div>
+<div class="description">@Async with @TransactionalEventListener can race transaction commit visibility</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalBeanMethodInspection</div>
+<div class="display-name">@Transactional on @Bean method<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional on @Bean method</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalCheckedExceptionInspection</div>
+<div class="display-name">Checked exception may not trigger transaction rollback<span class="badge red">ERROR</span></div>
+<div class="description">Checked exception may not trigger transaction rollback</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalConflictingRollbackRulesInspection</div>
+<div class="display-name">Conflicting rollback and no-rollback rules<span class="badge red">ERROR</span></div>
+<div class="description">Conflicting rollback and no-rollback rules</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalConstructorTrapInspection</div>
+<div class="display-name">Constructor calls @Transactional method before proxy exists<span class="badge red">ERROR</span></div>
+<div class="description">Constructor calls @Transactional method before proxy exists</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalDirtyCheckingDataFlowInspection</div>
+<div class="display-name">@Transactional read method mutates a managed entity<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects @Transactional methods that load entities from a repository or EntityManager and then mutate them without readOnly=true and without an explicit write operation (save, delete, etc.). Hibernate dirty checking may persist those temporary changes unexpectedly. Uses the DataFlow taint engine to track loaded entities through assignments, Optional unwraps, casts, and ternaries — replacing brittle string-name matching.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalEventListenerWithoutTransactionInspection</div>
+<div class="display-name">@TransactionalEventListener without @Transactional<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @TransactionalEventListener</pre> methods that lack a transaction boundary, which can cause the listener to run without an active transaction context.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalFinalClassInspection</div>
+<div class="display-name">@Transactional final class cannot be subclass-proxied<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional final class cannot be subclass-proxied</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalFinalMethodInspection</div>
+<div class="display-name">@Transactional final method cannot be subclass-proxied<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional final method cannot be subclass-proxied</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalInterfaceMethodWithCglibInspection</div>
+<div class="display-name">@Transactional on interface method ignored by CGLIB proxy<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional on interface method ignored by CGLIB proxy</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalLongRunningOperationInspection</div>
+<div class="display-name">Long-running work inside @Transactional<span class="badge red">ERROR</span></div>
+<div class="description">Long-running work inside @Transactional</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalMethodInFinalClassInspection</div>
+<div class="display-name">@Transactional method in final class cannot be subclass-proxied<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional method in final class cannot be subclass-proxied</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalMultipleWritesWithoutTransactionInspection</div>
+<div class="display-name">Method performs multiple write operations without @Transactional<span class="badge red">ERROR</span></div>
+<div class="description">Method performs multiple write operations without @Transactional</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalNestedWithJpaInspection</div>
+<div class="display-name">Propagation.NESTED is unsafe with standard JPA transaction managers<span class="badge red">ERROR</span></div>
+<div class="description">Propagation.NESTED is unsafe with standard JPA transaction managers</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalOpenSessionInViewInspection</div>
+<div class="display-name">spring.jpa.open-in-view should be disabled<span class="badge red">ERROR</span></div>
+<div class="description">spring.jpa.open-in-view should be disabled</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalPostConstructInspection</div>
+<div class="display-name">@Transactional on @PostConstruct is ignored<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> @Transactional</pre> annotations on <pre class="code"> @PostConstruct</pre> methods, where the Spring proxy is not yet active and transaction advice is ignored.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalPrivateMethodInspection</div>
+<div class="display-name">@Transactional private method is not proxied<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects proxy-breaking usage of <pre class="code"> @Transactional</pre> and related pitfalls. Covers: private/static/final methods, final classes, self-invocations, checked exceptions without rollback, conflicting rollback rules, read-only transactions performing writes, class-level read-only inheritance violations, <pre class="code"> @Transactional</pre> on tests, abstract classes, repositories, and dangerous pairings such as <pre class="code"> @Async</pre> with <pre class="code"> @TransactionalEventListener</pre>.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalReadOnlyClassWriteInspection</div>
+<div class="display-name">Class-level read-only transaction contains write method<span class="badge red">ERROR</span></div>
+<div class="description">Class-level read-only transaction contains write method</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalReadOnlyEntityFetchInspection</div>
+<div class="display-name">Read-only transaction fetches entities instead of DTOs<span class="badge red">ERROR</span></div>
+<div class="description">Read-only transaction fetches entities instead of DTOs</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalReadOnlyWriteInspection</div>
+<div class="display-name">@Transactional(readOnly = true) method performs writes<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional(readOnly = true) method performs writes</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalRepositoryBoundaryInspection</div>
+<div class="display-name">Repository-level @Transactional is too narrow<span class="badge red">ERROR</span></div>
+<div class="description">Repository-level @Transactional is too narrow</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTransactionalRequiresNewConnectionPressureInspection</div>
+<div class="display-name">REQUIRES_NEW in loops or deep call chains can exhaust connections<span class="badge yellow">WARNING</span></div>
+<div class="description">REQUIRES_NEW in loops or deep call chains can exhaust connections</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalRequiresNewSelfInvocationInspection</div>
+<div class="display-name">Self-invocation ignores REQUIRES_NEW boundary<span class="badge red">ERROR</span></div>
+<div class="description">Self-invocation ignores REQUIRES_NEW boundary</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalRollbackOnlyWithoutThrowInspection</div>
+<div class="display-name">setRollbackOnly used without explicit thrown exception<span class="badge red">ERROR</span></div>
+<div class="description">setRollbackOnly used without explicit thrown exception</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalSelfInvocationInspection</div>
+<div class="display-name">Self-invocation bypasses @Transactional proxy<span class="badge red">ERROR</span></div>
+<div class="description">Self-invocation bypasses @Transactional proxy</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalSelfInvocationIndirectionInspection</div>
+<div class="display-name">@Transactional self-invocation through indirection<span class="badge red">ERROR</span></div>
+<div class="description">Detects @Transactional self-invocation through indirection within the same class. When a non-transactional method calls another method that eventually calls a</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalStaticMethodInspection</div>
+<div class="display-name">@Transactional static method is not proxied<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional static method is not proxied</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalStreamResourceLeakInspection</div>
+<div class="display-name">Repository Stream used without try-with-resources<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects Spring Data repository <pre class="code"> Stream</pre> calls that are not wrapped in try-with-resources or explicitly closed, which can leak database connections.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalSwallowedExceptionInspection</div>
+<div class="display-name">Exception swallowed inside @Transactional method<span class="badge red">ERROR</span></div>
+<div class="description">Exception swallowed inside @Transactional method</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTransactionalTestInspection</div>
+<div class="display-name">Avoid @Transactional on integration tests<span class="badge yellow">WARNING</span></div>
+<div class="description">Avoid @Transactional on integration tests</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalUnsupportedTimeoutInspection</div>
+<div class="display-name">@Transactional timeout may not be supported<span class="badge red">ERROR</span></div>
+<div class="description">@Transactional timeout may not be supported</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringTransactionalWeakIsolationInspection</div>
+<div class="display-name">Multiple reads with weak/default transaction isolation<span class="badge red">ERROR</span></div>
+<div class="description">Multiple reads with weak/default transaction isolation</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringUnexpectedRollbackExceptionInspection</div>
+<div class="display-name">Caught RuntimeException from @Transactional call may cause UnexpectedRollbackException<span class="badge red">ERROR</span></div>
+<div class="description">Detects @Transactional methods that call another @Transactional method and catch RuntimeException without re-throwing it. The nested transaction may already be marked rollback-only, causing an UnexpectedRollbackException when the outer transaction commits.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringValidOnPrimitiveInspection</div>
+<div class="display-name">@Valid on primitive or String parameter has no effect<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects @Valid annotations on primitive types or String parameters. On primitives and String it has no effect and is misleading.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringValidationBindingResultOrderInspection</div>
+<div class="display-name">BindingResult should immediately follow validated parameter<span class="badge red">ERROR</span></div>
+<div class="description">BindingResult should immediately follow validated parameter</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringValidationMissingValidatedInspection</div>
+<div class="display-name">Method parameter constraints require @Validated<span class="badge red">ERROR</span></div>
+<div class="description">Method parameter constraints require @Validated</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringValidationNestedDtoMissingValidInspection</div>
+<div class="display-name">Nested DTO field should be annotated with @Valid<span class="badge red">ERROR</span></div>
+<div class="description">Nested DTO field should be annotated with @Valid</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringValueHardcodedSecretInspection</div>
+<div class="display-name">Hardcoded secret in @Value field<span class="badge red">ERROR</span></div>
+<div class="description">Detects @Value annotations on fields named like secrets/passwords/tokens/apiKeys that contain a hardcoded string literal instead of a property placeholder. Hardcoded credentials in source code are a security vulnerability.</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow spring-framework">Spring Framework</div>
+<h2 id="spring-framework">Spring Framework<span class="count">11 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInAsyncMethod</div>
+<div class="display-name">@Async method return type issue<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects <pre class="code"> @Async</pre> methods with unsupported return types or other async method configuration issues that may cause runtime failures in Spring's async proxy infrastructure.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringProfileExpression</div>
+<div class="display-name">Spring profile expression issue<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects invalid or problematic Spring profile expressions in <pre class="code"> @Profile</pre> annotations that may cause bean activation failures at runtime.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringBootApplicationSetup</div>
+<div class="display-name">Spring Boot application setup issue<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects Spring Boot application class setup problems such as multiple <pre class="code"> @SpringBootApplication</pre> classes in the same package or misplaced configuration.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringDataModifyingAnnotationMissing</div>
+<div class="display-name">@Modifying annotation missing on data modification query<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects Spring Data JPA query methods that perform data modifications without the required <pre class="code"> @Modifying</pre> annotation, which causes runtime exceptions.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringDataMethodInconsistency</div>
+<div class="display-name">Spring Data repository method inconsistency<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects inconsistencies in Spring Data repository derived query method names or signatures that may cause query derivation failures at runtime.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringDataPageableParameterMissing</div>
+<div class="display-name">Pageable parameter missing on paged query<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects Spring Data repository methods returning <pre class="code"> Page</pre> or <pre class="code"> Slice</pre> without a <pre class="code"> Pageable</pre> parameter, which is required for pagination.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringDataRepositoryMethodParameters</div>
+<div class="display-name">Spring Data repository method parameter issue<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects incorrect or problematic parameters in Spring Data repository method signatures, such as duplicate <pre class="code"> Pageable</pre> or <pre class="code"> Sort</pre> parameters.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringDataRepositoryMethodReturnType</div>
+<div class="display-name">Spring Data repository method return type mismatch<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects return type mismatches in Spring Data repository methods where the declared return type is incompatible with the query result.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringDataJdbcEmptySequenceName</div>
+<div class="display-name">Empty sequence name in Spring Data JDBC<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects Spring Data JDBC entities with <pre class="code"> @GeneratedValue</pre> using <pre class="code"> SEQUENCE</pre> strategy without specifying a sequence name.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInMVCPathVariable</div>
+<div class="display-name">MVC PathVariable issue<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects issues with <pre class="code"> @PathVariable</pre> usage in Spring MVC controllers such as mismatched names, missing path segments, or type mismatches.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSpringMvcPathVariableDeclaration</div>
+<div class="display-name">Spring MVC PathVariable declaration issue<span class="badge yellow">WARNING</span></div>
+<div class="description">Built-in wrapper: detects declaration issues with <pre class="code"> @PathVariable</pre> parameters in Spring MVC controller methods, such as missing required attributes or incorrect placement.</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow spring-javaformat">Spring Java Format</div>
+<h2 id="spring-javaformat">Spring Java Format<span class="count">59 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInCanBeFinalInspection</div>
+<div class="display-name">Field can be final<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports fields that can be declared final, reducing mutable state and aligning with Spring Java Format preferences.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInCustomRegExpInspection</div>
+<div class="display-name">CustomRegExp<span class="badge yellow">WARNING</span></div>
+<div class="description">Runs configured custom regular-expression checks as part of the Spring Buddy inspection profile.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInUNUSED_IMPORTInspection</div>
+<div class="display-name">Unused import<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports unused Java imports so files stay clean and Spring Java Format compliant.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringNoWhitespaceAfterInspection</div>
+<div class="display-name">Disallow whitespace after selected tokens<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports whitespace after tokens where Spring Java Format requires tight spacing.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInClassWithOnlyPrivateConstructorsInspection</div>
+<div class="display-name">Class with only private constructors should be final<span class="badge yellow">WARNING</span></div>
+<div class="description">Class with only private constructors should be final</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInControlFlowStatementWithoutBracesInspection</div>
+<div class="display-name">Flow statement without braces<span class="badge yellow">WARNING</span></div>
+<div class="description">Flow statement without braces</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInConvert2MethodRefInspection</div>
+<div class="display-name">Lambda can be replaced with method reference<span class="badge yellow">WARNING</span></div>
+<div class="description">Lambda can be replaced with method reference</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInInfiniteRecursionInspection</div>
+<div class="display-name">Infinite recursion<span class="badge yellow">WARNING</span></div>
+<div class="description">Infinite recursion</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInJavadocReferenceInspection</div>
+<div class="display-name">JavaDoc issues<span class="badge yellow">WARNING</span></div>
+<div class="description">JavaDoc issues</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInLambdaParameterHidingMemberVariableInspection</div>
+<div class="display-name">Lambda parameter hides member variable<span class="badge yellow">WARNING</span></div>
+<div class="description">Lambda parameter hides member variable</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInLambdaParameterTypeCanBeSpecifiedInspection</div>
+<div class="display-name">Lambda parameter type can be specified<span class="badge yellow">WARNING</span></div>
+<div class="description">Lambda parameter type can be specified</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInMissingOverrideAnnotationInspection</div>
+<div class="display-name">Missing @Override annotation<span class="badge yellow">WARNING</span></div>
+<div class="description">Missing @Override annotation</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInMissortedModifiersInspection</div>
+<div class="display-name">Missorted modifiers<span class="badge yellow">WARNING</span></div>
+<div class="description">Missorted modifiers</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInMultipleVariablesInDeclarationInspection</div>
+<div class="display-name">Multiple variables in one declaration<span class="badge yellow">WARNING</span></div>
+<div class="description">Multiple variables in one declaration</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInNonFinalUtilityClassInspection</div>
+<div class="display-name">Utility class is not final<span class="badge yellow">WARNING</span></div>
+<div class="description">Utility class is not final</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSimplifiableAnnotationInspection</div>
+<div class="display-name">Simplifiable annotation<span class="badge yellow">WARNING</span></div>
+<div class="description">Simplifiable annotation</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSimplifiableAssertionInspection</div>
+<div class="display-name">Simplifiable assertion<span class="badge yellow">WARNING</span></div>
+<div class="description">Simplifiable assertion</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSimplifiableBooleanExpressionInspection</div>
+<div class="display-name">Simplifiable boolean expression<span class="badge yellow">WARNING</span></div>
+<div class="description">Simplifiable boolean expression</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSimplifiableConditionalExpressionInspection</div>
+<div class="display-name">Simplifiable conditional expression<span class="badge yellow">WARNING</span></div>
+<div class="description">Simplifiable conditional expression</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInStaticImportInspection</div>
+<div class="display-name">Static import<span class="badge yellow">WARNING</span></div>
+<div class="description">Static import</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInSystemOutErrInspection</div>
+<div class="display-name">System.out/System.err usage<span class="badge yellow">WARNING</span></div>
+<div class="description">System.out/System.err usage</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInUnnecessaryModifierInspection</div>
+<div class="display-name">Unnecessary modifier<span class="badge yellow">WARNING</span></div>
+<div class="description">Unnecessary modifier</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInUnnecessarySemicolonInspection</div>
+<div class="display-name">Unnecessary semicolon<span class="badge yellow">WARNING</span></div>
+<div class="description">Unnecessary semicolon</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInUnqualifiedFieldAccessInspection</div>
+<div class="display-name">Unqualified field access (missing 'this.')<span class="badge yellow">WARNING</span></div>
+<div class="description">Unqualified field access (missing 'this.')</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInUtilityClassWithPublicConstructorInspection</div>
+<div class="display-name">Utility class with public constructor<span class="badge yellow">WARNING</span></div>
+<div class="description">Utility class with public constructor</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">BuiltInVariableTypeCanBeExplicitInspection</div>
+<div class="display-name">Variable type can be explicit<span class="badge yellow">WARNING</span></div>
+<div class="description">Variable type can be explicit</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringAnnotationUseStyleInspection</div>
+<div class="display-name">Annotation use should follow Spring style<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects annotation style violations: empty parentheses on no-argument annotations, explicit <pre class="code"> value=</pre> where compact form is allowed, single-element arrays with braces, and trailing commas in array values.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringArrayTypeStyleInspection</div>
+<div class="display-name">Array brackets should be declared with the type<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects array declarations where brackets are placed after the variable name rather than with the type (e.g. <pre class="code"> String args[]</pre>), which is discouraged style.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringAssertJBooleanMethodMatcherInspection</div>
+<div class="display-name">Use direct AssertJ matcher for boolean method assertions<span class="badge yellow">WARNING</span></div>
+<div class="description">Use direct AssertJ matcher for boolean method assertions</div>
+</article>
+<article class="card" data-level="weak">
+<div class="class-name">SpringAssertJChainableInspection</div>
+<div class="display-name">Chain assertThat() calls on the same subject<span class="badge weak">WEAK WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringAssertJChainable: detects sibling statements that all call <pre class="code"> assertThat(sameSubject)...</pre> on the same subject expression and suggests chaining them into a single fluent assertion.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringAssertJEmptyStringMatcherInspection</div>
+<div class="display-name">Use AssertJ isEmpty() for empty strings<span class="badge yellow">WARNING</span></div>
+<div class="description">Use AssertJ isEmpty() for empty strings</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringAssertJSizeMatcherInspection</div>
+<div class="display-name">Use AssertJ collection size matchers<span class="badge yellow">WARNING</span></div>
+<div class="description">Use AssertJ collection size matchers</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringAssertJStyleInspection</div>
+<div class="display-name">Use AssertJ instead of JUnit Assert/Assertions<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Bans JUnit-style assertions in favour of AssertJ fluent assertions. Flags usages of <pre class="code"> org.junit.Assert</pre> and Jupiter <pre class="code"> Assertions</pre> (static imports or direct calls) and offers a quick-fix to rewrite them as AssertJ <pre class="code"> assertThat(...)</pre> chains.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringAvoidNestedBlocksInspection</div>
+<div class="display-name">Nested blocks should be avoided<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects unnecessary nested block statements inside code blocks, which add no semantic value and reduce readability.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringCatchVariableNameInspection</div>
+<div class="display-name">Catch variable should follow Spring conventions<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringCatchCheck: catch clause variables must not use single-letter names or the wide-eye <pre class="code"> o_o</pre> name.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringDeprecatedInspection</div>
+<div class="display-name">@Deprecated should declare a non-empty since attribute<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringDeprecatedCheck: <pre class="code"> @Deprecated</pre> annotations should declare a non-empty <pre class="code"> since</pre> attribute.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringFinalClassInspection</div>
+<div class="display-name">Classes with private construction should be final<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects classes that can be declared <pre class="code"> final</pre> because they have only private or protected constructors and no subclasses, preventing accidental extension.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHideUtilityClassConstructorInspection</div>
+<div class="display-name">Utility class should have a private constructor<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringHideUtilityClassConstructor: a utility class (one where every method and field is <pre class="code"> static</pre>) must not have a <pre class="code"> public</pre> or package-private (default) constructor. It should have exactly one <pre class="code"> private</pre> no-arg constructor. Mirrors <pre class="code"> io.spring.javaformat.checkstyle.check.SpringHideUtilityClassConstructor</pre> which itself is a variant of Checkstyle's <pre class="code"> HideUtilityClassConstructor</pre>. Quick-fix options: Make the existing constructor <pre class="code"> private</pre> Add a <pre class="code"> private</pre> no-arg constructor when none exists</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringImportOrderInspection</div>
+<div class="display-name">Imports should be ordered according to spring-javaformat<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects import statements that are not ordered or grouped according to spring-javaformat conventions (java, javax, other, org.springframework, static).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringInMemoryFilteringInspection</div>
+<div class="display-name">In-memory filtering of repository-loaded collection<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports when a collection returned by a Spring Data repository or <pre class="code"> EntityManager</pre> query is immediately chained into an in-memory <pre class="code"> .stream().filter()</pre>, <pre class="code"> .sorted()</pre>, <pre class="code"> .skip()</pre>, or <pre class="code"> .limit()</pre> operation. Fetching thousands of rows into JVM memory just to filter 90% of them in a Java stream wastes heap, CPU, and database throughput. Prefer a custom <pre class="code"> @Query</pre>, a derived query method (e.g. <pre class="code"> findByStatus(...)</pre>), or a <pre class="code"> Pageable</pre>/<pre class="code"> Specification</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringInnerTypeLastInspection</div>
+<div class="display-name">Inner types should be declared last<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects class members (fields, methods, initializers) declared after inner types, violating the convention that inner types should be placed last in a class body.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringInterfaceIsTypeInspection</div>
+<div class="display-name">Interfaces should define types, not only constants<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects interfaces that define only constants without any methods, violating the principle that an interface should represent a type.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringLambdaInspection</div>
+<div class="display-name">Lambda expression should follow Spring conventions<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects lambda style violations: missing parentheses around a single parameter and unnecessary curly braces around a single-expression body.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMethodOrderInspection</div>
+<div class="display-name">equals, hashCode, and toString should be ordered<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects <pre class="code"> equals</pre>, <pre class="code"> hashCode</pre>, and <pre class="code"> toString</pre> methods that are not ordered according to spring-javaformat conventions (equals, hashCode, toString).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMethodParamPadInspection</div>
+<div class="display-name">Method parentheses should not be padded<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects whitespace between a method name and its opening parenthesis in declarations or call expressions, which is disallowed by spring-javaformat.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMethodVisibilityInspection</div>
+<div class="display-name">Method visibility should follow Spring conventions<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects methods with unnecessarily broad visibility in non-public or final classes. Public methods in package-private or private classes, and protected methods in final classes, cannot be accessed from outside the package or subclassed, making the wider visibility misleading. Package-private is sufficient and preferred in these cases.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMockitoBddStyleInspection</div>
+<div class="display-name">Use BDDMockito (given/when/then) instead of Mockito.when<span class="badge yellow">WARNING</span></div>
+<div class="description">Use BDDMockito (given/when/then) instead of Mockito.when</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringMutableExceptionInspection</div>
+<div class="display-name">Exception fields should be final<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects non-final fields inside exception, error, or throwable classes. Exception objects should be immutable after construction; mutable fields can lead to inconsistent error state if modified after the exception is thrown and caught.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringNoWhitespaceBeforeInspection</div>
+<div class="display-name">Selected tokens should not be preceded by whitespace<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects whitespace before tokens where it is not allowed (e.g., {@code ,}, {@code ;}, {@code ...}, postfix {@code ++}, postfix {@code --}, colon in labeled statements). Extra whitespace in these positions is a formatting inconsistency that reduces code clarity.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringOneTopLevelClassInspection</div>
+<div class="display-name">Top-level types should each be in their own source file<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects Java source files that declare more than one top-level class or interface. Each top-level type should reside in its own file named after the type. Multiple top-level types in a single file make navigation and maintenance harder and violate Java naming conventions.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringRedundantModifierInspection</div>
+<div class="display-name">Redundant modifiers should be omitted<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects redundant modifiers that the Java compiler or language semantics already imply. Examples include {@code public} / {@code static} / {@code final} on interface fields, {@code public} / {@code abstract} on interface methods, {@code final} on methods in a {@code final} class or private methods, and {@code static} on nested enum types. Removing them keeps the declaration concise.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringSlf4jStringConcatenationInspection</div>
+<div class="display-name">Use SLF4J '[{}]' placeholders instead of String concatenation<span class="badge yellow">WARNING</span></div>
+<div class="description">Detects string concatenation inside SLF4J log statements. SLF4J supports parameterized messages (e.g. {@code log.info("user={}", user)}). String concatenation forces eager evaluation even when the log level is disabled, wasting CPU and memory. Use placeholders instead.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringStringLiteralEqualityInspection</div>
+<div class="display-name">String literals should not be compared with == or !=<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects {@code ==} and {@code !=} comparisons that involve at least one string literal. Using reference equality for {@code String} objects is unreliable because strings may not be interned. {@code equals()} should be used for value comparison instead.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringSystemOutErrInspection</div>
+<div class="display-name">Use logger instead of System.out/System.err<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports usages of System.out / System.err method calls (println/print/printf) and offers a quick-fix to replace them with logger calls (log.info / log.error).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTernaryInspection</div>
+<div class="display-name">Ternary expression should follow Spring conventions<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects formatting and style issues inside ternary (conditional) expressions. It flags complex conditions that are not wrapped in parentheses (hurting readability) and {@code == null} checks that should be rewritten as {@code != null} with swapped branches.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTestFileNameInspection</div>
+<div class="display-name">Test class name should end with 'Tests'<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">SpringTestFileNameCheck: any class that contains at least one {@code @Test} method (JUnit 4 or JUnit 5) must have a name ending with {@code Tests}. This mirrors {@code io.spring.javaformat.checkstyle.check.SpringTestFileNameCheck}.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringTypecastParenPadInspection</div>
+<div class="display-name">Typecast parentheses should not be padded<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects whitespace padding immediately inside the parentheses of a type cast expression. Whitespace between the opening parenthesis and the cast type, or between the cast type and the closing parenthesis, is a style inconsistency that should be removed.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringUpperEllInspection</div>
+<div class="display-name">Long literals should use uppercase L suffix<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects long literals that use a lowercase <pre class="code"> 'l'</pre> suffix instead of uppercase <pre class="code"> 'L'</pre>. A lowercase <pre class="code"> 'l'</pre> is easily mistaken for the digit <pre class="code"> '1'</pre>, which can introduce subtle bugs when reading or reviewing code. The suffix should always be <pre class="code"> 'L'</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringWhitespaceAfterInspection</div>
+<div class="display-name">Selected tokens should be followed by whitespace<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Checks that commas and semicolons are followed by whitespace. Missing whitespace after these tokens reduces readability and is against Spring formatting conventions.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringWhitespaceAroundInspection</div>
+<div class="display-name">Selected tokens should be surrounded by whitespace<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Checks that operators and keywords have required whitespace around them. Missing whitespace around operators or control-flow keywords reduces readability and is against Spring formatting conventions.</div>
+</article>
+</div>
+</div>
+
+</div>
+
+<a href="#top" class="back-to-top" title="Back to top">&#8593;</a>
+
+
+<script>
+function applyFilter(level) {
+    const cards = document.querySelectorAll('article.card');
+    const sections = document.querySelectorAll('.category-section');
+    const stats = document.querySelectorAll('.stat[data-filter]');
+    const indicator = document.getElementById('filter-indicator');
+
+    stats.forEach(s => s.classList.remove('active-filter'));
+    if (level === 'all') {
+        cards.forEach(c => c.classList.remove('hidden'));
+        sections.forEach(s => s.classList.remove('hidden'));
+        if (indicator) indicator.style.display = 'none';
+        return;
+    }
+
+    const activeStat = document.querySelector('.stat[data-filter="' + level + '"]');
+    if (activeStat) activeStat.classList.add('active-filter');
+
+    let visible = 0;
+    cards.forEach(c => {
+        if (c.dataset.level === level) {
+            c.classList.remove('hidden');
+            visible++;
+        } else {
+            c.classList.add('hidden');
+        }
+    });
+
+    sections.forEach(s => {
+        const visibleCards = s.querySelectorAll('article.card:not(.hidden)');
+        if (visibleCards.length === 0) {
+            s.classList.add('hidden');
+        } else {
+            s.classList.remove('hidden');
+            const countSpan = s.querySelector('h2 .count');
+            if (countSpan) {
+                countSpan.textContent = visibleCards.length + (visibleCards.length === 1 ? ' inspection' : ' inspections');
+            }
+        }
+    });
+
+    if (indicator) {
+        const labels = {error: 'ERROR', warning: 'WARNING', weak: 'WEAK WARNING'};
+        indicator.textContent = 'Showing ' + visible + ' ' + labels[level] + ' inspections. Click "All" in the nav bar or the Total Inspections stat to reset.';
+        indicator.style.display = 'block';
+    }
+}
+
+// Clear filter when clicking the "All" nav link
+document.addEventListener('DOMContentLoaded', function() {
+    const allLink = document.querySelector('.nav-bar a[href="#top"]');
+    if (allLink) {
+        allLink.addEventListener('click', function() { applyFilter('all'); });
+    }
+});
+</script>
+
+</body>
+</html>
