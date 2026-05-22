@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>cascade = CascadeType.ALL</code> on <code>@ManyToOne</code> or
+<code>@ManyToMany</code> associations.
+<p>
+    The owning side of a many-to-one relationship should not cascade lifecycle operations to the
+    parent — deleting a child can unintentionally delete shared parents. Restrict cascading to the
+    operations actually needed, or move the cascade to the inverse <code>@OneToMany</code> side.
+</p>
+</body>
+</html>

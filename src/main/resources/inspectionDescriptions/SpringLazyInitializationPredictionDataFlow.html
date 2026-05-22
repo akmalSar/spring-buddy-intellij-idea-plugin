@@ -1,0 +1,15 @@
+<html>
+<body>
+Predicts <code>LazyInitializationException</code> by detecting lazy getter calls
+on JPA entities outside <code>@Transactional</code> methods, where the entity was
+obtained from a repository or service call that loaded it inside a transaction.
+<p>
+    A collection getter (<code>getItems()</code>) or entity getter that returns
+    another JPA entity type triggers lazy loading. If the call is made after the
+    original <code>@Transactional</code> method has returned, the Hibernate session
+    is closed and <code>LazyInitializationException</code> is thrown at runtime.
+    Use <code>@Transactional</code> on the caller, initialize the association
+    eagerly (<code>EntityGraph</code> or <code>JOIN FETCH</code>), or return a DTO.
+</p>
+</body>
+</html>

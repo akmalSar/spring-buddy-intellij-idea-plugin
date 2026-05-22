@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>@Entity</code> classes whose <code>equals</code> / <code>hashCode</code> methods reference the
+<code>@Id</code> (or <code>@EmbeddedId</code>) field.
+<p>
+    Generated identifiers are <code>null</code> until the entity is flushed, which breaks the equality
+    contract when entities are placed in a <code>HashSet</code>/<code>HashMap</code> before persist.
+    Prefer a stable business key, or use <code>UUID</code> assigned in the constructor.
+</p>
+</body>
+</html>

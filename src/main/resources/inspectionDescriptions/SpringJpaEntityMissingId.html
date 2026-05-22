@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports JPA <code>@Entity</code> classes that do not declare <code>@Id</code> or
+<code>@EmbeddedId</code> in their class hierarchy.
+<p>
+    Hibernate requires every entity to have an identifier. An entity without an identifier fails
+    persistence-unit startup with a mapping exception. Add an <code>@Id</code> or
+    <code>@EmbeddedId</code> to the correct domain identifier field or getter.
+</p>
+</body>
+</html>

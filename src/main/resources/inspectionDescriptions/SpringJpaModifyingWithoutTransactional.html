@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports Spring Data JPA <code>@Modifying</code> query methods that are not transactional.
+<p>
+    Bulk update/delete queries need an active transaction to flush reliably. Without <code>@Transactional</code>,
+    the operation can fail at runtime or run outside the intended transaction boundary.
+</p>
+<p>
+    Add <code>@Transactional</code> to the modifying repository method or to the containing repository/interface.
+</p>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports <code>@Async</code> methods (and classes annotated with <code>@Async</code>) that do not specify
+an explicit <code>executor</code> attribute.
+<p>
+    Without a custom executor Spring falls back to <code>SimpleAsyncTaskExecutor</code>,
+    which creates a <b>new thread for every single task</b>. Under load this exhausts memory
+    and eventually crashes the JVM with <code>OutOfMemoryError</code>.
+    Specify <code>@Async("taskExecutor")</code> and provide a bounded <code>ThreadPoolTaskExecutor</code> bean,
+    or implement <code>AsyncConfigurer</code> to define a default executor.
+</p>
+</body>
+</html>

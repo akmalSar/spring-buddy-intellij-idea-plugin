@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>@RequestMapping</code> annotations on controller methods that do not specify an explicit HTTP method.
+<p>
+    Without <code>method = RequestMethod.GET</code> (or similar), the handler maps to <b>all</b> HTTP verbs,
+    which can accidentally expose mutation endpoints to GET requests.
+    Prefer composed annotations such as <code>@GetMapping</code>, <code>@PostMapping</code>,
+    <code>@PutMapping</code>, <code>@DeleteMapping</code>, or <code>@PatchMapping</code>.
+</p>
+</body>
+</html>

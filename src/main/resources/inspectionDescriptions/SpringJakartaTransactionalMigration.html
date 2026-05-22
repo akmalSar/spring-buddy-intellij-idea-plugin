@@ -1,0 +1,20 @@
+<html>
+<body>
+Reports usage of <code>jakarta.transaction.Transactional</code> (or <code>javax.transaction.Transactional</code>) in Spring-managed code.
+<p>
+    Spring's transaction management (enabled via <code>@EnableTransactionManagement</code>)
+    only recognises its own <code>org.springframework.transaction.annotation.Transactional</code>.
+    The Jakarta variant is silently ignored at runtime, so no proxy is created and the method
+    executes without an actual transaction boundary.
+</p>
+<p>
+    The quick fix replaces the annotation with Spring's <code>@Transactional</code> and migrates
+    Jakarta-specific attributes:
+</p>
+<ul>
+    <li><code>value = TxType.REQUIRES_NEW</code> → <code>propagation = Propagation.REQUIRES_NEW</code></li>
+    <li><code>rollbackOn</code> → <code>rollbackFor</code></li>
+    <li><code>dontRollbackOn</code> → <code>noRollbackFor</code></li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,6 @@
+<html>
+<body>
+<p>Reports Spring Data repository methods that modify data but are missing the <code>@Modifying</code> annotation.</p>
+<p>Methods with <code>@Query</code> that execute native DML (INSERT, UPDATE, DELETE) must be annotated with <code>@Modifying</code> so Spring Data knows to flush the <code>EntityManager</code> and bind the query correctly.</p>
+</body>
+</html>

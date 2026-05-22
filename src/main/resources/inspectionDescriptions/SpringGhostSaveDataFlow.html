@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<p>
+    Reports mutations of <b>detached JPA entities</b> that will be silently ignored
+    because there is no active Hibernate session to flush the changes to the database
+    (a "Ghost Save").
+</p>
+
+<p>
+    An entity becomes <i>detached</i> when it is fetched from a Spring Data repository
+    or <code>EntityManager</code> outside an active <code>@Transactional</code> context.
+    Any setter or mutator called on such an entity will appear to succeed at runtime but
+    will <b>never be persisted</b>.
+</p>
+
+<h3>Examples of code that triggers this inspection</h3>
+
+<p><b>Basic ghost save</b></p>
+<pre><code>
+// No @Transactional — entity is detached immediately after fetch
+public void updateName(Long id, String name) {
+    User user = userRepository.findById(id).orElseThrow();
+    user.setName(name);   // ← flagged: change will not be persisted
+}
+</code></pre>
+
+<p><b>Ghost save through a helper method (inter-procedural)</b></p>
+<pre><code>
+public void process(Long id) {
+    User user = userRepository.findById(id).orElseThrow();
+    applyDefaults(user);   // ← flagged: taint follows into the callee
+}
+
+private void applyDefaults(User user) {
+    user.setStatus("ACTIVE");   // ← also flagged
+}
+</code></pre>
+
+<p><b>Ghost save through an alias</b></p>
+<pre><code>
+public void process(Long id) {
+    User original = userRepository.findById(id).orElseThrow();
+    User alias    = original;     // alias is also detached
+    alias.setName("Bob");         // ← flagged
+}
+</code></pre>
+
+<h3>How to fix</h3>
+
+<p>
+    The recommended fix is to annotate the enclosing method (or its containing class)
+    with <code>@Transactional</code>. This ensures the entity remains in the
+    <i>managed</i> state for the duration of the method, and Hibernate will
+    automatically flush any changes at the end of the transaction.
+</p>
+
+<pre><code>
+@Transactional   // ← added
+public void updateName(Long id, String name) {
+    User user = userRepository.findById(id).orElseThrow();
+    user.setName(name);   // now persisted automatically
+}
+</code></pre>
+
+<p>
+    Alternatively, call <code>repository.save(entity)</code> explicitly after
+    all mutations — but prefer <code>@Transactional</code> as it is less
+    error-prone and covers all mutations in the method body.
+</p>
+
+<h3>Suppression</h3>
+
+<p>
+    If you have intentionally fetched a detached entity and do not want the changes
+    persisted (e.g. for in-memory transformation only), suppress the warning with:
+</p>
+
+<pre><code>
+@SuppressWarnings("SpringGhostSave")
+public void transformOnly(Long id) {
+    User user = userRepository.findById(id).orElseThrow();
+    user.setName(enrichName(user.getName()));   // intentionally not persisted
+    sendNotification(user);
+}
+</code></pre>
+</body>
+</html>

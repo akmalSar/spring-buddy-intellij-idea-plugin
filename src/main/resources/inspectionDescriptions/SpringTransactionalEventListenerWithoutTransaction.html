@@ -1,0 +1,19 @@
+<html>
+<body>
+Reports <code>@TransactionalEventListener</code> methods that are not themselves transactional and are not inside a
+transactional class.
+<p>
+    Transactional event listeners are bound to transaction phases. If the listener performs database work, making the
+    transaction boundary explicit avoids accidental non-transactional writes and clarifies intent.
+</p>
+<p>
+    Add <code>@Transactional</code> when the listener performs transactional work, or use plain <code>@EventListener</code>
+    if transaction phase semantics are not needed.
+</p>
+<p>
+    Use <code>@Transactional(propagation = Propagation.REQUIRES_NEW)</code> only when the listener work must commit
+    independently from any surrounding transaction, for example audit/outbox-style writes. This changes semantics and
+    can increase connection usage.
+</p>
+</body>
+</html>

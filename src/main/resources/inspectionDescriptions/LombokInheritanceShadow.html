@@ -1,0 +1,46 @@
+<html>
+<body>
+
+<p>Reports field shadowing and related issues in class inheritance hierarchies.</p>
+
+<p><b> Subclass field shadows a parent field</b></p>
+<p>When a subclass redeclares a field with the same name as a field in an
+    ancestor class, Java creates two separate memory locations on the same
+    object. Reads and writes through a parent-typed reference will silently
+    access the parent's copy of the field, not the subclass copy.</p>
+
+<pre><code>
+public class BaseDto {
+    protected String name;
+}
+
+public class SubDto extends BaseDto {
+    private String name;  // shadows BaseDto.name
+}
+
+BaseDto dto = new SubDto();
+dto.name = "Alice";       // sets BaseDto.name, NOT SubDto.name
+</code></pre>
+
+<p><b> Shadowing field with @Getter / @Setter</b></p>
+<p>Lombok generates getters/setters for the shadowing field, but they are
+    invisible when the object is accessed through the parent type — the
+    generated methods belong to the subclass, while parent-typed references
+    resolve to the parent's field. Remove the field redeclaration and
+    annotate the parent field instead.</p>
+
+<p><b> @AllArgsConstructor on subclass with shadowed fields</b></p>
+<p>{@code @AllArgsConstructor} on a subclass only covers the subclass's
+    own fields. Shadowed parent fields will silently remain {@code null}
+    after construction because the generated constructor does not know
+    about them.</p>
+
+<p><b> Validation annotation on a shadowing field</b></p>
+<p>Bean Validation annotations ({@code @NotNull}, {@code @NotBlank},
+    {@code @Min}, {@code @Max}, {@code @Pattern}, {@code @Valid}, etc.)
+    on a shadowing field will not fire when the object is validated
+    through a parent-typed reference. The constraint is effectively
+    invisible to the validation framework in that case.</p>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+<html>
+<body>
+
+<p>Reports dangerous usage of Lombok {@code @Builder.Default}.</p>
+
+<p><b> @Builder.Default with @AllArgsConstructor</b></p>
+<p>{@code @Builder.Default} sets a fallback value that is applied when
+    building an object via the builder pattern. However, when
+    {@code @AllArgsConstructor} is also present on the class, direct
+    constructor calls bypass the builder entirely — the default value
+    will <em>not</em> be applied, and the field will receive whatever
+    value is passed to the constructor (including {@code null}).</p>
+
+<p>If you need both patterns, ensure callers use the builder, or
+    initialize the field directly instead of relying on
+    {@code @Builder.Default}.</p>
+
+<pre><code>
+@Builder
+@AllArgsConstructor
+public class Dto {
+    @Builder.Default
+    private List<String> items = new ArrayList<>();
+    // new Dto(null) → items = null, NOT new ArrayList<>()
+    // builder().build() → items = new ArrayList<>() (default applied)
+}
+</code></pre>
+
+</body>
+</html>

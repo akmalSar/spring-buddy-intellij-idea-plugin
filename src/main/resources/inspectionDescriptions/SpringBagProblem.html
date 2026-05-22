@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>@OneToMany / @ManyToMany with List causes bag semantics</h2>
+<p>Reports JPA <code>@OneToMany</code> or <code>@ManyToMany</code> fields typed as
+    <code>java.util.List</code>. In Hibernate, a <code>List</code> allowed to contain duplicates
+    is treated as a "Bag", causing Hibernate to delete every row in the join table and
+    re-insert all of them on every collection change. Use <code>java.util.Set</code> instead
+    — Hibernate can then issue a single INSERT or DELETE statement for incremental updates.</p>
+</body>
+</html>

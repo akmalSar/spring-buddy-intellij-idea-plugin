@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports <code>catch</code> blocks that log an exception via SLF4J (or Lombok's <code>@Slf4j</code>-generated
+<code>log</code> field) and then rethrow the same exception variable.
+<p>
+    This is a classic double-logging anti-pattern: the exception will be logged again by the caller
+    or the global error handler, producing duplicate stack traces and noisy logs.
+</p>
+<pre><code>catch (IOException ex) {
+    log.error("oops", ex); // redundant
+    throw ex;
+}</code></pre>
+<p>
+    Quick-fix removes the redundant log statement. Either log <em>or</em> rethrow — not both.
+</p>
+</body>
+</html>

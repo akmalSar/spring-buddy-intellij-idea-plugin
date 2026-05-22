@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports call sites where the result of an <code>@Async</code> method returning a
+<code>Future</code>/<code>CompletableFuture</code>/<code>ListenableFuture</code> is silently discarded
+as an expression statement.
+<p>
+    When the returned future is ignored, exceptions thrown inside the async task are swallowed —
+    no caller sees them. Either consume the future (chain <code>thenApply</code>/<code>whenComplete</code>,
+    register a callback, or call <code>get()</code>), or change the method to return <code>void</code>.
+</p>
+<p>
+    For <code>CompletableFuture</code> / <code>CompletionStage</code> return types a quick-fix chains
+    <code>.exceptionally(...)</code> with a <code>log.error</code> handler so failures are visible
+    instead of silently dropped. For plain <code>Future</code> / <code>ListenableFuture</code> the
+    quick-fix assigns the result to a local variable so the caller can handle it explicitly.
+</p>
+</body>
+</html>

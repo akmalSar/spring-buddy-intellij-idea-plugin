@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports invalid JPA <code>mappedBy</code> references on <code>@OneToMany</code> and
+<code>@OneToOne</code> associations.
+<p>
+    The <code>mappedBy</code> value must name the owning-side field on the target entity. If the
+    field does not exist or does not point back to the owning entity, Hibernate fails startup with
+    an association mapping exception. Correct the <code>mappedBy</code> value or the owning-side
+    association.
+</p>
+</body>
+</html>

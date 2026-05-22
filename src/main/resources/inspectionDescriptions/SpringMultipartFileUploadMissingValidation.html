@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports controller methods that accept <code>MultipartFile</code> parameters without
+size limits (<code>@Size</code>, <code>@Max</code>) or explicit content-type validation.
+<p>
+    An unrestricted file upload endpoint allows attackers to exhaust server disk space
+    or storage quotas by uploading arbitrarily large or numerous files.
+    Add <code>@Max(10485760)</code> (or <code>@Size</code>) to the parameter, validate
+    <code>file.getContentType()</code> inside the method body, or configure
+    <code>spring.servlet.multipart.max-file-size</code> in application properties.
+</p>
+</body>
+</html>

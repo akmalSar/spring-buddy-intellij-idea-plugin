@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports two or more sibling statements that all start with <code>assertThat(sameSubject)</code>
+on the textually identical subject expression.
+<p>
+    AssertJ assertions are fluent — you can chain them on a single subject:
+</p>
+<pre><code>assertThat(user)
+    .isNotNull()
+    .extracting(User::getName).isEqualTo("Alice");</code></pre>
+<p>
+    Reports as a weak warning since the rewrite is stylistic and the user may prefer one
+    assertion per line for readability.
+</p>
+</body>
+</html>

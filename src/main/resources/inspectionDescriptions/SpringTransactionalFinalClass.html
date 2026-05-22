@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>@Transactional final class cannot be subclass-proxied</h2>
+<p>Reports final classes annotated with @Transactional. CGLIB cannot create a subclass proxy for final classes, so
+    class-level transaction advice can be ineffective. Remove final or use transaction boundaries on a proxied
+    service.</p>
+</body>
+</html>

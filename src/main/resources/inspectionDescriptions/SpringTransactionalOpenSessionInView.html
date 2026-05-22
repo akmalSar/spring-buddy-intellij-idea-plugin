@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>spring.jpa.open-in-view should be disabled</h2>
+<p>Reports Spring Boot configuration enabling Open Session In View. OSIV keeps persistence resources open during
+    rendering or serialization, enabling lazy loading outside the service layer and causing N+1 queries or connection
+    pool starvation. Set spring.jpa.open-in-view=false.</p>
+</body>
+</html>

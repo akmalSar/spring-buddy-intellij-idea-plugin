@@ -1,0 +1,63 @@
+<html>
+<body>
+
+<p>Reports dangerous or incorrect usage of {@code @EqualsAndHashCode} and
+    {@code @Data} in the context of JPA entities and class hierarchies.</p>
+
+<p><b> @EqualsAndHashCode without callSuper=true on a subclass</b></p>
+<p>By default {@code @EqualsAndHashCode} only considers fields declared in
+    the current class. On a subclass this silently excludes all inherited
+    fields from equality checks. Two objects that differ only in parent
+    fields will incorrectly be considered equal. Set {@code callSuper = true}
+    to include parent fields.</p>
+
+<pre><code>
+// Warning — parent fields excluded
+@EqualsAndHashCode
+public class SubDto extends BaseDto { ... }
+
+// Correct
+@EqualsAndHashCode(callSuper = true)
+public class SubDto extends BaseDto { ... }
+</code></pre>
+
+<p><b> @Data on a subclass</b></p>
+<p>{@code @Data} implies {@code @EqualsAndHashCode} without
+    {@code callSuper = true}, silently excluding parent fields from equality.
+    Use explicit {@code @EqualsAndHashCode(callSuper = true)} and
+    {@code @ToString(callSuper = true)} instead of {@code @Data}.</p>
+
+<p><b> @EqualsAndHashCode on a JPA @Entity</b></p>
+<p>Lombok-generated {@code equals()} and {@code hashCode()} using mutable
+    fields breaks JPA entity identity, Hibernate session tracking, and
+    collection behavior (e.g. {@code Set} membership). Entities should
+    implement {@code equals()}/{@code hashCode()} manually using only the
+    entity's stable identifier (e.g. the database-generated primary key)
+    or a business key.</p>
+
+<pre><code>
+@EqualsAndHashCode  // breaks JPA — uses mutable fields
+@Entity
+public class User { ... }
+
+// Correct — manual equals/hashCode on stable identifier
+@Entity
+public class User {
+    @Id private Long id;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        return id != null && id.equals(((User) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}
+</code></pre>
+
+</body>
+</html>

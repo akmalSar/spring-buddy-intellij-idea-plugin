@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports primitive Java types on JPA entity IDs and Spring Data repository query surfaces.
+<p>
+    Entity identifiers and repository query values should use wrapper types such as
+    <code>Long</code>, <code>Integer</code>, and <code>Boolean</code>. Primitive values cannot
+    represent <code>null</code>, which can make unsaved entity IDs, optional search filters, and
+    nullable query results behave incorrectly.
+</p>
+<p>
+    The quick-fix replaces the primitive type with the matching wrapper type.
+</p>
+</body>
+</html>

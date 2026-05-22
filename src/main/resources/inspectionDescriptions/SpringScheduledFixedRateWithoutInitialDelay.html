@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>@Scheduled</code> methods that use <code>fixedRate</code> or <code>fixedDelay</code>
+without an <code>initialDelay</code> attribute.
+<p>
+    The task starts immediately on application context startup. If the method performs heavy I/O,
+    all cluster nodes can stampede the same resource at the same moment. Add
+    <code>initialDelay = ...</code> to spread the first execution across time.
+</p>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports multiple methods within the same class that share a {@code @Cacheable}
+or {@code @CachePut} cache name.
+<p>
+    Spring Cache stores all entries for a given cache name in a single namespace.
+    When two methods share a cache name they write into the same underlying cache.
+    If the methods have different parameter signatures, return types, or custom key
+    expressions, one method may read a value written by another, causing
+    {@code ClassCastException}, stale data, or silent corruption.
+</p>
+<p>
+    <b>Fix:</b> Give each method its own dedicated cache name (e.g.
+    {@code "users-by-id"} vs {@code "users-by-email"}), or ensure both methods
+    use an explicit, compatible {@code key} expression and return the same type.
+</p>
+</body>
+</html>

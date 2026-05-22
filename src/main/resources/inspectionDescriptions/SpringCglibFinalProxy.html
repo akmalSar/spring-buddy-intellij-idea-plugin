@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports final Spring bean classes and final proxy-advised methods that cannot be subclass-proxied by CGLIB.
+<p>
+    CGLIB creates a subclass of the bean to apply advice such as <code>@Transactional</code>, <code>@Async</code>,
+    caching, and method-security annotations. A final class cannot be subclassed, and a final method cannot be
+    overridden by the proxy.
+</p>
+<p>
+    Remove <code>final</code> from Spring beans and advised methods, or switch to an interface-based design where
+    applicable.
+</p>
+</body>
+</html>

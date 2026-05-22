@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Avoid @Transactional on integration tests</h2>
+<p>Reports @Transactional on integration test classes or test methods. Test rollback can hide flush, constraint, and
+    commit-time failures, creating false positives. Prefer explicit cleanup or database test utilities instead of
+    wrapping tests in transactions.</p>
+</body>
+</html>

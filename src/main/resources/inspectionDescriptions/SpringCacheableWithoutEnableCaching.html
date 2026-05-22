@@ -1,0 +1,19 @@
+<html>
+<body>
+Reports cache annotations ({@code @Cacheable}, {@code @CachePut},
+{@code @CacheEvict}) in projects that do not have an {@code @EnableCaching}
+configuration.
+<p>
+    Spring Cache is not auto-configured. The cache annotations are processed by an
+    AOP interceptor that is only registered when {@code @EnableCaching} is present on
+    a {@code @Configuration} class. Without it, all cache annotations are silently
+    ignored and no caching happens at runtime, leading to unnecessary database load
+    and a false sense of performance optimisation.
+</p>
+<p>
+    <b>Fix:</b> Add {@code @EnableCaching} to your main application class or a
+    dedicated configuration class. The quick-fix adds the annotation to the
+    class that contains the cached method.
+</p>
+</body>
+</html>

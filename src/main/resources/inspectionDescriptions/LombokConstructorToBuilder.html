@@ -1,0 +1,43 @@
+<html>
+<body>
+
+<p>Reports constructor calls on classes annotated with Lombok's <code>@Builder</code> that can be
+    replaced with the builder pattern.</p>
+
+<p>Using the builder pattern instead of direct constructor calls improves readability, especially
+    when a class has many fields, and makes it easier to understand which value is assigned to which
+    field at the call site.</p>
+
+<p><b>Example:</b></p>
+
+<pre><code>
+// Before
+PaymentAcquirerInsertDto dto = new PaymentAcquirerInsertDto("visa", 100, true);
+</code></pre>
+
+<p>After applying the quick-fix:</p>
+
+<pre><code>
+// After
+PaymentAcquirerInsertDto dto = PaymentAcquirerInsertDto.builder()
+    .acquirer("visa")
+    .amount(100)
+    .active(true)
+    .build();
+</code></pre>
+
+<p><b>When is this triggered?</b></p>
+<ul>
+    <li>The constructed class is annotated with <code>@Builder</code> or <code>lombok.Builder</code>.</li>
+    <li>The constructor call has one or more arguments.</li>
+    <li>All constructor parameter names can be mapped to fields on the class.</li>
+</ul>
+
+<p>If the parameter names do not match the field names (e.g. the constructor was written by hand
+    with different naming), the inspection will not trigger to avoid generating incorrect code.</p>
+
+<!-- tooltip shown on hover in the editor -->
+<p><b>Quick-fix:</b> <i>Replace with builder</i></p>
+
+</body>
+</html>

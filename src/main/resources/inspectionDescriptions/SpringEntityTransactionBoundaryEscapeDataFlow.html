@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports when a JPA entity returned from a <code>@Transactional</code> method of the
+same class is later mutated or lazy-loaded by a non-transactional caller method
+in the same class.
+<p>
+    Once the <code>@Transactional</code> proxy method returns, the persistence
+    context is closed and the entity becomes detached. Any subsequent lazy
+    getter call throws <code>LazyInitializationException</code>, and any
+    setter call is silently lost (no dirty checking happens outside a session).
+    Return a DTO or keep the access inside a <code>@Transactional</code> boundary.
+</p>
+</body>
+</html>

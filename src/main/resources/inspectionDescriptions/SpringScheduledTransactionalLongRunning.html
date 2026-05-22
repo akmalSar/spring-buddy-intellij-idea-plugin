@@ -1,0 +1,9 @@
+<html>
+<body>
+<h2>Long-running @Scheduled transaction</h2>
+<p>This inspection reports scheduled methods that are both @Scheduled and @Transactional and appear to perform
+    long-running work such as external client calls or sleeps. The transaction can hold a database connection for the
+    entire job duration. Split the job into short transactional units and perform external I/O outside the
+    transaction.</p>
+</body>
+</html>

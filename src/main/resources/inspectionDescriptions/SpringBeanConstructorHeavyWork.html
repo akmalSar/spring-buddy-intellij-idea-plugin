@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports Spring bean constructors that perform work by calling methods on injected constructor parameters.
+<p>
+    Constructors run before the bean lifecycle is complete. Heavy initialization or calls that need the fully wired
+    application context should run after dependency injection has completed.
+</p>
+<p>
+    Prefer <code>@PostConstruct</code> for lightweight initialization that needs injected dependencies, or an application
+    event such as <code>ApplicationReadyEvent</code> for startup work that should run after the application is ready.
+</p>
+</body>
+</html>

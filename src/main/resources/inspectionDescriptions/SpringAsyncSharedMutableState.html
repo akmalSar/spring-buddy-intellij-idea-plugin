@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports <code>@Async</code> methods that mutate shared fields of the enclosing Spring bean.
+<p>
+    Async methods run on a different thread. Writing bean fields, appending to mutable collections,
+    or updating cache state from those methods can race with request threads or other async tasks.
+</p>
+<p>
+    Prefer immutable handoff data, method-local state, concurrent collections, or explicit locking.
+</p>
+</body>
+</html>

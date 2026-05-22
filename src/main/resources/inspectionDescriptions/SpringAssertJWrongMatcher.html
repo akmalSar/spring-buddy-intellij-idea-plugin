@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports common AssertJ anti-patterns and rewrites them to the idiomatic matcher.
+<p>Examples:</p>
+<ul>
+    <li><code>assertThat(x.equals(y)).isTrue()</code> &rarr; <code>assertThat(x).isEqualTo(y)</code></li>
+    <li><code>assertThat(list.size()).isEqualTo(0)</code> &rarr; <code>assertThat(list).isEmpty()</code></li>
+    <li><code>assertThat(list.size()).isEqualTo(3)</code> &rarr; <code>assertThat(list).hasSize(3)</code></li>
+    <li><code>assertThat(opt.isPresent()).isTrue()</code> &rarr; <code>assertThat(opt).isPresent()</code></li>
+    <li><code>assertThat(str).isEqualTo("")</code> &rarr; <code>assertThat(str).isEmpty()</code></li>
+    <li><code>assertThat(str.isEmpty()).isTrue()</code> &rarr; <code>assertThat(str).isEmpty()</code></li>
+    <li><code>assertThat(coll.contains(x)).isTrue()</code> &rarr; <code>assertThat(coll).contains(x)</code></li>
+</ul>
+<p>The richer matcher gives a much better failure message than a plain boolean assertion.</p>
+</body>
+</html>

@@ -1,0 +1,2306 @@
+<idea-plugin>
+    <id>org.sarhan.springformat.inspections</id>
+    <name>Spring Buddy</name>
+    <vendor email="akmal.sarhan@gmail.com" url="https://github.com/akmalSar">Akmal Sarhan</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.java</depends>
+    <depends>com.intellij.spring</depends>
+    <depends>com.intellij.spring.data</depends>
+    <depends>com.intellij.spring.boot</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable
+                id="spring.buddy.settings"
+                displayName="Spring Buddy"
+                instance="com.sarhan.springformat.settings.SpringBuddyConfigurable"
+        />
+        <checkinHandlerFactory implementation="com.sarhan.springformat.git.SpringBuddyCheckinHandlerFactory"/>
+        <!-- ──────────────────────────────────────────────────────────────
+                     Transaction Flow Diagram — Project-Level Service
+                     Service.Level.PROJECT light service; no ProjectComponent.
+                     ────────────────────────────────────────────────────────────── -->
+        <projectService
+                serviceImplementation="com.sarhan.render.TransactionDiagramService"/>
+
+        <!-- ──────────────────────────────────────────────────────────────
+             Transaction Flow Diagram — Inlay Hints Provider
+             Registers the clickable "⟳ Tx Flow" hint above every
+             @Transactional method and its direct callers.
+             ────────────────────────────────────────────────────────────── -->
+        <codeInsight.inlayProvider
+                language="JAVA"
+                implementationClass="com.sarhan.render.TransactionInlayHintsProvider"/>
+
+        <!-- ──────────────────────────────────────────────────────────────
+             Transaction Flow Diagram — Tool Window Panel
+             ────────────────────────────────────────────────────────────── -->
+        <toolWindow id="Spring Buddy Tx Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.TransactionDiagramToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy Ghost-Save Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.GhostSaveFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy Boundary-Escape Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.boundary.BoundaryEscapeFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy Lazy-Init Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.lazyinit.LazyInitFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy Self-Invocation Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.selfinvocation.SelfInvocationFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy SQL Injection Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.sqlinjection.SqlInjectionFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy Bag Problem Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.bag.BagProblemFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy N+1 Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.nplusone.NPlusOneFlowToolWindowFactory"/>
+
+        <!-- ===== Spring Buddy > Built-in ===== -->
+
+        <globalInspection
+                shortName="BuiltInCanBeFinal"
+                displayName="Field can be final"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$CanBeFinal"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringGhostSaveDataFlow"
+                displayName="Ghost Save: detached entity mutation outside transaction"
+                groupName="Spring taintanalysis "
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.dataFlow.SpringGhostSaveDataFlowInspection"
+                runForWholeFile="false"
+                suppressId="SpringGhostSave"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInMissortedModifiers"
+                displayName="Missorted modifiers"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$MissortedModifiers"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInMultipleVariablesInDeclaration"
+                displayName="Multiple variables in one declaration"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$MultipleVariablesInDeclaration"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInMissingOverrideAnnotation"
+                displayName="Missing @Override annotation"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$MissingOverrideAnnotation"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInUnnecessaryModifier"
+                displayName="Unnecessary modifier"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$UnnecessaryModifier"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInUnnecessarySemicolon"
+                displayName="Unnecessary semicolon"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$UnnecessarySemicolon"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInUnqualifiedFieldAccess"
+                displayName="Unqualified field access (missing 'this.')"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$UnqualifiedFieldAccess"
+        />
+
+        <!--        <localInspection language="JAVA" shortName="BuiltInUnqualifiedMethodAccess"-->
+        <!--                         displayName="Unqualified method access (missing 'this.')"-->
+        <!--                         groupName="1. spring-javaformat" groupPath="Spring Buddy"-->
+        <!--                         enabledByDefault="true" level="WARNING"-->
+        <!--                         implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$UnqualifiedMethodAccess"/>-->
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInLambdaParameterHidingMemberVariable"
+                displayName="Lambda parameter hides member variable"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$LambdaParameterHidingMemberVariable"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInStaticImport"
+                displayName="Static import"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$StaticImport"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInClassWithOnlyPrivateConstructors"
+                displayName="Class with only private constructors should be final"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$ClassWithOnlyPrivateConstructors"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInNonFinalUtilityClass"
+                displayName="Utility class is not final"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$NonFinalUtilityClass"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInUtilityClassWithPublicConstructor"
+                displayName="Utility class with public constructor"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$UtilityClassWithPublicConstructor"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSimplifiableBooleanExpression"
+                displayName="Simplifiable boolean expression"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SimplifiableBooleanExpression"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSimplifiableConditionalExpression"
+                displayName="Simplifiable conditional expression"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SimplifiableConditionalExpression"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInVariableTypeCanBeExplicit"
+                displayName="Variable type can be explicit"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$VariableTypeCanBeExplicit"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSimplifiableAssertion"
+                displayName="Simplifiable assertion"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SimplifiableAssertion"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSimplifiableAnnotation"
+                displayName="Simplifiable annotation"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SimplifiableAnnotation"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInConvert2MethodRef"
+                displayName="Lambda can be replaced with method reference"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$Convert2MethodRef"
+        />
+
+        <!--        <localInspection-->
+        <!--                language="JAVA"-->
+        <!--                shortName="BuiltInMethodRefCanBeReplacedWithLambda"-->
+        <!--                displayName="Method reference can be replaced with lambda"-->
+        <!--                groupName="1. spring-javaformat"-->
+        <!--                groupPath="Spring Buddy"-->
+        <!--                enabledByDefault="true"-->
+        <!--                level="WARNING"-->
+        <!--                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$MethodRefCanBeReplacedWithLambda"-->
+        <!--        />-->
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInLambdaParameterTypeCanBeSpecified"
+                displayName="Lambda parameter type can be specified"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$LambdaParameterTypeCanBeSpecified"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInInfiniteRecursion"
+                displayName="Infinite recursion"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$InfiniteRecursion"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInLoggingPlaceholderCountMatchesArgumentCount"
+                displayName="Placeholder count does not match argument count"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$PlaceholderCountMatchesArgumentCount"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInControlFlowStatementWithoutBraces"
+                displayName="Flow statement without braces"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$ControlFlowStatementWithoutBraces"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInCustomRegExp"
+                displayName="CustomRegExp"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$CustomRegExp"
+        />
+        <globalInspection
+                shortName="BuiltInUNUSED_IMPORT"
+                displayName="Unused import"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$UnusedImport"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSystemOutErr"
+                displayName="System.out/System.err usage"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SystemOutErr"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInJavadocReference"
+                displayName="JavaDoc issues"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$JavaDoc"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInAsyncMethod"
+                displayName="@Async method issues"
+                groupName="Spring"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$AsyncMethod"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringProfileExpression"
+                displayName="Spring profile expression issues"
+                groupName="Spring"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringProfileExpression"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringBootApplicationSetup"
+                displayName="Spring Boot application setup issues"
+                groupName="Spring"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringBootApplicationSetup"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringDataModifyingAnnotationMissing"
+                displayName="Spring Data modifying annotation missing"
+                groupName="Spring data"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringDataModifyingAnnotationMissing"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringDataRepositoryMethodReturnType"
+                displayName="Spring Data repository method return type issues"
+                groupName="Spring data"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringDataRepositoryMethodReturnType"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringDataRepositoryMethodParameters"
+                displayName="Spring Data repository method parameter issues"
+                groupName="Spring data"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringDataRepositoryMethodParameters"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringDataMethodInconsistency"
+                displayName="Spring Data method inconsistency"
+                groupName="Spring data"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringDataMethodInconsistency"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringDataPageableParameterMissing"
+                displayName="Spring Data Pageable parameter missing"
+                groupName="Spring data"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringDataPageableParameterMissing"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringDataJdbcEmptySequenceName"
+                displayName="Spring Data JDBC empty sequence name"
+                groupName="Spring data"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringDataJdbcEmptySequenceName"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInSpringMvcPathVariableDeclaration"
+                displayName="Spring MVC path variable declaration issues"
+                groupName="Spring"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$SpringMvcPathVariableDeclaration"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BuiltInMVCPathVariable"
+                displayName="Spring MVC path variable issues"
+                groupName="Spring"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.inspection.builtin.BuiltInInspectionWrappers$MVCPathVariable"
+        />
+        <!-- ===== end Built-in ===== -->
+        <!-- SpringCatchCheck: catch variables must not use single-letter or o_o names -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringCatchVariableName"
+                displayName="Catch variable should follow Spring conventions"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringCatchVariableNameInspection"
+        />
+
+        <!-- Mockito BDD: ban Mockito.when / BDDMockito.when used via non-BDD import -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringMockitoBddStyle"
+                displayName="Use BDDMockito (given/when/then) instead of Mockito.when"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMockitoStyleInspection"
+        />
+
+        <!-- AssertJ: ban org.junit.Assert / jupiter Assertions imports -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringAssertJStyle"
+                displayName="Use AssertJ instead of JUnit Assert/Assertions"
+                groupName="AssertJ"
+                groupPath="Spring Buddy,1. spring-javaformat"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringAssertJStyleInspection"
+        />
+
+        <!-- SpringSlf4jStringConcatenation: prefer SLF4J '[{}]' placeholders over string concatenation -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringSlf4jStringConcatenation"
+                displayName="Use SLF4J '[{}]' placeholders instead of String concatenation"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringSlf4jStringConcatenationInspection"
+        />
+
+        <!-- SpringSystemOutErr: avoid System.out/System.err and use logger instead -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringSystemOutErr"
+                displayName="Use logger instead of System.out/System.err"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringSystemOutErrInspection"
+        />
+
+        <!-- SpringLoggerNotStaticFinal: SLF4J Logger fields must be private static final -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringLoggerNotStaticFinal"
+                displayName="SLF4J Logger field should be private static final"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringLoggerNotStaticFinalInspection"
+        />
+
+        <!-- SpringExceptionLoggedAndRethrown: catch block logs and rethrows the same exception -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringExceptionLoggedAndRethrown"
+                displayName="Exception is logged and rethrown (double-logging)"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringExceptionLoggedAndRethrownInspection"
+        />
+
+        <localInspection language="JAVA" shortName="SpringAssertJEmptyStringMatcher"
+                         displayName="Use AssertJ isEmpty() for empty strings" groupName="AssertJ"
+                         groupPath="Spring Buddy,1. spring-javaformat" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.springformat.inspection.SpringAssertJWrongMatcherInspection$EmptyStringEquality"/>
+        <localInspection language="JAVA" shortName="SpringAssertJBooleanMethodMatcher"
+                         displayName="Use direct AssertJ matcher for boolean method assertions"
+                         groupName="AssertJ" groupPath="Spring Buddy,1. spring-javaformat" enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.sarhan.springformat.inspection.SpringAssertJWrongMatcherInspection$BooleanMethodMatcher"/>
+        <localInspection language="JAVA" shortName="SpringAssertJSizeMatcher"
+                         displayName="Use AssertJ collection size matchers" groupName="AssertJ"
+                         groupPath="Spring Buddy,1. spring-javaformat" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.springformat.inspection.SpringAssertJWrongMatcherInspection$SizeEqualsMatcher"/>
+
+        <!-- SpringAssertJChainable: chain assertThat() calls on the same subject -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringAssertJChainable"
+                displayName="Chain assertThat() calls on the same subject"
+                groupName="AssertJ"
+                groupPath="Spring Buddy,1. spring-javaformat"
+                enabledByDefault="true"
+                level="WEAK WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringAssertJChainableInspection"
+        />
+
+        <!-- SpringTestNoAssertions: @Test method without any assertion / verify -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringTestNoAssertions"
+                displayName="@Test method has no assertion or verify() call"
+                groupName="Mockito"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTestNoAssertionsInspection"
+        />
+
+        <!-- SpringMockitoArgumentMatcherMix: mixing matchers and raw values in Mockito stubbing -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringMockitoArgumentMatcherMix"
+                displayName="Mixing Mockito matchers and raw values in the same call"
+                groupName="Mockito"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMockitoArgumentMatcherMixInspection"
+        />
+
+        <!-- SpringMockitoUnusedStubbing: when(...).thenReturn(...) whose method is never invoked -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringMockitoUnusedStubbing"
+                displayName="Mockito stubbing for a method that is never invoked in the test"
+                groupName="Mockito"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMockitoUnusedStubbingInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringEntityEqualsHashCodeOnId"
+                displayName="@Entity equals/hashCode references @Id field"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringEntityEqualsHashCodeOnIdInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaSaveInLoop"
+                displayName="Repository.save() called in a loop"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaSaveInLoopInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringQuerySqlInjection"
+                displayName="@Query built with string concatenation is vulnerable to SQL injection"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringQuerySqlInjectionInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringRepositoryFindAllWithoutPageable"
+                displayName="Repository.findAll() called without Pageable"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRepositoryFindAllWithoutPageableInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaCascadeAllOnManyToOne"
+                displayName="cascade = ALL on @ManyToOne/@ManyToMany"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaCascadeAllOnManyToOneInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaModifyingWithoutClearAutomatically"
+                displayName="@Modifying without clearAutomatically=true"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaModifyingWithoutClearAutomaticallyInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaModifyingWithoutTransactional"
+                displayName="@Modifying query method missing @Transactional"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaModifyingWithoutTransactionalInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaPrimitiveRepositoryTypes"
+                displayName="Use wrapper types for JPA IDs and repository query values"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaPrimitiveRepositoryTypesInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringDataDerivedQueryExplosion"
+                displayName="Spring Data derived query is too complex"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringDataDerivedQueryExplosionInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringDataProjectionFullLoad"
+                displayName="Projection interface may force full entity loading"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringDataProjectionFullLoadInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringAsyncReturnIgnored"
+                displayName="@Async return value is discarded"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringAsyncReturnIgnoredInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringAsyncWithoutExecutor"
+                displayName="@Async without explicit Executor"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringAsyncWithoutExecutorInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringAsyncWithoutEnableAsync"
+                displayName="@Async without @EnableAsync configuration"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringAsyncWithoutEnableAsyncInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringRetryableWithoutEnableRetry"
+                displayName="@Retryable without @EnableRetry configuration"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRetryableWithoutEnableRetryInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringRetryableProxyPitfall"
+                displayName="@Retryable method cannot be proxied by Spring"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRetryableProxyPitfallInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringRetryableWithTransactional"
+                displayName="@Retryable combined with @Transactional causes duplicate side-effects"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRetryableWithTransactionalInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringEventListenerSwallowsException"
+                displayName="@EventListener swallows exception"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringEventListenerSwallowsExceptionInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringOptionalAsFieldOrParameter"
+                displayName="Optional used as field or parameter"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringOptionalAsFieldOrParameterInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringOptionalEntityLookupException"
+                displayName="Repository Optional lookup should throw contextual exception"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringOptionalEntityLookupExceptionInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringCollectionReturnsNull"
+                displayName="Collection-returning method returns null"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringCollectionReturnsNullInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTodoFixmeBlocker"
+                displayName="TODO/FIXME without ticket reference in Spring component"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTodoFixmeBlockerInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringStatefulSingletonBean"
+                displayName="Mutable state in singleton Spring bean"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringBeanConcurrencyInspection$StatefulSingleton"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringSharedMutableCache"
+                displayName="Shared mutable cache in Spring bean is not thread-safe"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringBeanConcurrencyInspection$SharedMutableCache"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringAsyncSharedMutableState"
+                displayName="@Async method mutates unsynchronized bean state"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringBeanConcurrencyInspection$AsyncSharedMutableState"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringBeanConstructorHeavyWork"
+                displayName="Spring bean constructor performs work on injected dependency"
+                groupName="4. Misc Java/Spring quality"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringBeanConstructorHeavyWorkInspection"
+        />
+
+        <!-- SpringTestFileNameCheck: test classes must be named *Tests -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringTestFileName"
+                displayName="Test class name should end with 'Tests'"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTestFileNameInspection"
+        />
+
+        <!-- SpringHideUtilityClassConstructor: utility classes must have a private constructor -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringHideUtilityClassConstructor"
+                displayName="Utility class should have a private constructor"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringHideUtilityClassConstructorInspection"
+        />
+
+        <!-- SpringImportOrderCheck: imports must be grouped and sorted using Spring conventions -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringImportOrder"
+                displayName="Imports should be ordered according to spring-javaformat"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringImportOrderInspection"
+        />
+
+        <!-- InnerTypeLastCheck: nested types must be declared after other class members -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringInnerTypeLast"
+                displayName="Inner types should be declared last"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringInnerTypeLastInspection"
+        />
+
+        <!-- NoWhitespaceBeforeCheck: selected tokens must not be preceded by whitespace -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringNoWhitespaceBefore"
+                displayName="Selected tokens should not be preceded by whitespace"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringNoWhitespaceBeforeInspection"
+        />
+
+        <!-- FinalClassCheck: classes with only private construction should be final -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringFinalClass"
+                displayName="Classes with private construction should be final"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringFinalClassInspection"
+        />
+
+        <!-- AnnotationUseStyleCheck: annotations should use compact Spring style -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringAnnotationUseStyle"
+                displayName="Annotation use should follow Spring style"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringAnnotationUseStyleInspection"
+        />
+
+        <!-- OneTopLevelClassCheck: each top-level type should be in its own file -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringOneTopLevelClass"
+                displayName="Top-level types should each be in their own source file"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringOneTopLevelClassInspection"
+        />
+
+        <!-- WhitespaceAroundCheck: selected tokens should be surrounded by whitespace -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringWhitespaceAround"
+                displayName="Selected tokens should be surrounded by whitespace"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringWhitespaceAroundInspection"
+        />
+
+        <!-- InterfaceIsTypeCheck: interfaces should define types, not only constants -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringInterfaceIsType"
+                displayName="Interfaces should define types, not only constants"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringInterfaceIsTypeInspection"
+        />
+
+        <!-- AvoidNestedBlocksCheck: nested blocks should be removed -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringAvoidNestedBlocks"
+                displayName="Nested blocks should be avoided"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringAvoidNestedBlocksInspection"
+        />
+
+        <!-- UpperEllCheck: long literals should use uppercase L suffix -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringUpperEll"
+                displayName="Long literals should use uppercase L suffix"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringUpperEllInspection"
+        />
+
+        <!-- RedundantModifierCheck: implicit modifiers should be omitted -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringRedundantModifier"
+                displayName="Redundant modifiers should be omitted"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRedundantModifierInspection"
+        />
+
+        <!-- MutableExceptionCheck: exception fields should be immutable -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringMutableException"
+                displayName="Exception fields should be final"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMutableExceptionInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringMethodParamPad"
+                displayName="Method parentheses should not be padded"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMethodParamPadInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringNoWhitespaceAfter"
+                displayName="Selected tokens should not be followed by whitespace"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringNoWhitespaceAfterInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringWhitespaceAfter"
+                displayName="Selected tokens should be followed by whitespace"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringWhitespaceAfterInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringTypecastParenPad"
+                displayName="Typecast parentheses should not be padded"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTypecastParenPadInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringArrayTypeStyle"
+                displayName="Array brackets should be declared with the type"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringArrayTypeStyleInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringStringLiteralEquality"
+                displayName="String literals should not be compared with == or !="
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringStringLiteralEqualityInspection"
+        />
+
+        <!-- SpringMethodOrderCheck: equals, hashCode, and toString must be in that order -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringMethodOrder"
+                displayName="equals, hashCode, and toString should be ordered"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMethodOrderInspection"
+        />
+
+        <!-- SpringMethodVisibilityCheck: public/protected methods should not overexpose non-public/final classes -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringMethodVisibility"
+                displayName="Method visibility should follow Spring conventions"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMethodVisibilityInspection"
+        />
+
+        <!-- SpringTernaryCheck: ternary conditions must use Spring conventions -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringTernary"
+                displayName="Ternary expression should follow Spring conventions"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTernaryInspection"
+        />
+
+        <!-- SpringDeprecatedCheck: @Deprecated must declare a non-empty since attribute -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringDeprecated"
+                displayName="@Deprecated should declare a non-empty since attribute"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringDeprecatedInspection"
+        />
+
+        <!-- SpringLambdaCheck: lambdas must use Spring conventions -->
+        <localInspection
+                language="JAVA"
+                shortName="SpringLambda"
+                displayName="Lambda expression should follow Spring conventions"
+                groupName="1. spring-javaformat"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringLambdaInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalPrivateMethod"
+                displayName="@Transactional private method is not proxied"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalStaticMethod"
+                displayName="@Transactional static method is not proxied"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$StaticMethod"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalFinalMethod"
+                displayName="@Transactional final method cannot be subclass-proxied"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$FinalMethod"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalFinalClass"
+                displayName="@Transactional final class cannot be subclass-proxied"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$FinalClass"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalMethodInFinalClass"
+                displayName="@Transactional method in final class cannot be subclass-proxied"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$MethodInFinalClass"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalCheckedException"
+                displayName="Checked exception may not trigger transaction rollback"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$CheckedException"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalConflictingRollbackRules"
+                displayName="Conflicting rollback and no-rollback rules"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$ConflictingRollbackRules"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalReadOnlyWrite"
+                displayName="@Transactional(readOnly = true) method performs writes"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$ReadOnlyWrite"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalReadOnlyClassWrite"
+                displayName="Class-level read-only transaction contains write method"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalReadOnlyInheritanceInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalSelfInvocation"
+                displayName="Self-invocation bypasses @Transactional proxy"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$SelfInvocation"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalRequiresNewSelfInvocation"
+                displayName="Self-invocation ignores REQUIRES_NEW boundary"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$RequiresNewSelfInvocation"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalAsyncBoundary"
+                displayName="@Async crosses a transaction boundary"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$AsyncBoundary"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalLongRunningOperation"
+                displayName="Long-running work inside @Transactional"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$LongRunningOperation"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalUnsupportedTimeout"
+                displayName="@Transactional timeout may not be supported"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$UnsupportedTimeout"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalSwallowedException"
+                displayName="Exception swallowed inside @Transactional method"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$SwallowedException"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalBeanMethod"
+                displayName="@Transactional on @Bean method"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$TransactionalBeanMethod"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalInterfaceMethodWithCglib"
+                displayName="@Transactional on interface method ignored by CGLIB proxy"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$InterfaceMethodWithCglib"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalMultipleWritesWithoutTransaction"
+                displayName="Method performs multiple write operations without @Transactional"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$MultipleWritesWithoutTransaction"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalConstructorTrap"
+                displayName="Constructor calls @Transactional method before proxy exists"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$ConstructorTrap"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalPostConstruct"
+                displayName="@Transactional on @PostConstruct is ignored"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPostConstructInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalTest"
+                displayName="Avoid @Transactional on integration tests"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$TransactionalTest"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalReadOnlyEntityFetch"
+                displayName="Read-only transaction fetches entities instead of DTOs"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$ReadOnlyEntityFetch"
+        />
+        <localInspection
+                language="Properties,YAML"
+                shortName="SpringTransactionalOpenSessionInView"
+                displayName="spring.jpa.open-in-view should be disabled"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$OpenSessionInView"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalRepositoryBoundary"
+                displayName="Repository-level @Transactional is too narrow"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$RepositoryTransaction"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalWeakIsolation"
+                displayName="Multiple reads with weak/default transaction isolation"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$WeakIsolation"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalRollbackOnlyWithoutThrow"
+                displayName="setRollbackOnly used without explicit thrown exception"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$RollbackOnlyWithoutThrow"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalAbstractClass"
+                displayName="@Transactional on abstract class creates ambiguous transaction boundaries"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$AbstractClassTransaction"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalAsyncEventListener"
+                displayName="@Async with @TransactionalEventListener can race transaction commit visibility"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$AsyncTransactionalEventListener"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalEventListenerWithoutTransaction"
+                displayName="@TransactionalEventListener without @Transactional"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalEventListenerWithoutTransactionInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalRequiresNewConnectionPressure"
+                displayName="REQUIRES_NEW in loops or deep call chains can exhaust connections"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$RequiresNewInLoopOrDeepStack"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalNestedWithJpa"
+                displayName="Propagation.NESTED is unsafe with standard JPA transaction managers"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalPrivateMethodInspection$NestedWithJpa"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalDirtyCheckingDataFlow"
+                displayName="@Transactional read method mutates a managed entity"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.dataFlow.SpringTransactionalDirtyCheckingDataFlowInspection"
+        />
+<!--        <localInspection-->
+<!--                language="JAVA"-->
+<!--                shortName="SpringNPlusOneQuery"-->
+<!--                displayName="Lazy association access in loop can cause N+1 queries"-->
+<!--                groupName="@Transactional"-->
+<!--                groupPath="Spring Buddy,2. pitfalls"-->
+<!--                enabledByDefault="true"-->
+<!--                level="WARNING"-->
+<!--                implementationClass="com.sarhan.springformat.inspection.SpringNPlusOneQueryInspection"-->
+<!--        />-->
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaNPlusOnePredictionDataFlow"
+                displayName="N+1 query predicted via DataFlow taint analysis"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.dataFlow.SpringJpaNPlusOnePredictionDataFlowInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringSecurityProxyPitfall"
+                displayName="Spring Security annotation may be bypassed by proxy limitations"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringProxyAnnotationPitfallInspection$Security"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringCacheProxyPitfall"
+                displayName="Spring Cache annotation may be bypassed by proxy limitations"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringProxyAnnotationPitfallInspection$Cache"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringCacheableOnVoid"
+                displayName="@Cacheable/@CachePut on void method caches nothing"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringCacheableOnVoidInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringCacheableWithoutEnableCaching"
+                displayName="@Cacheable without @EnableCaching configuration"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringCacheableWithoutEnableCachingInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringCacheableKeyCollision"
+                displayName="Cache name collision between methods"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringCacheableKeyCollisionInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringAsyncProxyPitfall"
+                displayName="@Async annotation may be bypassed by proxy limitations"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringProxyAnnotationPitfallInspection$Async"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringDuplicateRequestMapping"
+                displayName="Duplicate Spring MVC request mapping"
+                groupName="Spring MVC"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringDuplicateRequestMappingInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringCglibFinalProxy"
+                displayName="Final Spring bean class or method breaks CGLIB proxying"
+                groupName="Spring proxy"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringCglibFinalProxyInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaEntityLombokPitfall"
+                displayName="JPA entity should avoid broad Lombok-generated methods"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$LombokOnEntity"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaEntityMissingId"
+                displayName="JPA entity missing identifier"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityMissingIdInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaEntityNoArgConstructor"
+                displayName="JPA entity should declare a protected no-arg constructor"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$MissingNoArgConstructor"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaToOneLazyPitfall"
+                displayName="JPA to-one association should use FetchType.LAZY"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$ToOneEagerDefault"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaEnumeratedOrdinal"
+                displayName="@Enumerated should use EnumType.STRING"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$EnumeratedOrdinal"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaAuditingMissingEntityListener"
+                displayName="JPA auditing field missing AuditingEntityListener"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$AuditingMissingListener"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaOneToManyWithoutMappedBy"
+                displayName="@OneToMany without mappedBy creates a join table"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$OneToManyWithoutMappedBy"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJpaInvalidMappedBy"
+                displayName="Invalid JPA mappedBy reference"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaInvalidMappedByInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringRequestMappingMissingMethod"
+                displayName="@RequestMapping without explicit HTTP method"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRequestMappingMissingMethodInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringControllerEntityReturn"
+                displayName="Controller should not return JPA entities directly"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringControllerBoundaryInspection$EntityReturn"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringControllerRepositoryInjection"
+                displayName="Controller should not inject repositories directly"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringControllerBoundaryInspection$RepositoryInjection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringControllerTransactional"
+                displayName="Controller should not define @Transactional boundaries"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringControllerBoundaryInspection$TransactionalController"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringMultipartFileUploadMissingValidation"
+                displayName="MultipartFile upload should specify size limits or content-type validation"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringMultipartFileUploadMissingValidationInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJacksonLazyEntitySerialization"
+                displayName="Jackson serialization of entity with lazy associations may cause LazyInitializationException"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJacksonLazyEntitySerializationInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJacksonDeserializedFieldAccess"
+                displayName="Access to property not available after Jackson deserialization"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJacksonDeserializedFieldAccessInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJsonIgnoreFieldAccess"
+                displayName="Access to @JsonIgnore property on deserialized DTO parameter"
+                groupName="Controller boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJsonIgnoreFieldAccessInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringValidationNestedDtoMissingValid"
+                displayName="Nested DTO field should be annotated with @Valid"
+                groupName="Validation"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringValidationPitfallInspection$NestedDtoValid"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringValidationBindingResultOrder"
+                displayName="BindingResult should immediately follow validated parameter"
+                groupName="Validation"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringValidationPitfallInspection$BindingResultOrder"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringValidationMissingValidated"
+                displayName="Method parameter constraints require @Validated"
+                groupName="Validation"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringValidationPitfallInspection$MissingValidated"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringServiceMultipleRepositoriesWithoutTransaction"
+                displayName="Service method uses multiple repositories without @Transactional"
+                groupName="Service boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ServiceMultipleRepositoriesWithoutTransaction"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringBootTestCouldBeSlice"
+                displayName="@SpringBootTest may be broader than needed"
+                groupName="Spring test"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$SpringBootTestSlice"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringDirtiesContextPitfall"
+                displayName="@DirtiesContext slows test suites"
+                groupName="Spring test"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$DirtyContext"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringMockBeanContextCache"
+                displayName="@MockBean creates additional Spring test contexts"
+                groupName="Spring test"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$MockBeanContextCache"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringConfigurationPropertiesMissingValidated"
+                displayName="@ConfigurationProperties constraints require @Validated"
+                groupName="Configuration properties"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ConfigurationPropertiesMissingValidated"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringConfigurationPropertiesNotRegistered"
+                displayName="@ConfigurationProperties may not be registered"
+                groupName="Configuration properties"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ConfigurationPropertiesNotRegistered"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringScheduledProxyPitfall"
+                displayName="@Scheduled method should be proxy-compatible"
+                groupName="Scheduled job"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ScheduledProxy"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringScheduledTransactionalLongRunning"
+                displayName="Long-running @Scheduled method should not hold transactions"
+                groupName="Scheduled job"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ScheduledTransactionalLongRunning"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringScheduledWithoutEnableScheduling"
+                displayName="@Scheduled without @EnableScheduling configuration"
+                groupName="Scheduled job"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringScheduledWithoutEnableSchedulingInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringScheduledInvalidSignature"
+                displayName="@Scheduled method has invalid signature"
+                groupName="Scheduled job"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringScheduledInvalidSignatureInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringScheduledWithoutLock"
+                displayName="@Scheduled method may need a distributed lock"
+                groupName="Scheduled job"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ScheduledWithoutLock"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringScheduledFixedRateWithoutInitialDelay"
+                displayName="@Scheduled fixedRate/fixedDelay without initialDelay"
+                groupName="Scheduled job"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringScheduledFixedRateWithoutInitialDelayInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringServiceSwallowedException"
+                displayName="Service method swallows broad exception"
+                groupName="Service boundary"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringRemainingPitfallInspection$ServiceSwallowedException"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringConditionalOnPropertyDefaultValueTrap"
+                displayName="@ConditionalOnProperty matchIfMissing contradicts @Value default"
+                groupName="Spring config"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringConditionalOnPropertyDefaultValueInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringLeakyValueInNonBean"
+                displayName="@Value/@Autowired in non-Spring-managed class"
+                groupName="Spring config"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringLeakyValueInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringValueHardcodedSecret"
+                displayName="Hardcoded secret in @Value field"
+                groupName="Spring config"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringValueHardcodedSecretInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringConfigurationLiteMode"
+                displayName="@Bean method call in non-@Configuration class uses lite mode"
+                groupName="Spring config"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringConfigurationLiteModeInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringConfigurationMutableState"
+                displayName="Mutable instance field in @Configuration class"
+                groupName="Spring config"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringConfigurationMutableStateInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="LombokBuilderDefaultValue"
+                displayName="Field initializer erased by @Builder"
+                groupName="Lombok"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokBuilderDefaultValueInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalStreamResourceLeak"
+                displayName="Repository Stream used without try-with-resources"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalStreamResourceLeakInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringBagProblem"
+                displayName="@OneToMany/@ManyToMany with List causes bag semantics"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringBagProblemInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringEventListenerMissingComponent"
+                displayName="@EventListener method in non-Spring-managed class"
+                groupName="Async / concurrency"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringEventListenerMissingComponentInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringUnexpectedRollbackException"
+                displayName="Caught RuntimeException from @Transactional call may cause UnexpectedRollbackException"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringUnexpectedRollbackExceptionInspection"
+        />        <!--        Lombok builder-->
+        <localInspection
+                language="JAVA"
+                shortName="LombokConstructorToBuilder"
+                displayName="Constructor call can be replaced with Lombok builder"
+                groupName="3. Lombok"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokConstructorToBuilderInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokSetterChainToBuilder"
+                displayName="Setter chain can be replaced with Lombok builder"
+                groupName="3. Lombok"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokSetterChainToBuilderInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokAllArgsConstructorRedundancy"
+                displayName="Redundant @AllArgsConstructor"
+                groupName="3. Lombok"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokAllArgsConstructorRedundancyInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokBuilderRedundancy"
+                displayName="Redundant @Builder"
+                groupName="3. Lombok"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokBuilderRedundancyInspection"
+        />
+
+        <localInspection language="JAVA" shortName="LombokBuilderOnSubclassWithBuilderParent"
+                         displayName="@Builder on subclass with @Builder parent" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="ERROR"
+                         implementationClass="com.sarhan.lombok.LombokBuilderHierarchyInspection$BuilderOnSubclassWithBuilderParent"/>
+        <localInspection language="JAVA" shortName="LombokBuilderWithPartialConstructor"
+                         displayName="@Builder with partial constructor" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokBuilderHierarchyInspection$BuilderWithPartialConstructor"/>
+        <localInspection language="JAVA" shortName="LombokSuperBuilderMissingParent"
+                         displayName="@SuperBuilder parent missing @SuperBuilder" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="ERROR"
+                         implementationClass="com.sarhan.lombok.LombokBuilderHierarchyInspection$SuperBuilderMissingParent"/>
+        <localInspection language="JAVA" shortName="LombokBuilderSubclassWithoutSuperBuilderParent"
+                         displayName="@Builder subclass should use @SuperBuilder with parent" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokBuilderHierarchyInspection$BuilderSubclassWithoutSuperBuilderParent"/>
+        <localInspection language="JAVA" shortName="LombokBuilderOnParentWithSubclasses"
+                         displayName="@Builder on parent class with subclasses" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokBuilderHierarchyInspection$BuilderOnParentWithSubclasses"/>
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokInheritanceShadow"
+                displayName="Lombok inheritance shadowing issues"
+                groupName="Lombok" groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokInheritanceShadowInspection"
+        />
+
+        <localInspection language="JAVA" shortName="LombokEqualsAndHashCodeWithoutCallSuper"
+                         displayName="@EqualsAndHashCode missing callSuper=true on subclass" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokEqualsAndHashCodeInspection$EqualsAndHashCodeWithoutCallSuper"/>
+        <localInspection language="JAVA" shortName="LombokDataOnSubclassWithoutCallSuper"
+                         displayName="@Data on subclass excludes superclass equality" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokEqualsAndHashCodeInspection$DataOnSubclassWithoutCallSuper"/>
+        <localInspection language="JAVA" shortName="LombokEqualsAndHashCodeOnJpaEntity"
+                         displayName="@EqualsAndHashCode on JPA entity" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokEqualsAndHashCodeInspection$EqualsAndHashCodeOnJpaEntity"/>
+
+        <localInspection language="JAVA" shortName="LombokDataWithManualConstructor"
+                         displayName="@Data with manually declared constructor" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokDataAnnotationInspection$DataWithManualConstructor"/>
+        <localInspection language="JAVA" shortName="LombokDataOnJpaEntity" displayName="@Data on JPA entity"
+                         groupName="Lombok" groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokDataAnnotationInspection$DataOnJpaEntity"/>
+        <localInspection language="JAVA" shortName="LombokDataRedundantRequiredArgsConstructor"
+                         displayName="@RequiredArgsConstructor is redundant with @Data" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WEAK WARNING"
+                         implementationClass="com.sarhan.lombok.LombokDataAnnotationInspection$RedundantRequiredArgsConstructor"/>
+        <localInspection language="JAVA" shortName="LombokDataWithAllArgsConstructor"
+                         displayName="@AllArgsConstructor with @Data" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WEAK WARNING"
+                         implementationClass="com.sarhan.lombok.LombokDataAnnotationInspection$DataWithAllArgsConstructor"/>
+
+        <localInspection language="JAVA" shortName="LombokToStringWithoutCallSuper"
+                         displayName="@ToString missing callSuper=true on subclass" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokToStringInspection$ToStringWithoutCallSuper"/>
+        <localInspection language="JAVA" shortName="LombokToStringCircularReference"
+                         displayName="@ToString circular reference risk" groupName="Lombok"
+                         groupPath="Spring Buddy,2. pitfalls" enabledByDefault="true" level="WARNING"
+                         implementationClass="com.sarhan.lombok.LombokToStringInspection$ToStringCircularReference"/>
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokConstructorAnnotation"
+                displayName="Lombok constructor annotation issues"
+                groupName="Lombok" groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokConstructorAnnotationInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokNonNull"
+                displayName="Lombok @NonNull issues"
+                groupName="Lombok" groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.lombok.LombokNonNullInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokBuilderDefault"
+                displayName="Lombok @Builder.Default issues"
+                groupName="Lombok" groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokBuilderDefaultInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokSetterOnBuilderField"
+                displayName="Lombok @Setter on @Builder field"
+                groupName="Lombok" groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WEAK WARNING"
+                implementationClass="com.sarhan.lombok.LombokSetterOnBuilderFieldInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="LombokManualGetterShadow"
+                displayName="Manual method shadows Lombok getter"
+                groupName="Lombok" groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.lombok.LombokManualGetterShadowInspection"
+        />
+
+        <localInspection
+                language="JAVA"
+                shortName="SpringTransactionalSelfInvocationIndirection"
+                displayName="@Transactional self-invocation through indirection"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringTransactionalSelfInvocationIndirectionInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringReadOnlyEntityMutationDataFlow"
+                displayName="JPA entity mutation inside @Transactional(readOnly = true)"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.dataFlow.SpringReadOnlyEntityMutationDataFlowInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringSqlInjectionTaintFlow"
+                displayName="SQL injection through tainted variable flow into query execution"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringSqlInjectionTaintFlowInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringEntityTransactionBoundaryEscapeDataFlow"
+                displayName="JPA entity returned from @Transactional is accessed outside transaction boundary"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.dataFlow.SpringEntityTransactionBoundaryEscapeDataFlowInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringLazyInitializationPredictionDataFlow"
+                displayName="LazyInitializationException predicted on detached entity access"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.dataFlow.SpringLazyInitializationPredictionDataFlowInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringValidOnPrimitive"
+                displayName="@Valid on primitive or String parameter has no effect"
+                groupName="Validation"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringValidOnPrimitiveInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringJakartaTransactionalMigration"
+                displayName="Jakarta @Transactional ignored by Spring transaction management"
+                groupName="@Transactional"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJakartaTransactionalMigrationInspection"
+        />
+
+        <codeInsight.inlayProviderFactory
+                implementation="com.sarhan.springformat.visualization.SpringTransactionPropagationInlayProviderFactory"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringOrphanedApplicationEvent"
+                displayName="Orphaned Spring application event or listener"
+                groupName="Spring"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringOrphanedApplicationEventInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringInMemoryFiltering"
+                displayName="In-memory filtering of repository-loaded collection"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringInMemoryFilteringDataFlowInspection"
+        />
+    </extensions>
+
+    <actions>
+        <action
+                id="SpringFormat.RunInspections"
+                icon="com.intellij.java.ui.icons.JavaUIIcons.SpringPromo"
+                class="com.sarhan.springformat.RunSpringFormatInspectionsAction"
+                text="Run Spring Buddy Inspections"
+                description="Run Spring Buddy Inspections using the bundled built-in inspection profile"
+        >
+            <add-to-group
+                    group-id="ProjectViewPopupMenu"
+                    anchor="after"
+                    relative-to-action="ProjectViewPopupMenuRefactoringGroup"
+            />
+            <add-to-group
+                    group-id="EditorPopupMenu"
+                    anchor="after"
+                    relative-to-action="ProjectViewPopupMenuRefactoringGroup"
+            />
+        </action>
+    </actions>
+</idea-plugin>

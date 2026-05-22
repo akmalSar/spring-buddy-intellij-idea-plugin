@@ -1,0 +1,34 @@
+<html>
+<body>
+Reports access to <code>@JsonIgnore</code>'d properties on DTO parameters inside
+Spring-managed components (services, validators, event listeners, etc.).
+<p>
+    When a DTO arrives in a Spring component through Jackson deserialization
+    (e.g. from a controller <code>@RequestBody</code>), fields annotated with
+    <code>@JsonIgnore</code> or listed in <code>@JsonIgnoreProperties</code> are
+    <code>null</code> or default values. Accessing them silently produces
+    incorrect data.
+</p>
+<p>
+    This inspection scans any Spring <code>@Component</code>, <code>@Service</code>,
+    <code>@Repository</code>, <code>@Controller</code>, <code>@RestController</code>,
+    or <code>@Configuration</code> class and flags every read access (field reference
+    or getter call) on a method parameter whose declared type carries Jackson-excluded
+    properties.
+</p>
+<p>
+    <b>How to fix:</b>
+    <ul>
+        <li>Remove the access if the property is not expected to be present.</li>
+        <li>Load the missing data from the database instead of relying on the DTO.</li>
+        <li>Remove <code>@JsonIgnore</code> if the field must be present in the DTO.</li>
+    </ul>
+</p>
+<p>
+    <b>Note:</b> fully-populated JPA entities that happen to carry
+    <code>@JsonIgnore</code> for serialization purposes but are loaded from the
+    database may trigger a false positive. Suppress the inspection for that method
+    if you are certain the object was not deserialized.
+</p>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports Spring Data JPA <code>@Modifying</code> annotations that don't set
+<code>clearAutomatically = true</code>.
+<p>
+    Without it, entities cached in the persistence context can become stale after a bulk update or
+    delete query, leading to subtle read-after-write bugs. The quick-fix adds the attribute.
+</p>
+</body>
+</html>

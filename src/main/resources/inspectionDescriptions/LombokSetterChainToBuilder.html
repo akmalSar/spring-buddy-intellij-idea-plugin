@@ -1,0 +1,60 @@
+<html>
+<body>
+
+<p>Reports a no-arg constructor call followed by a chain of setter calls on a class annotated
+    with Lombok's <code>@Builder</code>, when the entire sequence can be collapsed into a single
+    builder expression.</p>
+
+<p>Replacing setter chains with the builder pattern removes intermediate mutable state, reduces
+    the number of statements, and makes it immediately clear which fields are initialised and
+    with what values.</p>
+
+<p><b>Example:</b></p>
+
+<pre><code>
+B2bInvoiceVatDto dto = new B2bInvoiceVatDto();
+dto.setId(feDto.getId());
+dto.setHeadId(feDto.getHeadId());
+dto.setVatAmount(feDto.getVatAmount());
+dto.setVatRate(feDto.getVatRate());
+dto.setVatGroup(feDto.getVatGroup());
+dto.setVatCountry(feDto.getVatCountry().getId());
+dto.setBaseAmount(feDto.getBaseAmount());
+dto.setVatCalculationType(feDto.getVatCalculationType().getId());
+</code></pre>
+
+<p>After applying the quick-fix:</p>
+
+<pre><code>
+B2bInvoiceVatDto dto = B2bInvoiceVatDto.builder()
+    .id(feDto.getId())
+    .headId(feDto.getHeadId())
+    .vatAmount(feDto.getVatAmount())
+    .vatRate(feDto.getVatRate())
+    .vatGroup(feDto.getVatGroup())
+    .vatCountry(feDto.getVatCountry().getId())
+    .baseAmount(feDto.getBaseAmount())
+    .vatCalculationType(feDto.getVatCalculationType().getId())
+    .build();
+</code></pre>
+
+<p><b>When is this triggered?</b></p>
+<ul>
+    <li>The variable is initialised with a no-arg constructor.</li>
+    <li>The constructed class is annotated with <code>@Builder</code> or <code>lombok.Builder</code>.</li>
+    <li>One or more consecutive <code>variable.setXxx(...)</code> calls follow the declaration
+        in the same block.
+    </li>
+    <li>Each setter call has exactly one argument (complex expressions and nested calls are
+        preserved verbatim).
+    </li>
+</ul>
+
+<p>The inspection stops collecting setter calls at the first statement that is not a direct
+    setter on the declared variable, so only the contiguous block is replaced. Statements that
+    appear after an unrelated line are left untouched.</p>
+
+<p><b>Quick-fix:</b> <i>Replace with builder</i></p>
+
+</body>
+</html>

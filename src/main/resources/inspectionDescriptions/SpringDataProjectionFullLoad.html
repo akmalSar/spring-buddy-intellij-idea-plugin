@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports Spring Data projection interfaces that can force full entity loading.
+<p>
+    Closed interface projections are efficient when getters return scalar values. Returning an entity
+    from a projection method can defeat the projection and load the full associated entity.
+</p>
+<p>
+    Projection methods using SpEL via <code>@Value</code> are open projections and can also require loading
+    the full target entity.
+</p>
+</body>
+</html>

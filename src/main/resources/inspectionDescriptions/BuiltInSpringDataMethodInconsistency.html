@@ -1,0 +1,11 @@
+<html>
+<body>
+<p>Reports inconsistencies in Spring Data repository method declarations:</p>
+<ul>
+  <li>Derived query method names that do not match any entity property</li>
+  <li><code>@Query</code> methods referencing non-existent named queries</li>
+  <li>Method names containing keywords in an order that Spring Data cannot parse</li>
+</ul>
+<p>These inconsistencies typically lead to runtime <code>IllegalArgumentException</code> when the repository proxy is created.</p>
+</body>
+</html>

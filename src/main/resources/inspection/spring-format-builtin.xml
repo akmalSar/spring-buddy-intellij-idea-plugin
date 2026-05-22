@@ -1,0 +1,299 @@
+<profile version="1.0" is_locked="true">
+    <option name="myName" value="spring-format-builtin"/>
+    <inspection_tool class="BuiltInCanBeFinal" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat">
+        <option name="REPORT_CLASSES" value="false"/>
+        <option name="REPORT_METHODS" value="false"/>
+        <option name="REPORT_FIELDS" value="true"/>
+    </inspection_tool>
+    <inspection_tool class="BuiltInClassWithOnlyPrivateConstructors" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInControlFlowStatementWithoutBraces" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInConvert2MethodRef" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInCustomRegExp" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+
+    <inspection_tool class="BuiltInInfiniteRecursion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInJavadocReference" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat">
+        <option name="TOP_LEVEL_CLASS_OPTIONS">
+            <value>
+                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none"/>
+                <option name="REQUIRED_TAGS" value=""/>
+            </value>
+        </option>
+        <option name="INNER_CLASS_OPTIONS">
+            <value>
+                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none"/>
+                <option name="REQUIRED_TAGS" value=""/>
+            </value>
+        </option>
+        <option name="METHOD_OPTIONS">
+            <value>
+                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none"/>
+                <option name="REQUIRED_TAGS" value="@return@param@throws or @exception"/>
+            </value>
+        </option>
+        <option name="FIELD_OPTIONS">
+            <value>
+                <option name="ACCESS_JAVADOC_REQUIRED_FOR" value="none"/>
+                <option name="REQUIRED_TAGS" value=""/>
+            </value>
+        </option>
+        <option name="IGNORE_DEPRECATED" value="false"/>
+        <option name="IGNORE_JAVADOC_PERIOD" value="true"/>
+        <option name="IGNORE_DUPLICATED_THROWS" value="false"/>
+        <option name="IGNORE_POINT_TO_ITSELF" value="false"/>
+        <option name="myAdditionalJavadocTags" value=""/>
+    </inspection_tool>
+    <inspection_tool class="SpringGhostSaveDataFlow" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInLambdaParameterHidingMemberVariable" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInLambdaParameterTypeCanBeSpecified" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+<!--    <inspection_tool class="BuiltInMethodRefCanBeReplacedWithLambda" enabled="true" level="WARNING"-->
+<!--                     enabled_by_default="true" groups="spring-javaformat"/>-->
+    <inspection_tool class="BuiltInMissortedModifiers" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat">
+        <option name="m_requireAnnotationsFirst" value="true"/>
+    </inspection_tool>
+    <inspection_tool class="BuiltInMultipleVariablesInDeclaration" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInMissingOverrideAnnotation" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInNonFinalUtilityClass" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInLoggingPlaceholderCountMatchesArgumentCount" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="BuiltInSimplifiableAnnotation" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInSimplifiableAssertion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInSimplifiableBooleanExpression" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInSimplifiableConditionalExpression" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInVariableTypeCanBeExplicit" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAssertJStyle" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAssertJChainable" enabled="true" level="WEAK WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringArrayTypeStyle" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+
+    <inspection_tool class="SpringAvoidNestedBlocks" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringNoWhitespaceBefore" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAssertJEmptyStringMatcher" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAssertJBooleanMethodMatcher" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAssertJSizeMatcher" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAnnotationUseStyle" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringAsyncProxyPitfall" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCglibFinalProxy" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringAsyncReturnIgnored" enabled="true" level="ERROR" enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringAsyncWithoutExecutor" enabled="true" level="ERROR" enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringAsyncWithoutEnableAsync" enabled="true" level="ERROR" enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringRetryableWithoutEnableRetry" enabled="true" level="ERROR" enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringRetryableProxyPitfall" enabled="true" level="ERROR" enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringRetryableWithTransactional" enabled="true" level="ERROR" enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringBootTestCouldBeSlice" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCacheProxyPitfall" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCacheableOnVoid" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCacheableWithoutEnableCaching" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCacheableKeyCollision" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringDuplicateRequestMapping" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCollectionReturnsNull" enabled="true" level="ERROR" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringConfigurationPropertiesMissingValidated" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringConfigurationPropertiesNotRegistered" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringControllerEntityReturn" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringRequestMappingMissingMethod" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringControllerRepositoryInjection" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringControllerTransactional" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringMultipartFileUploadMissingValidation" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJacksonLazyEntitySerialization" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJacksonDeserializedFieldAccess" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJsonIgnoreFieldAccess" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringDeprecated" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringDirtiesContextPitfall" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringMockBeanContextCache" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringEntityEqualsHashCodeOnId" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringEventListenerSwallowsException" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="async-concurrency"/>
+    <inspection_tool class="SpringExceptionLoggedAndRethrown" enabled="true" level="WARNING" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringFinalClass" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringImportOrder" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringInterfaceIsType" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringOneTopLevelClass" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringRedundantModifier" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringJpaCascadeAllOnManyToOne" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaEntityLombokPitfall" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaEntityMissingId" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaEntityNoArgConstructor" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaModifyingWithoutClearAutomatically" enabled="true" level="ERROR"
+                      enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaModifyingWithoutTransactional" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaEnumeratedOrdinal" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaAuditingMissingEntityListener" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaOneToManyWithoutMappedBy" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaInvalidMappedBy" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaPrimitiveRepositoryTypes" enabled="true" level="WARNING"
+                      enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaSaveInLoop" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringQuerySqlInjection" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringRepositoryFindAllWithoutPageable" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaToOneLazyPitfall" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <!-- Lombok issues moved here from plugin.xml so the bundled profile includes them -->
+    <inspection_tool class="LombokConstructorToBuilder" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>
+    <inspection_tool class="LombokSetterChainToBuilder" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>
+    <inspection_tool class="LombokAllArgsConstructorRedundancy" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>
+    <inspection_tool class="LombokBuilderRedundancy" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>
+    <inspection_tool class="LombokInheritanceShadow" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokEqualsAndHashCodeWithoutCallSuper" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokDataOnSubclassWithoutCallSuper" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokEqualsAndHashCodeOnJpaEntity" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokDataWithManualConstructor" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokDataOnJpaEntity" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokDataRedundantRequiredArgsConstructor" enabled="true" level="WEAK WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokDataWithAllArgsConstructor" enabled="true" level="WEAK WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokToStringWithoutCallSuper" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokToStringCircularReference" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokConstructorAnnotation" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokNonNull" enabled="true" level="ERROR" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokBuilderDefault" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokSetterOnBuilderField" enabled="true" level="WEAK WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokManualGetterShadow" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokBuilderOnSubclassWithBuilderParent" enabled="true" level="ERROR" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokBuilderWithPartialConstructor" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokSuperBuilderMissingParent" enabled="true" level="ERROR" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokBuilderSubclassWithoutSuperBuilderParent" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="LombokBuilderOnParentWithSubclasses" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="SpringLoggerNotStaticFinal" enabled="true" level="WARNING" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringMethodOrder" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringMethodVisibility" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringMethodParamPad" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringMockitoArgumentMatcherMix" enabled="true" level="WARNING" enabled_by_default="true" groups="mockito"/>
+    <inspection_tool class="SpringMutableException" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringMockitoUnusedStubbing" enabled="true" level="WARNING" enabled_by_default="true" groups="mockito"/>
+<!--    <inspection_tool class="SpringNPlusOneQuery" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>-->
+    <inspection_tool class="SpringJpaNPlusOnePredictionDataFlow" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringOptionalAsFieldOrParameter" enabled="true" level="WARNING" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringOptionalEntityLookupException" enabled="true" level="WARNING" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringStatefulSingletonBean" enabled="true" level="ERROR" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringSharedMutableCache" enabled="true" level="ERROR" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringAsyncSharedMutableState" enabled="true" level="ERROR" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringBeanConstructorHeavyWork" enabled="true" level="WARNING" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringNoWhitespaceAfter" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringScheduledProxyPitfall" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringScheduledTransactionalLongRunning" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringScheduledWithoutEnableScheduling" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringScheduledInvalidSignature" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringScheduledWithoutLock" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringScheduledFixedRateWithoutInitialDelay" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringSecurityProxyPitfall" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringServiceMultipleRepositoriesWithoutTransaction" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringServiceSwallowedException" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringSlf4jStringConcatenation" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringStringLiteralEquality" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringSystemOutErr" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringTernary" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringTypecastParenPad" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringTestNoAssertions" enabled="true" level="WARNING" enabled_by_default="true" groups="mockito"/>
+    <inspection_tool class="SpringTodoFixmeBlocker" enabled="true" level="WARNING" enabled_by_default="true" groups="misc"/>
+    <inspection_tool class="SpringWhitespaceAround" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringWhitespaceAfter" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringUpperEll" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringTransactionalAbstractClass" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalAsyncBoundary" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalAsyncEventListener" enabled="true" level="WARNING"
+                      enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalEventListenerWithoutTransaction" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalBeanMethod" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalCheckedException" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalConflictingRollbackRules" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalConstructorTrap" enabled="true" level="WARNING"
+                      enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalPostConstruct" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalDirtyCheckingDataFlow" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalFinalClass" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalFinalMethod" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalInterfaceMethodWithCglib" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalLongRunningOperation" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalMethodInFinalClass" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalMultipleWritesWithoutTransaction" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalNestedWithJpa" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalOpenSessionInView" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalPrivateMethod" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalReadOnlyEntityFetch" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalReadOnlyClassWrite" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalReadOnlyWrite" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalRepositoryBoundary" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalRequiresNewConnectionPressure" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalRequiresNewSelfInvocation" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalRollbackOnlyWithoutThrow" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalSelfInvocation" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalStaticMethod" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalSwallowedException" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalTest" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalUnsupportedTimeout" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalWeakIsolation" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringValidationBindingResultOrder" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringValidationMissingValidated" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringValidationNestedDtoMissingValid" enabled="true" level="ERROR"
+                     enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringCatchVariableName" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringDataDerivedQueryExplosion" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringDataProjectionFullLoad" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringHideUtilityClassConstructor" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="spring-javaformat"/>
+
+    <inspection_tool class="SpringInnerTypeLast" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringLambda" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringMockitoBddStyle" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="SpringTestFileName" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInStaticImport" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInSystemOutErr" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInUNUSED_IMPORT" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInUnnecessaryModifier" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInUnnecessarySemicolon" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInUnqualifiedFieldAccess" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInUtilityClassWithPublicConstructor" enabled="true" level="WARNING"
+                     enabled_by_default="true" groups="spring-javaformat"/>
+    <inspection_tool class="BuiltInAsyncMethod" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringProfileExpression" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringBootApplicationSetup" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringDataModifyingAnnotationMissing" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringDataRepositoryMethodReturnType" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringDataRepositoryMethodParameters" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringDataMethodInconsistency" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringDataPageableParameterMissing" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringDataJdbcEmptySequenceName" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInSpringMvcPathVariableDeclaration" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="BuiltInMVCPathVariable" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+
+    <inspection_tool class="SpringConfigurationLiteMode" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringConfigurationMutableState" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="LombokBuilderDefaultValue" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok,pitfalls"/>
+    <inspection_tool class="SpringTransactionalStreamResourceLeak" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringConditionalOnPropertyDefaultValueTrap" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringBagProblem" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringEventListenerMissingComponent" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls,async-concurrency"/>
+    <inspection_tool class="SpringLeakyValueInNonBean" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringValueHardcodedSecret" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringUnexpectedRollbackException" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringTransactionalSelfInvocationIndirection" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringReadOnlyEntityMutationDataFlow" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringSqlInjectionTaintFlow" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringEntityTransactionBoundaryEscapeDataFlow" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringLazyInitializationPredictionDataFlow" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringValidOnPrimitive" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJakartaTransactionalMigration" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+
+    <inspection_tool class="SpringOrphanedApplicationEvent" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringInMemoryFiltering" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+</profile>

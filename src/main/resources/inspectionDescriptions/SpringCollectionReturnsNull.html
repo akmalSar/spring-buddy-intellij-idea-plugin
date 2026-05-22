@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports methods declared to return <code>List</code>/<code>Set</code>/<code>Map</code>/<code>Collection</code>/<code>Iterable</code>
+that return <code>null</code>.
+<p>
+    Returning an empty collection avoids null checks at every call site and prevents <code>NullPointerException</code>.
+    A quick-fix replaces <code>null</code> with <code>Collections.emptyList()</code>/<code>emptySet()</code>/<code>emptyMap()</code>.
+</p>
+</body>
+</html>

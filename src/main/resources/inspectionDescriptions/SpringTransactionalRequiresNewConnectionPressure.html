@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>REQUIRES_NEW connection pressure</h2>
+<p>Reports REQUIRES_NEW methods called in loops or deep same-class call chains. Each REQUIRES_NEW suspends the outer
+    transaction and borrows another database connection, which can exhaust the pool under load. Use REQUIRED or redesign
+    transaction boundaries.</p>
+</body>
+</html>

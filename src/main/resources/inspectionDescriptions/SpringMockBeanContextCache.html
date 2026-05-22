@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports <code>@MockBean</code> fields in Spring integration tests.
+<p>
+    <code>@MockBean</code> changes the Spring test context cache key. Different mock sets across test
+    classes force separate application contexts, slowing the suite substantially.
+</p>
+<p>
+    Prefer centralising common mocks in a shared base test class or <code>@TestConfiguration</code> so tests
+    can reuse the same cached context.
+</p>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<html>
+<body>
+
+<p>Reports dangerous or incorrect usage of {@code @Builder} and {@code @SuperBuilder} in
+    class hierarchies.</p>
+
+<p><b> @Builder on a parent class with subclasses</b></p>
+<p>When a parent class has {@code @Builder}, any subclass builder will silently
+    exclude parent fields. Use {@code @SuperBuilder} on both parent and subclasses
+    to include inherited fields in the builder.</p>
+
+<pre><code>
+// Warning
+@Builder
+public class BaseDto {
+    private String id;
+}
+
+public class SubDto extends BaseDto {
+    private String name;
+    // SubDto.builder() will NOT include .id(...)
+}
+
+// Correct
+@SuperBuilder
+public class BaseDto {
+    private String id;
+}
+
+@SuperBuilder
+public class SubDto extends BaseDto {
+    private String name;
+}
+</code></pre>
+
+<p><b> @Builder on a subclass whose parent also has @Builder</b></p>
+<p>This causes a constructor conflict at compile time because both classes generate
+    static {@code builder()} methods with incompatible return types. Java refuses to
+    compile because the subclass {@code builder()} cannot hide the parent's
+    {@code builder()}. Use {@code @SuperBuilder} on both classes instead.</p>
+
+<p><b>Example error:</b></p>
+<pre><code>
+builder() in SubDto cannot hide builder() in BaseDto
+  return type SubDtoBuilder is not compatible with BaseDtoBuilder
+</code></pre>
+
+<p><b> @Builder with a partial constructor</b></p>
+<p>When {@code @Builder} is present but the only available explicit constructor covers
+    fewer parameters than the number of instance fields, the builder will silently
+    leave unmatched fields as {@code null}. Either add an all-args constructor or
+    explicitly place {@code @Builder} on the partial constructor.</p>
+
+<pre><code>
+@Builder
+public class InvoiceDto {
+    private String invNo;       // always null in builder
+    private String lineRef;     // always null in builder
+    private int lineNum;
+
+    public InvoiceDto(int lineNum) {  // partial constructor
+        this.lineNum = lineNum;
+    }
+}
+</code></pre>
+
+<p><b> @Builder on a subclass without @SuperBuilder on parent</b></p>
+<p
+<p>When a subclass has {@code @Builder} but the parent does not have
+    {@code @SuperBuilder}, the subclass builder silently excludes all parent
+    fields. Use {@code @SuperBuilder} on both classes to include inherited
+    fields in the builder.</p>
+
+<p><b> @SuperBuilder on subclass without @SuperBuilder on parent</b></p>
+<p>{@code @SuperBuilder} requires every class in the superclass chain to
+    also be annotated with {@code @SuperBuilder}. Having {@code @SuperBuilder}
+    on a subclass whose parent lacks it causes a hard compile error. Add
+    {@code @SuperBuilder} to all ancestor classes.</p>
+
+<pre><code>
+// Compile error
+public class BaseDto {
+    private String id;
+}
+
+@SuperBuilder  // ERROR: parent lacks @SuperBuilder
+public class SubDto extends BaseDto {
+    private String name;
+}
+
+// Correct
+@SuperBuilder
+public class BaseDto {
+    private String id;
+}
+
+@SuperBuilder
+public class SubDto extends BaseDto {
+    private String name;
+}
+</code></pre>
+
+</body>
+</html>

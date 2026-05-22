@@ -1,0 +1,37 @@
+<html>
+<body>
+
+<p>Reports incorrect usage of Lombok {@code @NonNull}.</p>
+
+<p><b> @NonNull on a primitive field</b></p>
+<p>Lombok's {@code @NonNull} adds a null-check in the generated constructor
+    and setter. On a primitive field ({@code int}, {@code long},
+    {@code boolean}, etc.) this is meaningless because primitives can
+    never be {@code null}. The annotation serves no purpose and adds
+    visual noise. Remove it.</p>
+
+<pre><code>
+// Warning — primitives cannot be null
+@NonNull
+private int amount;
+</code></pre>
+
+<p><b> @NonNull and @Builder.Default on the same field</b></p>
+<p>This combination causes a {@code NullPointerException} during construction.
+    Lombok executes the null-check <em>before</em> applying the
+    {@code @Builder.Default} value, so the field is still {@code null} at
+    the moment of the check. Use one or the other, not both.</p>
+
+<pre><code>
+// NullPointerException at runtime
+@Builder
+public class Dto {
+    @NonNull
+    @Builder.Default
+    private String status = "NEW";
+}
+// builder().build() throws NPE — null check fires before default
+</code></pre>
+
+</body>
+</html>

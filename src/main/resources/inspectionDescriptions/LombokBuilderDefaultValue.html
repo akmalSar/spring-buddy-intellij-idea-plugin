@@ -1,0 +1,9 @@
+<html>
+<body>
+<h2>Field initializer erased by @Builder</h2>
+<p>Reports fields with default initializers (e.g. <code>String role = "GUEST"</code>) in classes
+    annotated with @Builder where the field is missing <code>@Builder.Default</code>.
+    Lombok's @Builder ignores field initializers, so the generated builder silently sets
+    the field to <code>null</code>. Add <code>@Builder.Default</code> to preserve the default value.</p>
+</body>
+</html>

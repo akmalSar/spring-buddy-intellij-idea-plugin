@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>@Value / @Autowired in non-Spring-managed class</h2>
+<p>Reports <code>@Value</code> or <code>@Autowired</code> annotations on fields in classes
+    that are not Spring beans (no @Component, @Service, @Configuration, etc.). Spring only
+    injects values into managed beans — if the class is instantiated manually via
+    <code>new</code>, the annotated fields will always be <code>null</code>. Annotate the
+    class with <code>@Component</code> to enable dependency injection.</p>
+</body>
+</html>

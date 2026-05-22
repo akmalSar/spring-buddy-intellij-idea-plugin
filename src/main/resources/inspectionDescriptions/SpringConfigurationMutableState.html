@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports mutable (non-<code>final</code>, non-<code>@Autowired</code>, non-<code>@Value</code>)
+instance fields inside <code>@Configuration</code> classes.
+<p>
+    <code>@Configuration</code> beans are singletons by default. Mutable state shared across
+    threads during context refresh or bean creation can lead to race conditions and
+    non-deterministic initialization. Make the field <code>final</code>, externalize the state
+    into a dedicated bean, or use <code>AtomicReference</code>/<code>ConcurrentHashMap</code>
+    if concurrent mutation is truly required.
+</p>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports setter or collection-mutator calls on JPA entities inside a
+<code>@Transactional(readOnly = true)</code> method.
+<p>
+    Even though the transaction is marked read-only, Hibernate still performs
+    dirty checking on managed entities. Calling a setter or mutator triggers
+    the dirty-check mechanism and may attempt a flush at commit time,
+    causing a <code>TransactionSystemException</code> or
+    <code>UnexpectedRollbackException</code>.
+    Remove the mutation or change the transaction to <code>readOnly = false</code>.
+</p>
+</body>
+</html>

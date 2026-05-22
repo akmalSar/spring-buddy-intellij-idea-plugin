@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports SLF4J <code>Logger</code> fields that are not declared <code>private static final</code>.
+<p>
+    A logger should typically be a single per-class instance with stable visibility:
+</p>
+<pre><code>private static final Logger log = LoggerFactory.getLogger(MyService.class);</code></pre>
+<p>
+    Quick-fix adds the missing <code>private</code>, <code>static</code>, and <code>final</code> modifiers
+    (removing any conflicting <code>public</code>/<code>protected</code>).
+</p>
+<p>Interface fields and non-SLF4J logger types are ignored.</p>
+</body>
+</html>

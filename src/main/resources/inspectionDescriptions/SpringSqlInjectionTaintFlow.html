@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports potential SQL injection through intra-procedural taint flow:
+<code>@RequestParam</code>, <code>@PathVariable</code>, or request-object values
+that are concatenated into strings and passed to query execution methods
+such as <code>JdbcTemplate.query</code>, <code>EntityManager.createNativeQuery</code>,
+or <code>Statement.execute</code>.
+<p>
+    Spring Data <code>@Query</code> annotations only accept compile-time constants,
+    but dynamic queries built with string concatenation in service or controller
+    methods are a direct SQL injection vector. Replace concatenation with
+    parameterized queries (<code>?</code> placeholders or named parameters)
+    or use JPA Criteria API.
+</p>
+</body>
+</html>

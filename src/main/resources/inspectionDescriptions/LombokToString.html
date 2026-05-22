@@ -1,0 +1,50 @@
+<html>
+<body>
+
+<p>Reports dangerous or incorrect usage of Lombok {@code @ToString}.</p>
+
+<p><b> @ToString without callSuper=true on a subclass</b></p>
+<p>By default {@code @ToString} only includes fields declared in the current
+    class. On a subclass this silently excludes all inherited fields from
+    the string representation. Set {@code callSuper = true} to include
+    parent fields.</p>
+
+<pre><code>
+// Warning — parent fields excluded from toString()
+@ToString
+public class SubDto extends BaseDto { ... }
+
+// Correct
+@ToString(callSuper = true)
+public class SubDto extends BaseDto { ... }
+</code></pre>
+
+<p><b> @ToString or @Data with a circular reference</b></p>
+<p>When a class has a field whose type references back to the declaring
+    class (a bidirectional relationship), Lombok's {@code @ToString} can
+    cause a {@code StackOverflowError} at runtime because the generated
+    {@code toString()} recursively prints both sides. Exclude one side
+    of the relationship using {@code @ToString.Exclude}.</p>
+
+<pre><code>
+// StackOverflowError at runtime
+@Data
+public class Customer {
+    private List<Order> orders;
+}
+
+@Data
+public class Order {
+    private Customer customer;  // circular reference
+}
+
+// Fix — exclude one side
+@Data
+public class Order {
+    @ToString.Exclude
+    private Customer customer;
+}
+</code></pre>
+
+</body>
+</html>

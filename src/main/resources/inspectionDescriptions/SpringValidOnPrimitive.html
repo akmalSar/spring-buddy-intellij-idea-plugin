@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports <code>@Valid</code> annotations on method parameters of primitive type
+or <code>String</code>.
+<p>
+    <code>@Valid</code> triggers validation recursively on the object's fields and
+    method parameters. It has no effect on primitives, wrapper types, or plain
+    <code>String</code> values because they have no nested fields to validate.
+    Use <code>@NotNull</code>, <code>@NotBlank</code>, <code>@Size</code>,
+    <code>@Min</code>, <code>@Max</code>, or <code>@Pattern</code> directly on the
+    parameter instead.
+</p>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>Missing @Validated</h2>
+<p>Reports method parameter constraint annotations (e.g. <code>@NotNull</code>, <code>@Size</code>, <code>@Valid</code>)
+    on classes that are not annotated with <code>@Validated</code>. Method-level validation requires a validated Spring
+    bean, as Spring's AOP proxy — responsible for enforcing these constraints — is only activated when
+    <code>@Validated</code> is present on the class. Without it, constraint annotations on method parameters
+    are silently ignored at runtime.</p>
+</body>
+</html>

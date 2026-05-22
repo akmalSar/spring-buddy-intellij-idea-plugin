@@ -1,0 +1,23 @@
+<html>
+<body>
+
+<p>Reports {@code @Setter} annotations on fields in a {@code @Builder}-annotated class.</p>
+
+<p><b> @Setter on a @Builder field</b></p>
+<p>The builder pattern is typically used to create immutable objects.
+    Placing {@code @Setter} on a field inside a {@code @Builder} class
+    undermines immutability by adding a mutable accessor. If the field
+    genuinely needs to be mutable, document this explicitly. If not,
+    remove {@code @Setter} to preserve the immutability guarantee
+    that the builder pattern conveys.</p>
+
+<pre><code>
+@Builder
+public class PaymentDto {
+    @Setter  // undermines immutability
+    private String acquirer;
+}
+</code></pre>
+
+</body>
+</html>

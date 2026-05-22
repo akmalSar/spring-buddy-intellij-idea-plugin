@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>@Async crosses a transaction boundary</h2>
+<p>Reports methods that combine @Async and @Transactional, or transactional methods that self-invoke @Async methods.
+    Transactions are thread-bound, so asynchronous execution does not inherit the caller transaction context. Split
+    asynchronous and transactional work deliberately.</p>
+</body>
+</html>

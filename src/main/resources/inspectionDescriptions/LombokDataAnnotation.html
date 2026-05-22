@@ -1,0 +1,86 @@
+<html>
+<body>
+
+<p>Reports dangerous usage of Lombok {@code @Data}.</p>
+
+<p><b> @Data with a manually defined constructor</b></p>
+<p
+<p>{@code @Data} only generates {@code @RequiredArgsConstructor}, not
+    {@code @AllArgsConstructor}, when a constructor is already defined
+    in the class. This means the generated constructor will only cover
+    {@code final} and {@code @NonNull} fields, which may not match the
+    developer's intent. Be explicit: use {@code @AllArgsConstructor}
+    directly if a full constructor covering all fields is needed.</p>
+
+<pre><code>
+// Warning — only generates RequiredArgsConstructor
+@Data
+public class PaymentDto {
+    private String acquirer;
+    private int amount;
+
+    public PaymentDto(String acquirer) {
+        this.acquirer = acquirer;
+    }
+    // PaymentDto(int, String) is generated but only covers acquirer
+}
+
+// Explicit
+@Getter @Setter @EqualsAndHashCode @ToString
+@AllArgsConstructor
+public class PaymentDto {
+    private String acquirer;
+    private int amount;
+}
+</code></pre>
+
+<p><b>DATA-JPA — @Data on a JPA @Entity</b></p>
+<p>{@code @Data} is dangerous on JPA entities. It pulls in
+    {@code @EqualsAndHashCode} (which breaks collections and entity
+    identity), {@code @ToString} (which can trigger
+    {@code LazyInitializationException} or {@code StackOverflowError}
+    from bidirectional relations), and {@code @Setter} (which makes
+    entity fields mutable, undermining Hibernate managed state).</p>
+<p>Use explicit {@code @Getter} + {@code @Setter} annotations on
+    only the fields you need, or {@code @Value} for immutable DTOs.</p>
+
+<pre><code>
+// Dangerous
+@Data
+@Entity
+public class User { ... }
+
+// Safer
+@Getter
+@Entity
+public class User {
+    @Id @Setter private Long id;
+    private String name;       // no setter
+    private String email;      // no setter
+}
+</code></pre>
+
+<p><b> @Data with explicit @RequiredArgsConstructor</b></p>
+<p>{@code @Data} already includes {@code @RequiredArgsConstructor}. Specifying
+    it again is redundant and adds visual noise. Remove the explicit annotation.</p>
+
+<pre><code>
+// Redundant
+@Data
+@RequiredArgsConstructor  // ← @Data already provides this
+public class Dto { ... }
+
+// Correct
+@Data
+public class Dto { ... }
+</code></pre>
+
+<p><b> @Data with @AllArgsConstructor</b></p>
+<p>{@code @Data} generates setters for all fields, which conflicts with the
+    intent of {@code @AllArgsConstructor} (which implies a constructor for all
+    fields, typically used for immutable objects). If you need immutability,
+    use {@code @Value} instead. If you genuinely need both setters and an
+    all-args constructor, document why.</p>
+
+</body>
+</html>

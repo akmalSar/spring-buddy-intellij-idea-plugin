@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports JPA entities with Spring Data auditing fields such as <code>@CreatedDate</code> but without
+<code>@EntityListeners(AuditingEntityListener.class)</code>.
+<p>
+    Auditing also requires <code>@EnableJpaAuditing</code> in configuration, but the entity listener is
+    required on the entity for auditing callbacks to populate fields.
+</p>
+</body>
+</html>

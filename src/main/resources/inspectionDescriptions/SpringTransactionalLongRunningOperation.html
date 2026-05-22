@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Long-running work inside @Transactional</h2>
+<p>Reports transactional methods that appear to perform slow external work such as network/client calls or Thread.sleep.
+    Holding a database transaction while waiting on external I/O can exhaust the connection pool. Use a transaction
+    sandwich: load, call external service outside a transaction, then save.</p>
+</body>
+</html>

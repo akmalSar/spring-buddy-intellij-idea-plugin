@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports write methods inside a class-level <code>@Transactional(readOnly = true)</code> scope when the
+method has <code>@Transactional</code> but does not explicitly override <code>readOnly</code>.
+<p>
+    With propagation <code>REQUIRED</code>, read-only transaction settings can be inherited from the class
+    or an outer transaction. Writes may be skipped, delayed until commit failure, or behave differently
+    depending on the database and driver.
+</p>
+<p>
+    Explicitly declare <code>@Transactional(readOnly = false)</code> on write methods.
+</p>
+</body>
+</html>

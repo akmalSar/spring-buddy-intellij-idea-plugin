@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports Spring application events that have no matching listeners and listeners whose
+event type is never published via <code>ApplicationEventPublisher.publishEvent()</code>.
+<p>
+    Spring events are weakly typed at the invocation site — the publisher and listener
+    are connected only by the event class. When refactoring changes the event type or
+    removes a listener, the connection silently breaks. This inspection cross-references
+    all <code>publishEvent()</code> call sites against all <code>@EventListener</code>
+    and <code>@TransactionalEventListener</code> parameter types to flag dead ends before
+    they cause silent failures at runtime.
+</p>
+</body>
+</html>

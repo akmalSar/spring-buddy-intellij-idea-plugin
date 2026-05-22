@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports <code>@Transactional</code> methods that appear to load an entity from a repository and then
+mutate it without declaring <code>readOnly = true</code>.
+<p>
+    In a regular JPA transaction, dirty checking persists changes to managed entities when the
+    transaction commits, even if the method never calls <code>save()</code>. Marking read operations
+    as <code>@Transactional(readOnly = true)</code> communicates intent and avoids accidental dirty
+    checking.
+</p>
+<p>
+    The quick-fix adds <code>readOnly = true</code> to the transactional annotation.
+</p>
+</body>
+</html>

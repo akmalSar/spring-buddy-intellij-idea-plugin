@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports when a collection returned by a Spring Data repository or <code>EntityManager</code>
+query is immediately chained into an in-memory <code>.stream().filter()</code>,
+<code>.sorted()</code>, <code>.skip()</code>, or <code>.limit()</code> operation.
+<p>
+    Fetching thousands of rows into JVM memory just to discard 90% of them in a Java
+    stream wastes heap, CPU, and database throughput. Push the filtering to the database
+    layer instead: write a custom <code>@Query</code>, use a derived query method
+    (e.g. <code>findByStatus(...)</code>), or pass a <code>Pageable</code>/<code>Specification</code>
+    to the existing repository method.
+</p>
+</body>
+</html>

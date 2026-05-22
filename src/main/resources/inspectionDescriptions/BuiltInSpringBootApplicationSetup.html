@@ -1,0 +1,10 @@
+<html>
+<body>
+<p>Reports incorrect Spring Boot application setup:</p>
+<ul>
+  <li>Multiple <code>@SpringBootApplication</code>-annotated classes in a single package hierarchy</li>
+  <li>Missing <code>@SpringBootConfiguration</code> in the hierarchy when using <code>@SpringBootApplication</code></li>
+</ul>
+<p>Only one <code>@SpringBootConfiguration</code>-annotated class is recommended per package hierarchy to avoid auto-configuration problems.</p>
+</body>
+</html>

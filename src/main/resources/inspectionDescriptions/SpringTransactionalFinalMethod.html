@@ -1,0 +1,7 @@
+<html>
+<body>
+<h2>@Transactional final method cannot be subclass-proxied</h2>
+<p>Reports final methods annotated with @Transactional. CGLIB subclass proxies cannot override final methods, so
+    transaction advice may not run. Remove final or place the transaction on an interceptable public method.</p>
+</body>
+</html>

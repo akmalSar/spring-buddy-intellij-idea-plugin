@@ -1,0 +1,24 @@
+<html>
+<body>
+Reports {@code @Retryable} annotations on methods that Spring cannot proxy.
+<p>
+    Spring Retry creates CGLIB proxies around Spring beans, just like
+    {@code @Transactional}. The following method modifiers block proxying:
+</p>
+<ul>
+    <li><b>{@code private}</b> — invisible to the proxy subclass.</li>
+    <li><b>{@code static}</b> — has no {@code this} reference to wrap.</li>
+    <li><b>{@code final}</b> — cannot be overridden in the proxy subclass.</li>
+</ul>
+<p>
+    A {@code final} class is also a problem: the proxy cannot subclass it.
+    In all cases the retry interceptor is silently bypassed and the method
+    executes without any retry logic.
+</p>
+<p>
+    <b>Fix:</b> Make the method {@code public}, remove {@code static} or
+    {@code final}, or remove {@code final} from the containing class. The
+    quick-fixes offer safe automated transformations.
+</p>
+</body>
+</html>

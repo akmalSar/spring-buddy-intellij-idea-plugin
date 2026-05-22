@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>@Test</code> methods whose body has no assertion-like call —
+no AssertJ <code>assertThat</code>, no JUnit <code>assertX</code>, no Mockito
+<code>verify</code>/<code>then</code>, no <code>fail</code>, etc.
+<p>
+    Such tests pass as long as no exception is thrown and usually indicate a forgotten assertion
+    or a test that no longer exercises any meaningful behaviour.
+</p>
+</body>
+</html>

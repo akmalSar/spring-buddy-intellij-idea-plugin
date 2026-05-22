@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports {@code @Retryable} annotations in projects that do not have an
+{@code @EnableRetry} configuration.
+<p>
+    Spring Retry is not auto-configured. The {@code @Retryable} annotation is
+    processed by a Spring AOP interceptor that is only registered when an
+    {@code @EnableRetry} annotation is present on a {@code @Configuration} class.
+    Without it, {@code @Retryable} is silently ignored and the method executes
+    without any retry logic, giving a false sense of resilience.
+</p>
+<p>
+    <b>Fix:</b> Add {@code @EnableRetry} to your main application class or a
+    dedicated configuration class. The quick-fix adds the annotation to the
+    class that contains the {@code @Retryable} method.
+</p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports non-transactional methods that call another method in the same class,
+which eventually calls a <code>@Transactional</code> method, causing the transaction
+boundary to be bypassed through self-invocation indirection.
+<p>
+    Spring AOP proxies only intercept calls that come <b>through the proxy</b>.
+    When method A calls method B, and B calls <code>@Transactional</code> method C,
+    all calls stay within the raw object — the proxy is never involved.
+    The <code>@Transactional</code> advice on C is completely ignored.
+    Refactor to call the transactional method from a separate bean, or make the
+    initial entry point <code>@Transactional</code>.
+</p>
+</body>
+</html>

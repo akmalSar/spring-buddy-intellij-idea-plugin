@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Self-invocation ignores REQUIRES_NEW</h2>
+<p>Reports same-bean calls to methods annotated with propagation REQUIRES_NEW. The proxy is bypassed, so the new
+    transaction boundary is ignored and the call participates in the existing execution path. Move the REQUIRES_NEW
+    method to another proxied bean.</p>
+</body>
+</html>

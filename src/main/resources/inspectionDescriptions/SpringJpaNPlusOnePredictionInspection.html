@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports potential N+1 query problems detected by the DataFlow taint engine.
+<p>
+    A collection of JPA entities is loaded from a Spring Data repository or
+    <code>EntityManager</code> query, then iterated inside a loop or stream. On
+    each iteration a lazy association getter is invoked, causing an extra SQL
+    select per element.
+</p>
+<p>
+    Fix by eagerly fetching the association with a fetch join,
+    <code>@EntityGraph</code>, <code>@BatchSize</code>, or a DTO projection that
+    only selects the columns you need.
+</p>
+</body>
+</html>

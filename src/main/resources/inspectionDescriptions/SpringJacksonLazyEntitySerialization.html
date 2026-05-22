@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports REST controller methods that return JPA entities (or collections of entities)
+containing lazy-loaded associations (<code>@OneToMany</code>, <code>@ManyToOne</code>, etc.)
+without <code>@JsonIgnore</code> or an explicit DTO projection.
+<p>
+    Jackson serialization triggers proxy initialization outside of an active Hibernate session,
+    causing <code>LazyInitializationException</code> in production. If the session is still open
+    (e.g. Open Session in View), it causes N+1 queries that kill response times.
+    Convert the return type to a DTO, or add <code>@JsonIgnore</code> to the association field.
+</p>
+</body>
+</html>

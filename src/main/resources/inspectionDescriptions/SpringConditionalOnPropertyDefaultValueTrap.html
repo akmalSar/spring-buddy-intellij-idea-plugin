@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>@ConditionalOnProperty matchIfMissing contradicts @Value default</h2>
+<p>Reports cases where <code>@ConditionalOnProperty(matchIfMissing = true)</code> on a
+    @Bean method is paired with <code>@Value("${property:default}")</code> on a field
+    referencing the same property with a conflicting default. If the property is missing,
+    the bean is created due to <code>matchIfMissing</code>, but the injected value reflects
+    a disabled state — creating a running service that thinks the feature is turned off.</p>
+</body>
+</html>

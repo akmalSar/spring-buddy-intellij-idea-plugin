@@ -1,0 +1,75 @@
+<html>
+<body>
+
+<p>Reports incorrect usage of Lombok constructor annotations.</p>
+
+<p><b> @AllArgsConstructor without @NoArgsConstructor on JPA/Jackson classes</b></p>
+<p>JPA (e.g. {@code @Entity}, {@code @MappedSuperclass}, {@code @Embeddable})
+    and Jackson ({@code @JsonDeserialize}) require a no-args constructor for
+    deserialization and proxy generation. A class annotated only with
+    {@code @AllArgsConstructor} will fail at runtime because no no-args
+    constructor is available. Add {@code @NoArgsConstructor} alongside
+    {@code @AllArgsConstructor}.</p>
+
+<pre><code>
+// Warning — missing no-args constructor
+@AllArgsConstructor
+@Entity
+public class User { ... }
+
+// Correct
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class User { ... }
+</code></pre>
+
+<p><b> @RequiredArgsConstructor with no qualifying fields</b></p>
+<p
+<p>{@code @RequiredArgsConstructor} generates a constructor that covers all
+    {@code final} fields and fields annotated with {@code @NonNull}. When
+    neither is present in the class, it degenerates to a <i>no-args
+        constructor</i>. This is likely unintentional — the annotation silently
+    does nothing useful. Use {@code @NoArgsConstructor} explicitly to
+    signal the real intent.</p>
+
+<pre><code>
+// Warning — no final or @NonNull fields, generates empty constructor
+@RequiredArgsConstructor
+public class Config { ... }
+</code></pre>
+
+<p><b>BUILDER-JPA — @Builder on a JPA entity without @NoArgsConstructor</b></p>
+<p>{@code @Builder} does not generate a no-args constructor. JPA and
+    Hibernate require a no-args constructor to instantiate entities for
+    proxying and deserialization. If {@code @Builder} is the only
+    constructor annotation, the entity will fail at runtime.</p>
+<p>Solutions:</p>
+<ul>
+    <li>Add {@code @NoArgsConstructor(force = true)} alongside
+        {@code @Builder} — this generates a package-private no-args
+        constructor with fields initialized to their defaults.
+    </li>
+    <li>Place {@code @Builder} on a static factory method or explicit
+        constructor instead, and add {@code @NoArgsConstructor} separately.
+    </li>
+</ul>
+
+<pre><code>
+// Runtime error — no no-args constructor
+@Builder
+@Entity
+public class User { ... }
+
+// Correct
+@Builder
+@NoArgsConstructor(force = true)
+@Entity
+public class User {
+    @Id private Long id;
+    private String name;
+}
+</code></pre>
+
+</body>
+</html>

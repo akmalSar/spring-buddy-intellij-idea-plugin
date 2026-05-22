@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>@Transactional private method is not proxied</h2>
+<p>Reports private methods annotated with @Transactional. Spring proxy-based transaction management cannot intercept
+    private methods, so the transaction annotation is ineffective. Make the method public or move the transactional
+    boundary to a public service method.</p>
+</body>
+</html>

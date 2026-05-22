@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>@Enumerated</code> mappings that do not explicitly use <code>EnumType.STRING</code>.
+<p>
+    JPA defaults to ordinal enum persistence. Reordering enum constants can silently remap existing
+    rows to the wrong values.
+</p>
+<p>Prefer <code>@Enumerated(EnumType.STRING)</code>.</p>
+</body>
+</html>

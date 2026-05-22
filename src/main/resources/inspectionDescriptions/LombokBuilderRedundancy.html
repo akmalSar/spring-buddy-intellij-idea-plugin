@@ -1,0 +1,63 @@
+<html>
+<body>
+
+<p>Reports {@code @Builder} or {@code @SuperBuilder} annotations that are either
+    <b>redundant</b> (an explicit {@code builder()} static method already exists in the class)
+    or <b>unused</b> (the annotated class has zero references anywhere in the project and
+    no textual {@code ClassName.builder()} call sites).</p>
+
+<p><b>Redundant @Builder</b></p>
+<p>When a class already declares its own {@code builder()} method, the Lombok annotation
+    serves no purpose because the hand-written method shadows the generated one. Removing the
+    annotation cleans up the declaration without changing behaviour.</p>
+
+<p><b>Example:</b></p>
+
+<pre><code>
+// Before
+@Builder
+public class InvoiceDto {
+    private String invoiceDate;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+}
+</code></pre>
+
+<p>After applying the quick-fix:</p>
+
+<pre><code>
+// After
+public class InvoiceDto {
+    private String invoiceDate;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+}
+</code></pre>
+
+<p><b>Unused @Builder</b></p>
+<p>When a concrete class carries {@code @Builder} but is never referenced in the project
+    (neither via {@code new ClassName(...)} nor {@code ClassName.builder()}), the generated
+    builder is guaranteed dead code. The inspection flags the annotation so it can be removed.</p>
+
+<p>Abstract classes are skipped because subclasses may rely on the parent builder pattern.</p>
+
+<p>The unused check uses a two-tier strategy:</p>
+<ul>
+    <li>First, it looks for resolved PSI references to the class (constructor calls,
+        field declarations, type casts, etc.).
+    </li>
+    <li>If none are found, it scans project source files for textual
+        {@code ClassName.builder} or {@code ClassName::builder} patterns. This catches
+        call sites where the synthetic {@code builder()} method does not exist in the PSI
+        and therefore cannot be found by a standard reference search.
+    </li>
+</ul>
+
+<p><b>Quick-fix:</b> <i>Remove unused/redundant @Builder</i></p>
+
+</body>
+</html>

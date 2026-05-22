@@ -1,0 +1,11 @@
+<html>
+<body>
+<h2>Caught RuntimeException from @Transactional call masks UnexpectedRollbackException</h2>
+<p>Reports catch blocks that swallow a <code>RuntimeException</code> from a call to a
+    <code>@Transactional</code> bean method without re-throwing, while inside another
+    <code>@Transactional</code> scope. The inner transaction is already marked rollback-only
+    when the exception escapes, so even though the caller "handles" the error, Spring throws
+    an <code>UnexpectedRollbackException</code> at commit time. Either re-throw the exception
+    or set <code>noRollbackFor</code> on the inner transaction if the exception is intentional.</p>
+</body>
+</html>

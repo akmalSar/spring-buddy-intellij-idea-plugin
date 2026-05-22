@@ -1,0 +1,32 @@
+<html>
+<body>
+
+<p>Detects manually defined methods that shadow Lombok-generated getters.</p>
+
+<p><b> Manual method matching a Lombok getter signature</b></p>
+<p>Lombok skips generating a getter for a field when a method with the
+    same signature already exists in the class. This is by design, but
+    it creates a fragile situation: if the manual method is later removed,
+    Lombok will silently start generating the getter — potentially with
+    different behaviour (the default {@code getX()} simply returns the
+    field value).</p>
+
+<p>Either keep the manual getter <em>and</em> remove the Lombok annotation
+    from the field to make the dependency explicit, or remove the manual
+    method and rely on Lombok's generation.</p>
+
+<pre><code>
+@Getter
+public class InvoiceDto {
+    private String invoiceDate;
+
+    // Lombok skips generating getInvoiceDate() because this exists
+    public String getInvoiceDate() {
+        return invoiceDate != null ? invoiceDate : "N/A";
+    }
+    // If this method is removed, Lombok will auto-generate a plain getter
+}
+</code></pre>
+
+</body>
+</html>

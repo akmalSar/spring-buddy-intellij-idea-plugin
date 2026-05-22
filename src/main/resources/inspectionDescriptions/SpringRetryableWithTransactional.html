@@ -1,0 +1,26 @@
+<html>
+<body>
+Reports methods annotated with both {@code @Retryable} and {@code @Transactional}.
+<p>
+    When a {@code @Transactional} method fails mid-transaction, Spring rolls back
+    the current transaction. Spring Retry then catches the exception and calls the
+    method again — starting a <b>brand-new</b> transaction. Any work that succeeded
+    before the failure in the first attempt is already undone by the rollback, yet
+    <b>non-transactional side-effects</b> (external API calls, file writes, message
+    publishes) are <b>not</b> rolled back and will be executed again on each retry.
+</p>
+<p>
+    This leads to duplicate side-effects, inconsistent state, and data loss.
+</p>
+<p>
+    <b>Safe alternatives:</b>
+</p>
+<ul>
+    <li>Move retry logic <b>outside</b> the transaction boundary (retry the
+        service call, not the transactional method).</li>
+    <li>Make the transactional method idempotent so retries are harmless.</li>
+    <li>Use a saga/outbox pattern for external side-effects instead of doing them
+        inside the retried transaction.</li>
+</ul>
+</body>
+</html>

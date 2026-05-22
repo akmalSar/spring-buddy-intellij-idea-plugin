@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>repository.save(...)</code> or <code>saveAndFlush(...)</code> calls performed in
+a loop body.
+<p>
+    Each call triggers a separate JPA persistence operation. Collect entities first and call
+    <code>saveAll(...)</code> once instead — combined with a JDBC batch size, this drastically
+    reduces round-trips.
+</p>
+</body>
+</html>

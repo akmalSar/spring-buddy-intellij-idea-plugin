@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports uses of <code>System.out</code> and <code>System.err</code> printing methods
+(<code>print</code>/<code>println</code>/<code>printf</code>) and offers a quick-fix to replace
+them with SLF4J logger calls (<code>log.info</code>/<code>log.error</code>).
+<p>
+    When the enclosing class lacks a logger, the quick-fix will add Lombok's
+    <code>@lombok.extern.slf4j.Slf4j</code> annotation so a <code>log</code> field is available.
+</p>
+<p>
+    Simple string concatenations are converted to SLF4J <code>{}</code> placeholders and the
+    non-literal operands are passed as additional arguments. Calls to <code>printf</code> are
+    converted to <code>String.format(...)</code> inside the logger call to preserve formatting semantics.
+</p>
+</body>
+</html>
+

@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>setRollbackOnly without thrown exception</h2>
+<p>Reports use of TransactionAspectSupport.currentTransactionStatus().setRollbackOnly() where control flow can still
+    appear successful. Manual rollback flags can make behavior hard to understand. Prefer throwing an exception that
+    naturally triggers rollback or document the boundary carefully.</p>
+</body>
+</html>

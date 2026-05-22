@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>@EventListener method in non-Spring-managed class</h2>
+<p>Reports methods annotated with <code>@EventListener</code> or
+    <code>@TransactionalEventListener</code> inside classes that are not Spring beans
+    (no @Component, @Service, @Repository, etc.). Spring only scans managed beans for
+    event listeners — the listener will silently never fire with no error or log message.
+    Annotate the containing class with <code>@Component</code> to register it with the context.</p>
+</body>
+</html>

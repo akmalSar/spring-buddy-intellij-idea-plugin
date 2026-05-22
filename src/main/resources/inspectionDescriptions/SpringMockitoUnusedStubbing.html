@@ -1,0 +1,18 @@
+<html>
+<body>
+Reports Mockito <code>when(mock.method(...))</code> / <code>given(mock.method(...))</code>
+stubbings inside a <code>@Test</code> method whose stubbed method name is not invoked
+anywhere else in the test body.
+<p>
+    Under strict stubbing (Mockito 3+) this would already fail; under lenient stubbing
+    or with custom rules these dead stubs accumulate and obscure the real test intent.
+</p>
+<p>
+    Detection is name-based and conservative — only flagged when the stubbed method name
+    literally does not appear elsewhere in the test method.
+</p>
+<p>
+    The quick-fix removes the unused stubbing statement.
+</p>
+</body>
+</html>

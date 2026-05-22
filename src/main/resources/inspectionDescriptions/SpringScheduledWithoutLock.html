@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>@Scheduled method may need a distributed lock</h2>
+<p>This inspection reports scheduled methods that do not declare a known distributed lock annotation. In a clustered
+    deployment, every application node can execute the same scheduled job. Add a distributed lock such as
+    @SchedulerLock, or document that the application is guaranteed to run as a single instance.</p>
+</body>
+</html>

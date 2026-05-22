@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports Spring Data derived query methods that are likely to become ambiguous or produce surprising SQL.
+<p>
+    Long method names with more than two conditions can hide implicit joins and make generated SQL hard to review.
+    Methods that mix <code>And</code> and <code>Or</code> are especially risky because Spring Data parses them using
+    fixed precedence, for example <code>NameOrAgeAndActive</code> means <code>name OR (age AND active)</code>.
+</p>
+<p>
+    Prefer an explicit <code>@Query</code>, specification, Querydsl predicate, or custom repository method when the
+    predicate has more than two conditions or mixed boolean operators.
+</p>
+</body>
+</html>

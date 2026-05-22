@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>@Transactional static method is not proxied</h2>
+<p>Reports static methods annotated with @Transactional. Spring AOP proxies intercept instance method calls, not static
+    calls, so the transaction annotation is ineffective. Remove static or move the operation to an instance service
+    method.</p>
+</body>
+</html>

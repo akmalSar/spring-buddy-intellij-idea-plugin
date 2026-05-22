@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>@Query</code> annotations whose value is built via string concatenation
+(<code>+</code>), <code>String.format</code>, or <code>StringBuilder</code>.
+<p>
+    Concatenating user input (or variables) directly into a JPA or native query string
+    bypasses Spring Data's parameter binding and opens the application to SQL injection.
+    Use named parameters (<code>:name</code>) or ordinal placeholders (<code>?1</code>) instead.
+</p>
+</body>
+</html>

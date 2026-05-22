@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports calls to <code>CrudRepository.findAll()</code> (or <code>JpaRepository.findAll()</code>)
+without a <code>Pageable</code> argument.
+<p>
+    On tables with millions of rows the entire result set is loaded into the heap at once,
+    which can exhaust memory and trigger <code>OutOfMemoryError</code>.
+    Use <code>findAll(Pageable)</code>, <code>Stream</code> with pagination, or a
+    <code>Slice</code>/<code>Page</code>-based query.
+</p>
+</body>
+</html>

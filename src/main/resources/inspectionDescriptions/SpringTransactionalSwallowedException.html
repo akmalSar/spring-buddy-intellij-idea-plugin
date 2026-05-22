@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Exception swallowed inside @Transactional method</h2>
+<p>Reports @Transactional methods with catch blocks that catch rollback-relevant exceptions and do not rethrow.
+    Swallowed exceptions let the method return normally, causing the transaction to commit. Rethrow, mark rollback-only,
+    or move error handling outside the transaction.</p>
+</body>
+</html>

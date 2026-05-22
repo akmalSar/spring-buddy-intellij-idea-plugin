@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports Mockito stubbing or verification calls that mix argument matchers
+(<code>any()</code>, <code>eq()</code>, <code>anyInt()</code>, ...) with raw values:
+<pre><code>when(service.lookup(any(), 42)).thenReturn(...);   // raw 42 must be eq(42)
+verify(service).save(eq(user), "ADMIN");           // raw "ADMIN" must be eq("ADMIN")</code></pre>
+<p>
+    Mockito requires that <em>either all</em> arguments use matchers <em>or none</em> do.
+    Mixing them throws <code>InvalidUseOfMatchersException</code> at runtime.
+</p>
+<p>
+    The quick-fix wraps raw arguments with <code>eq(...)</code>, preserving the qualifier used by
+    the existing matcher when calls are qualified.
+</p>
+</body>
+</html>

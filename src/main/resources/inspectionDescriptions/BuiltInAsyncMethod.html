@@ -1,0 +1,6 @@
+<html>
+<body>
+<p>Reports incorrect return types of <code>@Async</code> methods.</p>
+<p>For target method signatures, any parameter types are allowed. However, the return type should be either <code>void</code> or <code>Future</code>. It is also possible to return the more specific <code>ListenableFuture</code> or <code>CompletableFuture</code> types, which allow for richer interaction with the asynchronous task and for immediate composition with further processing steps.</p>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports repository <code>Optional</code> lookups that end with <code>get()</code> or no-argument
+<code>orElseThrow()</code>.
+<p>
+    These failures produce generic exceptions such as <code>NoSuchElementException: No value present</code>,
+    which do not identify the missing entity or id in production logs.
+</p>
+<p>
+    Prefer <code>orElseThrow(() -&gt; new ...("Entity not found: " + id))</code> so failures carry enough
+    context for debugging.
+</p>
+</body>
+</html>

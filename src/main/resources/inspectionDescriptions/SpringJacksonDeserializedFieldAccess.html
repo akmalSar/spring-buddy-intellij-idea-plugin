@@ -1,0 +1,29 @@
+<html>
+<body>
+Reports access to properties that are not available after Jackson deserialization of a
+<code>@RequestBody</code> or <code>@Valid</code> parameter in a Spring controller,
+including through chained getter navigation.
+<p>
+    Jackson deserialization does not populate fields annotated with
+    <code>@JsonIgnore</code> or listed in <code>@JsonIgnoreProperties</code>.
+    When a controller method accesses such a field directly or via
+    <code>user.getAddress().getStreet()</code> after deserialization it will
+    read <code>null</code> or a default primitive value, which is a silent data bug.
+</p>
+<p>
+    When a class or parameter carries <code>@JsonSerialize(as = SomeView.class)</code>,
+    only the properties exposed by that view interface (plus <code>id</code>) are
+    guaranteed to be available on the deserialized instance. Accessing any other
+    property may trigger a runtime <code>IllegalStateException</code> when the object
+    is a proxy-backed view guard.
+</p>
+<p>
+    <b>How to fix:</b>
+    <ul>
+        <li>Remove the field access if it is not needed.</li>
+        <li>Use a DTO that only contains the properties you actually need.</li>
+        <li>Remove <code>@JsonIgnore</code> if the field must be deserialized.</li>
+    </ul>
+</p>
+</body>
+</html>

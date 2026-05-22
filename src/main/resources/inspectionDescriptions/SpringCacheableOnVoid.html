@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports {@code @Cacheable} or {@code @CachePut} annotations on {@code void} methods.
+<p>
+    Spring Cache stores the <b>return value</b> of a method in the cache. When the
+    method returns {@code void} there is nothing to store, so the annotation is
+    silently ignored at runtime. The developer may believe caching is active
+    when it is not, leading to unnecessary database load.
+</p>
+<p>
+    <b>Fix:</b> Remove the annotation, or change the method to return the cached
+    value if the intent was truly to cache data.
+</p>
+</body>
+</html>

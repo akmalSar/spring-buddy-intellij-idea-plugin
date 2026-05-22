@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>@OneToMany</code> associations without <code>mappedBy</code>.
+<p>
+    Without <code>mappedBy</code>, Hibernate creates an implicit join table. This can introduce unexpected
+    schema objects, extra joins, and orphaned join-table rows.
+</p>
+<p>Prefer declaring the inverse side explicitly, for example <code>@OneToMany(mappedBy = "post")</code>.</p>
+</body>
+</html>

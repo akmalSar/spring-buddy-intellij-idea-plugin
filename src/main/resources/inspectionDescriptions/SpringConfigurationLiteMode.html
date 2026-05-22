@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>@Bean method call in non-@Configuration class uses lite mode</h2>
+<p>Reports @Bean methods in non-@Configuration classes (e.g. @Component, @Service) that call
+    other @Bean methods in the same class. In "Lite Mode", calling one bean method from another
+    does not go through the CGLIB proxy, creating a second unmanaged instance instead of returning
+    the singleton bean from the context. Annotate the class with @Configuration to enable
+    full proxy interception.</p>
+</body>
+</html>

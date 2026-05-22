@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Constructor calls @Transactional method</h2>
+<p>Reports constructors that call same-class @Transactional methods. During construction, the Spring proxy does not
+    exist yet, so transaction advice cannot run. Move initialization to a lifecycle callback or an external service call
+    after proxy creation.</p>
+</body>
+</html>

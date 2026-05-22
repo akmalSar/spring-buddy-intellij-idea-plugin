@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Service method uses multiple repositories without @Transactional</h2>
+<p>This inspection reports service methods that call multiple repositories without an explicit @Transactional boundary.
+    If one write succeeds and a later operation fails, data can be partially committed. Add @Transactional to the
+    service method or refactor the operations into a transactional service boundary.</p>
+</body>
+</html>

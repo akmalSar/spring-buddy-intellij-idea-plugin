@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Multiple writes without @Transactional</h2>
+<p>Reports non-test methods that perform multiple repository or persistence write operations without an apparent
+    transaction boundary. A failure between writes can leave partially committed data. Add @Transactional at the service
+    boundary unless the class or a private transactional caller already provides one.</p>
+</body>
+</html>

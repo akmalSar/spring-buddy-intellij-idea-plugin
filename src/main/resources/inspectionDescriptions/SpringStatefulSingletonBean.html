@@ -1,0 +1,22 @@
+<html>
+<body>
+Reports mutable instance fields in singleton Spring beans such as <code>@Service</code> or
+<code>@Component</code> classes.
+<p>
+    Spring beans are singletons by default. Mutable per-request or per-operation state stored in
+    the bean instance can be shared by multiple request threads and cause races or stale data.
+</p>
+<p>
+    Prefer method-local state, immutable fields, request/session-scoped components, or explicitly
+    thread-safe state when sharing is intentional.
+</p>
+<p>
+    Quick-fix guidance:
+</p>
+<ul>
+    <li><b>Make field final</b>: use when the field is dependency/configuration/object identity that should be assigned once and never replaced.</li>
+    <li><b>Mark field volatile</b>: use only for a simple latest-value flag/reference where reads and writes are independent. It gives visibility, not atomic compound updates.</li>
+    <li><b>Convert field to AtomicReference</b>: use for reference state that needs atomic replacement or compare-and-set style updates. It does not make the referenced object itself thread-safe.</li>
+</ul>
+</body>
+</html>

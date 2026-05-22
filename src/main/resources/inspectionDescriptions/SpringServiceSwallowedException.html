@@ -1,0 +1,9 @@
+<html>
+<body>
+<h2>Service method swallows broad exception</h2>
+<p>This inspection reports service methods that catch broad exceptions such as Exception and do not rethrow them.
+    Swallowing errors hides failures from callers and can leave the system in an inconsistent state. Rethrow the
+    exception, convert it to a meaningful domain exception, or move error handling to a boundary where the failure can
+    be handled explicitly.</p>
+</body>
+</html>

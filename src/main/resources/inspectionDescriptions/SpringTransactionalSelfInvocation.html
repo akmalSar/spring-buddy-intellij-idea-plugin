@@ -1,0 +1,8 @@
+<html>
+<body>
+<h2>Self-invocation bypasses @Transactional proxy</h2>
+<p>Reports same-bean calls to @Transactional methods. Spring proxy advice is applied when callers go through the proxy,
+    not when one method invokes another on this. Move the call to another bean or invoke through a proxy-aware
+    boundary.</p>
+</body>
+</html>

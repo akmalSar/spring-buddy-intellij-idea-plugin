@@ -1,0 +1,62 @@
+<html>
+<body>
+
+<p>Reports <code>@AllArgsConstructor</code> annotations that are redundant because an explicit
+    all-args constructor already exists and is never used, and removing the annotation would not
+    break Spring DI or final-field initialization.</p>
+
+<p>Lombok's <code>@AllArgsConstructor</code> generates a constructor at compile time. If a
+    hand-written constructor with the same signature already exists and no code calls it directly,
+    the annotation serves no purpose and can safely be removed to reduce visual noise.</p>
+
+<p><b>Example:</b></p>
+
+<pre><code>
+// Before
+@AllArgsConstructor
+public class PaymentDto {
+    private String acquirer;
+    private int amount;
+
+    public PaymentDto(String acquirer, int amount) {
+        this.acquirer = acquirer;
+        this.amount = amount;
+    }
+}
+</code></pre>
+
+<p>After applying the quick-fix:</p>
+
+<pre><code>
+// After
+public class PaymentDto {
+    private String acquirer;
+    private int amount;
+
+    public PaymentDto(String acquirer, int amount) {
+        this.acquirer = acquirer;
+        this.amount = amount;
+    }
+}
+</code></pre>
+
+<p><b>When is this triggered?</b></p>
+<ul>
+    <li>The class is annotated with <code>@AllArgsConstructor</code> or
+        <code>lombok.AllArgsConstructor</code>.
+    </li>
+    <li>An explicit constructor with the same parameter count as instance fields exists.</li>
+    <li>The explicit constructor has <b>zero usages</b> in the project.</li>
+    <li>The class is <b>not</b> a Spring-managed bean (e.g. <code>@Component</code>,
+        <code>@Service</code>, <code>@Controller</code>, etc.).
+    </li>
+    <li>The class is <b>not</b> annotated with <code>@ConfigurationProperties</code>.</li>
+    <li>The class has <b>no uninitialized final fields</b> (which would require the generated
+        constructor for legal instantiation).
+    </li>
+</ul>
+
+<p><b>Quick-fix:</b> <i>Remove redundant @AllArgsConstructor</i></p>
+
+</body>
+</html>

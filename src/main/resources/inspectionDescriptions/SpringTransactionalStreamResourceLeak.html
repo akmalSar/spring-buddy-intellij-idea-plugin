@@ -1,0 +1,10 @@
+<html>
+<body>
+<h2>Repository Stream used without try-with-resources</h2>
+<p>Reports calls to Spring Data repository methods returning <code>java.util.stream.Stream</code>
+    that are not wrapped in a try-with-resources block and not explicitly closed. Unlike
+    <code>List</code>, a repository <code>Stream</code> keeps the underlying database cursor and
+    connection open until <code>close()</code> is called, leading to connection pool exhaustion
+    under load. Always use try-with-resources when consuming repository streams.</p>
+</body>
+</html>

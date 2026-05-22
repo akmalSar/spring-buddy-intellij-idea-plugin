@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports mutable cache-like collections inside singleton Spring beans when they are not backed by a
+thread-safe collection or explicit locking.
+<p>
+    A plain <code>HashMap</code>, <code>ArrayList</code>, or <code>HashSet</code> stored in a singleton
+    bean is shared by all callers. Concurrent reads and writes can corrupt state or expose stale data.
+</p>
+<p>
+    Use <code>ConcurrentHashMap</code>, another concurrent collection, or protect access with a clear
+    synchronization strategy.
+</p>
+</body>
+</html>

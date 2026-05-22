@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports methods annotated with both <code>@PostConstruct</code> and <code>@Transactional</code>.
+<p>
+    <code>@PostConstruct</code> runs during bean initialization before the Spring proxy is fully active.
+    A transactional boundary declared on that method is therefore ignored, so writes can run without the
+    expected transaction.
+</p>
+<p>
+    Prefer an <code>@EventListener(ApplicationReadyEvent.class)</code> method with <code>@Transactional</code>
+    for startup work that requires a transaction.
+</p>
+</body>
+</html>
