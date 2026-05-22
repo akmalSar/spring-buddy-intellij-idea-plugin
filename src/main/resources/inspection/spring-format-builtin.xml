@@ -120,6 +120,7 @@
                       enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJpaModifyingWithoutTransactional" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJpaEnumeratedOrdinal" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringJpaLobMissingForClobColumn" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJpaAuditingMissingEntityListener" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJpaOneToManyWithoutMappedBy" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJpaInvalidMappedBy" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>

@@ -350,7 +350,7 @@ h2 .count {
 <a href="#lombok">Lombok<span class="nav-count">25</span></a>
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
-<a href="#pitfalls">Pitfalls<span class="nav-count">106</span></a>
+<a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
 </div>
@@ -362,10 +362,10 @@ h2 .count {
 </div>
 
 <div class="stat-row">
-<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>84</strong><span>ERROR</span></div>
+<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>85</strong><span>ERROR</span></div>
 <div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>130</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>4</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>218</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>219</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -639,7 +639,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow pitfalls">Pitfalls</div>
-<h2 id="pitfalls">Pitfalls<span class="count">106 inspections</span></h2>
+<h2 id="pitfalls">Pitfalls<span class="count">107 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="error">
 <div class="class-name">SpringAsyncProxyPitfallInspection</div>
@@ -820,6 +820,11 @@ h2 .count {
 <div class="class-name">SpringJpaInvalidMappedByInspection</div>
 <div class="display-name">Invalid JPA mappedBy reference<span class="badge red">ERROR</span></div>
 <div class="description">Detects <pre class="code"> mappedBy</pre> values on <pre class="code"> @OneToMany</pre> or <pre class="code"> @OneToOne</pre> associations that do not point to a valid owning-side field on the target entity. Invalid mappings fail Hibernate startup.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringJpaLobMissingForClobColumnInspection</div>
+<div class="display-name">@Column large-object definition missing @Lob<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Detects JPA fields with <pre class="code"> @Column(columnDefinition = "CLOB")</pre>, <pre class="code"> BLOB</pre>, or text-like large-object column definitions that do not also declare <pre class="code"> @Lob</pre>. The database column definition alone does not make JPA bind the property as a LOB; Hibernate can use the wrong JDBC type or fail at runtime. Quick-fix adds <pre class="code"> @Lob</pre>.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringJpaOneToManyWithoutMappedByInspection</div>

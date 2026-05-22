@@ -122,6 +122,70 @@ public class SpringJpaEntityDesignInspectionTest extends BasePlatformTestCase {
                     Status status;
                 }
                 enum Status { ACTIVE }
+        """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testReportsAndFixesMissingLobForClobColumn() {
+        this.myFixture.enableInspections(new SpringJpaEntityDesignInspection.MissingLobForClobColumn());
+        this.myFixture.configureByText("Article.java", """
+                @Entity
+                class Article {
+                    <error descr="@Column large-object definition should also declare @Lob so JPA maps the field as a large object">@Column(columnDefinition = "CLOB")
+                    <caret>java.lang.String body;</error>
+                }
+                @interface Entity { }
+                @interface Column { String columnDefinition() default ""; }
+                @interface Lob { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+
+        IntentionAction fix = this.myFixture.findSingleIntention("Add @Lob");
+        this.myFixture.launchAction(fix);
+
+        assertTrue(this.myFixture.getFile().getText().contains("@Lob"));
+    }
+
+    public void testReportsMissingLobForBlobColumnDefinition() {
+        this.myFixture.enableInspections(new SpringJpaEntityDesignInspection.MissingLobForClobColumn());
+        this.myFixture.configureByText("Upload.java", """
+                @Entity
+                class Upload {
+                    <error descr="@Column large-object definition should also declare @Lob so JPA maps the field as a large object">@Column(columnDefinition = "BLOB")
+                    byte[] rawData;</error>
+                }
+                @interface Entity { }
+                @interface Column { String columnDefinition() default ""; }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testReportsMissingLobForTextColumnDefinition() {
+        this.myFixture.enableInspections(new SpringJpaEntityDesignInspection.MissingLobForClobColumn());
+        this.myFixture.configureByText("Article.java", """
+                @Entity
+                class Article {
+                    <error descr="@Column large-object definition should also declare @Lob so JPA maps the field as a large object">@Column(columnDefinition = "LONGTEXT")
+                    java.lang.String body;</error>
+                }
+                @interface Entity { }
+                @interface Column { String columnDefinition() default ""; }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testDoesNotReportClobColumnWhenLobPresent() {
+        this.myFixture.enableInspections(new SpringJpaEntityDesignInspection.MissingLobForClobColumn());
+        this.myFixture.configureByText("Article.java", """
+                @Entity
+                class Article {
+                    @Lob
+                    @Column(columnDefinition = "CLOB")
+                    java.lang.String body;
+                }
+                @interface Entity { }
+                @interface Column { String columnDefinition() default ""; }
+                @interface Lob { }
                 """);
         this.myFixture.checkHighlighting(false, false, true, true);
     }

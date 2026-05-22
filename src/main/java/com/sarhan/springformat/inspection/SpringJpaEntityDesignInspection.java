@@ -42,6 +42,7 @@ import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import java.util.Locale;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -158,6 +159,28 @@ public abstract class SpringJpaEntityDesignInspection extends AbstractBaseJavaLo
             }
         }
         return false;
+    }
+
+    private static boolean hasLargeObjectColumnDefinition(PsiField field) {
+        PsiModifierList modifiers = field.getModifierList();
+        if (modifiers == null) {
+            return false;
+        }
+        for (PsiAnnotation annotation : modifiers.getAnnotations()) {
+            if (!isAnnotation(annotation, "Column")) {
+                continue;
+            }
+            PsiAnnotationMemberValue columnDefinition = annotation.findDeclaredAttributeValue("columnDefinition");
+            if (columnDefinition != null && isLargeObjectColumnDefinition(columnDefinition.getText())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isLargeObjectColumnDefinition(String text) {
+        String normalized = text.replace("\"", "").replace("'", "").toLowerCase(Locale.ROOT);
+        return normalized.contains("clob") || normalized.contains("blob") || normalized.contains("text");
     }
 
     private static boolean hasAuditingField(PsiClass psiClass) {
@@ -303,6 +326,18 @@ public abstract class SpringJpaEntityDesignInspection extends AbstractBaseJavaLo
                 holder.registerProblem(field,
                         "@OneToMany without mappedBy creates an implicit join table; specify mappedBy on the inverse side",
                         ProblemHighlightType.WARNING);
+            }
+        }
+    }
+
+    public static class MissingLobForClobColumn extends SpringJpaEntityDesignInspection {
+        @Override
+        protected void inspectField(PsiField field, ProblemsHolder holder) {
+            PsiModifierList modifiers = field.getModifierList();
+            if (hasLargeObjectColumnDefinition(field) && !hasAnnotation(modifiers, "Lob")) {
+                holder.registerProblem(field,
+                        "@Column large-object definition should also declare @Lob so JPA maps the field as a large object",
+                        ProblemHighlightType.ERROR, new AddLobAnnotationFix());
             }
         }
     }
@@ -459,6 +494,30 @@ public abstract class SpringJpaEntityDesignInspection extends AbstractBaseJavaLo
                     return;
                 }
             }
+        }
+    }
+
+    private static final class AddLobAnnotationFix implements LocalQuickFix {
+        @Override
+        @NotNull
+        public String getName() {
+            return "Add @Lob";
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return this.getName();
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiField field = descriptor.getPsiElement() instanceof PsiField f ? f
+                    : com.intellij.psi.util.PsiTreeUtil.getParentOfType(descriptor.getPsiElement(), PsiField.class);
+            if (field == null || field.getModifierList() == null) {
+                return;
+            }
+            field.getModifierList().addAnnotation("Lob");
         }
     }
 

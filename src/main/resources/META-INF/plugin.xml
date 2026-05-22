@@ -1654,6 +1654,16 @@
         />
         <localInspection
                 language="JAVA"
+                shortName="SpringJpaLobMissingForClobColumn"
+                displayName="@Column large-object definition missing @Lob"
+                groupName="JPA entity"
+                groupPath="Spring Buddy,2. pitfalls"
+                enabledByDefault="true"
+                level="ERROR"
+                implementationClass="com.sarhan.springformat.inspection.SpringJpaEntityDesignInspection$MissingLobForClobColumn"
+        />
+        <localInspection
+                language="JAVA"
                 shortName="SpringJpaAuditingMissingEntityListener"
                 displayName="JPA auditing field missing AuditingEntityListener"
                 groupName="JPA entity"

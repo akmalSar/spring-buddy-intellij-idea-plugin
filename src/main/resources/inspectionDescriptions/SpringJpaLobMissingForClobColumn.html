@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports JPA fields that use <code>@Column(columnDefinition = "CLOB")</code>, <code>BLOB</code>, or text-like large-object column definitions without <code>@Lob</code>.
+<p>
+    A database large-object column declaration alone does not tell JPA to bind the field with LOB semantics.
+    Hibernate can use the wrong JDBC type or schema metadata and fail at runtime or truncate large values.
+</p>
+<p>Add <code>@Lob</code> next to the <code>@Column</code> mapping. Use text fields for <code>CLOB</code> and binary fields such as <code>byte[]</code> for <code>BLOB</code>.</p>
+</body>
+</html>
