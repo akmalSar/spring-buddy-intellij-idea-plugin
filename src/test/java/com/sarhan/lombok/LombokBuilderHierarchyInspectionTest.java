@@ -106,7 +106,7 @@ public class LombokBuilderHierarchyInspectionTest extends BasePlatformTestCase {
     }
 
     public void testNoWarningWhenGenericMappedSuperclassChainHasSuperBuilder() {
-        this.myFixture.configureByText("EuropaceBaseEntity.java", """
+        this.myFixture.configureByText("DemoBaseEntity.java", """
                 import lombok.SuperBuilder;
                 @interface MappedSuperclass { }
                 interface Persistable<I> { }
@@ -123,7 +123,7 @@ public class LombokBuilderHierarchyInspectionTest extends BasePlatformTestCase {
 
                 @SuperBuilder
                 @MappedSuperclass
-                abstract class EuropaceBaseEntity extends BaseAuditedEntity<UUID> { }
+                abstract class DemoBaseEntity extends BaseAuditedEntity<UUID> { }
                 """);
         this.myFixture.enableInspections(new LombokBuilderHierarchyInspection.SuperBuilderMissingParent());
         this.myFixture.testHighlighting(true, false, false);

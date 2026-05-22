@@ -175,8 +175,8 @@ public class LombokEqualsAndHashCodeInspectionTest extends BasePlatformTestCase 
                 @Data
                 @ToString(callSuper = true)
                 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
-                public class AccountStatement extends EuropaceBaseEntity { }
-                class EuropaceBaseEntity { }
+                public class AccountStatement extends DemoBaseEntity { }
+                class DemoBaseEntity { }
                 """);
         this.myFixture.checkHighlighting();
     }

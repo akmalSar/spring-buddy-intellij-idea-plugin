@@ -233,12 +233,12 @@ public class SpringTestNoAssertionsInspectionTest extends BasePlatformTestCase {
                             .areAnnotatedWith(NotNull.class)
                             .should()
                             .notBeAnnotatedWith(NotBlank.class)
-                            .check(EUROPACE_ENTITY_CLASSES);
+                            .check(DEMO_ENTITY_CLASSES);
                     }
 
                     static class NotNull { }
                     static class NotBlank { }
-                    static Object EUROPACE_ENTITY_CLASSES;
+                    static Object DEMO_ENTITY_CLASSES;
                 }
                 """);
         this.myFixture.checkHighlighting(false, false, true, true);
