@@ -28,6 +28,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.sarhan.dataFlow.base.SpringEntitySourceDetector;
+import com.sarhan.render.flow.mutation.MutationFlowMode;
+import com.sarhan.render.flow.mutation.ShowJpaEntityMutationFlowFix;
 import com.sarhan.springformat.inspection.SpringInspectionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -310,7 +312,9 @@ public class SpringTransactionalDirtyCheckingDataFlowInspection extends Abstract
             if (this.reported.add(element)) {
                 PsiIdentifier nameIdentifier = (this.method instanceof PsiMethod m) ? m.getNameIdentifier() : null;
                 this.holder.registerProblem((nameIdentifier != null) ? nameIdentifier : element,
-                        message, ProblemHighlightType.ERROR, new SetReadOnlyTrueFix());
+                        message, ProblemHighlightType.ERROR,
+                        new ShowJpaEntityMutationFlowFix(MutationFlowMode.DIRTY_CHECKING),
+                        new SetReadOnlyTrueFix());
             }
         }
     }

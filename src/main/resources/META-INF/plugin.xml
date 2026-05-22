@@ -68,6 +68,14 @@
                     anchor="right"
                     factoryClass="com.sarhan.render.flow.nplusone.NPlusOneFlowToolWindowFactory"/>
 
+        <toolWindow id="Spring Buddy Unexpected Rollback Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.rollback.UnexpectedRollbackFlowToolWindowFactory"/>
+
+        <toolWindow id="Spring Buddy Entity Mutation Flow"
+                    anchor="right"
+                    factoryClass="com.sarhan.render.flow.mutation.JpaEntityMutationFlowToolWindowFactory"/>
+
         <!-- ===== Spring Buddy > Built-in ===== -->
 
         <globalInspection

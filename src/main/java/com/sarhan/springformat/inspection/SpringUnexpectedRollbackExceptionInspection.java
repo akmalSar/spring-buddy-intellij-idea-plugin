@@ -32,6 +32,7 @@ import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiThrowStatement;
 import com.intellij.psi.PsiTryStatement;
+import com.sarhan.render.flow.rollback.ShowUnexpectedRollbackFlowFix;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -141,7 +142,8 @@ public class SpringUnexpectedRollbackExceptionInspection extends AbstractBaseJav
                             PsiCatchSection firstCatch = catches[0];
                             holder.registerProblem(firstCatch.getFirstChild(),
                                     "Catching a RuntimeException from a @Transactional method call without re-throwing may cause an UnexpectedRollbackException; the transaction was already marked rollback-only",
-                                    ProblemHighlightType.ERROR);
+                                    ProblemHighlightType.ERROR,
+                                    new ShowUnexpectedRollbackFlowFix());
                         }
                     }
                 });

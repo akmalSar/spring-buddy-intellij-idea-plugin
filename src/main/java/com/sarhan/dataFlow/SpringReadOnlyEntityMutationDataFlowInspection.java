@@ -27,6 +27,8 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.sarhan.dataFlow.base.SpringEntitySourceDetector;
+import com.sarhan.render.flow.mutation.MutationFlowMode;
+import com.sarhan.render.flow.mutation.ShowJpaEntityMutationFlowFix;
 import com.sarhan.springformat.inspection.SpringInspectionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -285,9 +287,11 @@ public class SpringReadOnlyEntityMutationDataFlowInspection extends AbstractBase
             if (this.reportedElements.add(element)) {
                 if (txAnnotation != null) {
                     this.holder.registerProblem(element, message, ProblemHighlightType.ERROR,
+                            new ShowJpaEntityMutationFlowFix(MutationFlowMode.READ_ONLY),
                             new RemoveReadOnlyFix(txAnnotation));
                 } else {
-                    this.holder.registerProblem(element, message, ProblemHighlightType.ERROR);
+                    this.holder.registerProblem(element, message, ProblemHighlightType.ERROR,
+                            new ShowJpaEntityMutationFlowFix(MutationFlowMode.READ_ONLY));
                 }
             }
         }
