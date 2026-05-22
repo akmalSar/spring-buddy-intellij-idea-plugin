@@ -163,10 +163,10 @@ public class RunSpringFormatInspectionsAction extends AnAction {
                 if (!state.isEnabled()) {
                     continue;
                 }
-                if (state.getLevel() != HighlightDisplayLevel.ERROR) {
+                InspectionToolWrapper<?, ?> wrapper = state.getTool();
+                if (!isConfiguredErrorTool(wrapper)) {
                     continue;
                 }
-                InspectionToolWrapper<?, ?> wrapper = state.getTool();
                 if (!(wrapper instanceof LocalInspectionToolWrapper localWrapper)) {
                     continue;
                 }
@@ -180,6 +180,16 @@ public class RunSpringFormatInspectionsAction extends AnAction {
             }
         }
         return errorsByFile;
+    }
+
+    private static boolean isConfiguredErrorTool(InspectionToolWrapper<?, ?> wrapper) {
+        for (Element tool : SpringBuddySettingsUtil.loadBundledProfileTools()) {
+            if (wrapper.getShortName().equals(tool.getAttributeValue("class"))
+                    && SpringBuddySettingsUtil.toolLevel(tool) == HighlightDisplayLevel.ERROR) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static List<ProblemDescriptor> inspectFile(PsiFile psiFile, LocalInspectionToolWrapper wrapper,

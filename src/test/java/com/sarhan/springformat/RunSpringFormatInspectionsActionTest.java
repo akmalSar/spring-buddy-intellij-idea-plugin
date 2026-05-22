@@ -32,6 +32,14 @@ import com.sarhan.springformat.inspection.SpringJpaEntityMissingIdInspection;
 public class RunSpringFormatInspectionsActionTest extends BasePlatformTestCase {
 
     public void testCollectErrorInspectionsUsesNonNullTextRanges() {
+        assertCollectsJpaEntityMissingId(HighlightDisplayLevel.ERROR);
+    }
+
+    public void testCollectErrorInspectionsUsesBundledLevelWhenProfileLevelIsOverridden() {
+        assertCollectsJpaEntityMissingId(HighlightDisplayLevel.WARNING);
+    }
+
+    private void assertCollectsJpaEntityMissingId(HighlightDisplayLevel profileLevel) {
         this.myFixture.configureByText("User.java", """
                 @interface Entity { }
                 @Entity
@@ -42,7 +50,7 @@ public class RunSpringFormatInspectionsActionTest extends BasePlatformTestCase {
         VirtualFile file = this.myFixture.getFile().getVirtualFile();
         ScopeToolState state = new ScopeToolState("Test",
                 new LocalInspectionToolWrapper(new SpringJpaEntityMissingIdInspection()), true,
-                HighlightDisplayLevel.ERROR);
+                profileLevel);
 
         Map<String, List<String>> errors = RunSpringFormatInspectionsAction.collectErrorInspections(
                 getProject(), new VirtualFile[] { file }, List.of(state));
