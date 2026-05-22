@@ -21,7 +21,6 @@ import java.util.List;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaRecursiveElementWalkingVisitor;
-import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiCodeBlock;

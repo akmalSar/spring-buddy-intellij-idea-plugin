@@ -40,6 +40,7 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefJSQuery;
+import com.sarhan.render.GraphTheme;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -80,8 +81,7 @@ public final class GhostSaveFlowToolWindowFactory implements ToolWindowFactory {
         GhostSaveFlow flow = ReadAction.compute(() ->
                 new GhostSaveFlowBuilder(project).buildFromSink(mutationCall));
 
-        boolean dark = com.intellij.ide.ui.LafManager.getInstance()
-                .getCurrentUIThemeLookAndFeel().isDark();
+        boolean dark = GraphTheme.isDark();
         String html = new GhostSaveFlowSvgRenderer().renderHtml(flow, dark);
 
         JComponent root;

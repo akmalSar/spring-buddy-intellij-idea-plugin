@@ -38,6 +38,7 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefJSQuery;
+import com.sarhan.render.GraphTheme;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -75,8 +76,7 @@ public final class FlowToolWindowSupport {
             return;
         }
 
-        boolean dark = com.intellij.ide.ui.LafManager.getInstance()
-                .getCurrentUIThemeLookAndFeel().isDark();
+        boolean dark = GraphTheme.isDark();
         String html = new FlowSvgRenderer().renderHtml(flow, dark);
 
         JComponent root;

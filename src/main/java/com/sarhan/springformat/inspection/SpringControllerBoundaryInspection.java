@@ -223,6 +223,61 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
         return false;
     }
 
+    private static boolean hasEntityReturnExpression(PsiMethod method) {
+        if (method.getBody() == null) {
+            return true;
+        }
+        boolean[] hasReturn = {false};
+        boolean[] hasEntity = {false};
+        method.getBody().accept(new JavaRecursiveElementWalkingVisitor() {
+            @Override
+            public void visitReturnStatement(@NotNull PsiReturnStatement stmt) {
+                PsiExpression value = stmt.getReturnValue();
+                if (value == null) {
+                    return;
+                }
+                hasReturn[0] = true;
+                if (returnsEntityExpression(value)) {
+                    hasEntity[0] = true;
+                }
+            }
+        });
+        return !hasReturn[0] || hasEntity[0];
+    }
+
+    private static boolean returnsEntityExpression(PsiExpression value) {
+        PsiType type = value.getType();
+        if (type != null && isJpaEntityType(type)) {
+            return true;
+        }
+        if (value instanceof PsiMethodCallExpression call) {
+            if (isSpringResponseWrapperFactory(call)) {
+                for (PsiExpression arg : call.getArgumentList().getExpressions()) {
+                    if (returnsEntityExpression(arg)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isSpringResponseWrapperFactory(PsiMethodCallExpression call) {
+        PsiMethod method = call.resolveMethod();
+        if (method == null) {
+            return false;
+        }
+        PsiClass owner = method.getContainingClass();
+        if (owner == null) {
+            return false;
+        }
+        String qn = owner.getQualifiedName();
+        String name = method.getName();
+        return "org.springframework.http.ResponseEntity".equals(qn)
+                && ("ok".equals(name) || "of".equals(name) || "status".equals(name)
+                || "created".equals(name) || "accepted".equals(name));
+    }
+
     public static class EntityReturn extends SpringControllerBoundaryInspection {
         @Override
         protected void inspectMethod(PsiMethod method, ProblemsHolder holder) {
@@ -286,60 +341,5 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
                         ProblemHighlightType.WARNING);
             }
         }
-    }
-
-    private static boolean hasEntityReturnExpression(PsiMethod method) {
-        if (method.getBody() == null) {
-            return true;
-        }
-        boolean[] hasReturn = {false};
-        boolean[] hasEntity = {false};
-        method.getBody().accept(new JavaRecursiveElementWalkingVisitor() {
-            @Override
-            public void visitReturnStatement(@NotNull PsiReturnStatement stmt) {
-                PsiExpression value = stmt.getReturnValue();
-                if (value == null) {
-                    return;
-                }
-                hasReturn[0] = true;
-                if (returnsEntityExpression(value)) {
-                    hasEntity[0] = true;
-                }
-            }
-        });
-        return !hasReturn[0] || hasEntity[0];
-    }
-
-    private static boolean returnsEntityExpression(PsiExpression value) {
-        PsiType type = value.getType();
-        if (type != null && isJpaEntityType(type)) {
-            return true;
-        }
-        if (value instanceof PsiMethodCallExpression call) {
-            if (isSpringResponseWrapperFactory(call)) {
-                for (PsiExpression arg : call.getArgumentList().getExpressions()) {
-                    if (returnsEntityExpression(arg)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private static boolean isSpringResponseWrapperFactory(PsiMethodCallExpression call) {
-        PsiMethod method = call.resolveMethod();
-        if (method == null) {
-            return false;
-        }
-        PsiClass owner = method.getContainingClass();
-        if (owner == null) {
-            return false;
-        }
-        String qn = owner.getQualifiedName();
-        String name = method.getName();
-        return "org.springframework.http.ResponseEntity".equals(qn)
-                && ("ok".equals(name) || "of".equals(name) || "status".equals(name)
-                || "created".equals(name) || "accepted".equals(name));
     }
 }

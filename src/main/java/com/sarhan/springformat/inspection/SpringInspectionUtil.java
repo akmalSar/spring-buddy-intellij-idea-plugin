@@ -125,7 +125,7 @@ public final class SpringInspectionUtil {
 
     public static String shortName(String fqn) {
         int dot = fqn.lastIndexOf('.');
-        return dot >= 0 ? fqn.substring(dot + 1) : fqn;
+        return (dot >= 0) ? fqn.substring(dot + 1) : fqn;
     }
 
     private static boolean isUnqualifiedName(String name, String shortName) {

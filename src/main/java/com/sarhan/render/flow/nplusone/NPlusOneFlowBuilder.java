@@ -25,7 +25,6 @@ import com.intellij.psi.PsiAssignmentExpression;
 import com.intellij.psi.PsiCodeBlock;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiForeachStatement;
 import com.intellij.psi.PsiLambdaExpression;
 import com.intellij.psi.PsiMethod;

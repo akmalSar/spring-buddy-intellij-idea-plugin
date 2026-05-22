@@ -390,6 +390,51 @@ public class    TransactionGraphBuilderTest extends BasePlatformTestCase {
                 1, graph.getNodes().size());
     }
 
+    public void testReadOnlyEntityMutationDemoGraphBuilds() {
+        this.myFixture.configureByText("ReadOnlyEntityMutationDemo.java",
+                """
+                import java.util.Optional;
+                import org.springframework.data.jpa.repository.JpaRepository;
+                import org.springframework.stereotype.Service;
+                import org.springframework.transaction.annotation.Transactional;
+                import jakarta.persistence.Entity;
+                import jakarta.persistence.Id;
+                
+                @Service
+                class ReadOnlyEntityMutationDemo {
+                    private final MutableOrderRepository repo;
+                    ReadOnlyEntityMutationDemo(MutableOrderRepository repo) {
+                        this.repo = repo;
+                    }
+                    @Transactional(readOnly = true)
+                    void setOrderStatusViaOptional(Long id) {
+                        Optional<MutableOrder> opt = this.repo.findById(id);
+                        MutableOrder order = opt.get();
+                        order.setStatus("VIEWED");
+                    }
+                }
+                @Entity
+                class MutableOrder {
+                    @Id Long id;
+                    String status;
+                    void setStatus(String status) { this.status = status; }
+                }
+                interface MutableOrderRepository extends JpaRepository<MutableOrder, Long> {
+                    Optional<MutableOrder> findById(Long id);
+                }
+                """);
+
+        PsiMethod psiMethod = findMethod("ReadOnlyEntityMutationDemo", "setOrderStatusViaOptional");
+        assertNotNull(psiMethod);
+
+        TransactionGraph graph = buildGraph(psiMethod);
+
+        assertEquals("ReadOnlyEntityMutationDemo#setOrderStatusViaOptional", graph.getRoot().getId());
+        assertFalse("Read-only transaction root must be detected", graph.getRoot().isWriteInReadOnly());
+        assertFalse("JDK callers from Optional.get() must not be added to the graph",
+                graph.getNodes().stream().anyMatch((TransactionNode node) -> node.getId().startsWith("java.")));
+    }
+
     // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------

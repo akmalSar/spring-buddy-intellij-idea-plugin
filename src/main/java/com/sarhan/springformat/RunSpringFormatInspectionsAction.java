@@ -201,7 +201,7 @@ public class RunSpringFormatInspectionsAction extends AnAction {
         }
         Map<LocalInspectionToolWrapper, List<ProblemDescriptor>> descriptors = InspectionEngine.inspectEx(
                 Collections.singletonList(wrapper), psiFile, psiFile.getTextRange(), psiFile.getTextRange(), false,
-                false, true, indicator, (tool, problem) -> true);
+                false, true, indicator, (LocalInspectionToolWrapper tool, ProblemDescriptor problem) -> true);
         return descriptors.getOrDefault(wrapper, Collections.emptyList());
     }
 

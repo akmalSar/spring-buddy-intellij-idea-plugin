@@ -891,9 +891,7 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
         if (!(file instanceof com.intellij.psi.PsiJavaFile javaFile)) {
             return true;
         }
-        for (com.intellij.psi.PsiImportStatement imp : javaFile.getImportList() == null
-                ? new com.intellij.psi.PsiImportStatement[0]
-                : javaFile.getImportList().getImportStatements()) {
+        for (com.intellij.psi.PsiImportStatement imp : (javaFile.getImportList() != null) ? javaFile.getImportList().getImportStatements() : new com.intellij.psi.PsiImportStatement[0]) {
             String qName = imp.getQualifiedName();
             if (qName == null) {
                 continue;

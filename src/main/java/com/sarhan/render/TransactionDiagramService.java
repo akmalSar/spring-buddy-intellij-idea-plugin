@@ -17,6 +17,7 @@
 package com.sarhan.render;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.intellij.openapi.Disposable;
@@ -125,8 +126,18 @@ public final class TransactionDiagramService implements Disposable {
      */
     @NotNull
     public Job requestGraph(@NotNull PsiMethod method,
-                             @NotNull Consumer<TransactionGraph> onReady) {
-        String cacheKey = computeCacheKey(method);
+                              @NotNull Consumer<TransactionGraph> onReady) {
+        return requestGraph(method, onReady, null);
+    }
+
+    /**
+     * Asynchronously builds or retrieves a transaction graph, reporting failures
+     * through {@code onError} when provided.
+     */
+    @NotNull
+    public Job requestGraph(@NotNull PsiMethod method,
+                             @NotNull Consumer<TransactionGraph> onReady,
+                             @Nullable BiConsumer<String, Throwable> onError) {
 
         return kotlinx.coroutines.BuildersKt.launch(
                 this.cs,
@@ -138,20 +149,26 @@ public final class TransactionDiagramService implements Disposable {
                     try {
                         graph = kotlinx.coroutines.BuildersKt.runBlocking(
                                 Dispatchers.getDefault(),
-                                (CoroutineScope innerScope, Continuation<? super TransactionGraph> innerContinuation) -> {
+                                (CoroutineScope innerScope, Continuation<? super TransactionGraph> innerContinuation) -> ReadAction.compute(() -> {
+                                    String cacheKey = computeCacheKey(method);
                                     TransactionGraph cached = this.cache.get(cacheKey);
                                     if (cached != null) {
                                         return cached;
                                     }
 
-                                    TransactionGraph built = ReadAction.compute(
-                                            () -> this.builder.buildGraph(method));
+                                    TransactionGraph built = this.builder.buildGraph(method);
                                     this.cache.put(cacheKey, built);
                                     return built;
-                                });
+                                }));
                     } catch (InterruptedException ex) {
                         // Thread interrupted while building graph — abort
                         Thread.currentThread().interrupt();
+                        return kotlin.Unit.INSTANCE;
+                    } catch (Throwable ex) {
+                        if (onError != null) {
+                            ApplicationManager.getApplication().invokeLater(
+                                    () -> onError.accept("Unable to build transaction graph.", ex));
+                        }
                         return kotlin.Unit.INSTANCE;
                     }
 
@@ -169,7 +186,7 @@ public final class TransactionDiagramService implements Disposable {
      */
     @Nullable
     public TransactionGraph getCached(@NotNull PsiMethod method) {
-        return this.cache.get(computeCacheKey(method));
+        return ReadAction.compute(() -> this.cache.get(computeCacheKey(method)));
     }
 
     /**

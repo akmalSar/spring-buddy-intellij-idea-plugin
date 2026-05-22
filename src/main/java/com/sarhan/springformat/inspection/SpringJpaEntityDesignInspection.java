@@ -16,6 +16,8 @@
 
 package com.sarhan.springformat.inspection;
 
+import java.util.Locale;
+
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -42,7 +44,6 @@ import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
-import java.util.Locale;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -241,7 +242,7 @@ public abstract class SpringJpaEntityDesignInspection extends AbstractBaseJavaLo
                 }
             }
         }
-        String text = value != null ? value.getText() : null;
+        String text = (value != null) ? value.getText() : null;
         return "AuditingEntityListener.class".equals(text)
                 || "org.springframework.data.jpa.domain.support.AuditingEntityListener.class".equals(text);
     }

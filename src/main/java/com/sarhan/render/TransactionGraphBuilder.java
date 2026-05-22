@@ -46,6 +46,7 @@ import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiThisExpression;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.MethodReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.sarhan.springformat.inspection.SpringInspectionUtil;
@@ -519,12 +520,14 @@ public final class TransactionGraphBuilder {
 
     private void enqueueCallers(@NotNull PsiMethod method, @NotNull String parentId,
                                 Deque<WorkItem> queue, int depth) {
-        MethodReferencesSearch.search(method).forEach((PsiReference ref) -> {
+        MethodReferencesSearch.search(method, GlobalSearchScope.projectScope(this.project), false).forEach((PsiReference ref) -> {
             PsiElement element = ref.getElement();
             PsiMethod caller = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
             if (caller != null) {
                 PsiClass callerClass = caller.getContainingClass();
-                if (callerClass != null && isTestClass(callerClass)) {
+                if (callerClass == null || isTestClass(callerClass)
+                        || !isProjectClass(callerClass)
+                        || !isSpringBeanOrTransactional(callerClass)) {
                     return true;
                 }
                 queue.add(new WorkItem(caller, depth, parentId, false, false));

@@ -152,8 +152,7 @@ public final class TransactionJcefPanel {
         if (this.browser == null) {
             return;
         }
-        boolean dark = com.intellij.ide.ui.LafManager.getInstance().getCurrentUIThemeLookAndFeel()
-                .isDark();
+        boolean dark = GraphTheme.isDark();
         String html = this.service.renderHtml(graph, dark);
         String bridge = buildNavigationBridgeScript();
         String wrapped = html.replace("</body>", bridge + "</body>");
@@ -231,7 +230,34 @@ public final class TransactionJcefPanel {
         }
 
         // Async build
-        this.service.requestGraph(this.rootMethod, this::loadGraph);
+        this.service.requestGraph(this.rootMethod, this::loadGraph, this::loadError);
+    }
+
+    private void loadError(@NotNull String message, @NotNull Throwable error) {
+        if (this.browser == null) {
+            return;
+        }
+        String details = escapeHtml(error.getClass().getSimpleName() + ": "
+                + String.valueOf(error.getMessage()));
+        String html =
+                "<!DOCTYPE html><html><head><style>" +
+                "body{margin:0;display:flex;align-items:center;justify-content:center;" +
+                "height:100vh;font-family:monospace;color:#b3261e;padding:24px;box-sizing:border-box;}" +
+                ".box{max-width:720px}.title{font-weight:bold;margin-bottom:12px}.details{color:#5f6368}" +
+                "</style></head><body>" +
+                "<div class=\"box\"><div class=\"title\">" + escapeHtml(message) + "</div>" +
+                "<div class=\"details\">" + details + "</div></div>" +
+                "</body></html>";
+        ApplicationManager.getApplication().invokeLater(() ->
+                this.browser.loadHTML(html, "about:blank"));
+    }
+
+    @NotNull
+    private static String escapeHtml(@NotNull String value) {
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;");
     }
 
     private void loadIndexingBanner() {
