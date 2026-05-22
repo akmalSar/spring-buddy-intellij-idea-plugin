@@ -338,6 +338,21 @@ h2 .count {
     border-color: rgba(120, 214, 75, 0.34);
     color: #dcffe7;
 }
+.badge.fix::before {
+    content: "⚡";
+    font-size: 13px;
+    line-height: 1;
+}
+.badge.flow {
+    background: rgba(53, 197, 255, 0.13);
+    border-color: rgba(53, 197, 255, 0.34);
+    color: #dff7ff;
+}
+.badge.flow::before {
+    content: "◈";
+    font-size: 13px;
+    line-height: 1;
+}
 </style>
 </head>
 <body>
@@ -648,8 +663,8 @@ h2 .count {
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringBagProblemInspection</div>
-<div class="display-name">@OneToMany/@ManyToMany with List causes bag semantics<span class="badge yellow">WARNING</span></div>
-<div class="description">Detects <pre class="code"> @OneToMany</pre> and <pre class="code"> @ManyToMany</pre> fields typed as <pre class="code"> List</pre> instead of <pre class="code"> Set</pre>. Hibernate "bag" semantics cause delete-all + re-insert on every change, leading to severe performance issues and lost ordering.</div>
+<div class="display-name">@OneToMany/@ManyToMany with List causes bag semantics<span class="badge yellow">WARNING</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects <pre class="code"> @OneToMany</pre> and <pre class="code"> @ManyToMany</pre> fields typed as <pre class="code"> List</pre> instead of <pre class="code"> Set</pre>. Hibernate "bag" semantics cause delete-all + re-insert on every change, leading to severe performance issues and lost ordering. Visual flow available: shows the collection mapping, bag semantics, and flush-time delete/reinsert behavior in the Bag Problem Flow tool window.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringBootTestCouldBeSliceInspection</div>
@@ -748,13 +763,13 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringEntityTransactionBoundaryEscapeDataFlowInspection</div>
-<div class="display-name">JPA entity returned from @Transactional is accessed outside transaction boundary<span class="badge red">ERROR</span></div>
-<div class="description">Detects when a JPA entity returned from a @Transactional method is accessed (mutated or lazy-loaded) outside the transaction boundary within the same class. After the proxy method returns, the entity is detached; lazy access causes LazyInitializationException and mutations are silently lost or cause errors. Uses the DataFlow taint engine to track the escaped entity through assignments, Optional unwraps, casts, and ternaries — replacing brittle parent-walk and string-name matching.</div>
+<div class="display-name">JPA entity returned from @Transactional is accessed outside transaction boundary<span class="badge red">ERROR</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects when a JPA entity returned from a @Transactional method is accessed (mutated or lazy-loaded) outside the transaction boundary within the same class. After the proxy method returns, the entity is detached; lazy access causes LazyInitializationException and mutations are silently lost or cause errors. Uses the DataFlow taint engine to track the escaped entity through assignments, Optional unwraps, casts, and ternaries — replacing brittle parent-walk and string-name matching. Visual flow available: shows the transactional return source, detached local/alias, and lazy or mutating sink in the Boundary-Escape Flow tool window.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringGhostSaveDataFlowInspection</div>
-<div class="display-name">Ghost Save: detached entity mutation outside transaction<span class="badge yellow">WARNING</span></div>
-<div class="description">Detects "Ghost Saves" — mutations of JPA detached entities that are silently ignored because there is no active Hibernate session to flush the changes. ┌─────────────────────────────────────────────────────────────────────────┐ │ SOURCE: any call to a Spring Data repository finder or EntityManager │ │ method outside an active @Transactional context │ │ │ │ SINK: any setter / mutator call on a variable that traces back to │ │ such a source, including through aliases and helper methods │ └─────────────────────────────────────────────────────────────────────────┘ Capabilities: ✅ Zero false positives inside @Transactional contexts (method or class) ✅ Full pointer-alias propagation (fixed-point loop) ✅ Optional unwrap tracking: .get(), .orElseThrow(), .orElse() ✅ Cast passthrough: (User) rawRef ✅ Ternary propagation: condition ? tainted : other ✅ Spring Data interface hierarchy (JpaRepository, CrudRepository, …) ✅ EntityManager.find() / getReference() / merge() as sources ✅ @Query / @NamedQuery annotated methods as sources ✅ Inter-procedural taint: follows entities passed into helper methods ✅ Works on stub classes without backing fields (no PropertyUtil dependency) ✅ Works without full PSI index (stub/demo file fallback via simple names) ✅ Deduplicates problems when multiple entry paths reach the same sink</div>
+<div class="display-name">Ghost Save: detached entity mutation outside transaction<span class="badge yellow">WARNING</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects "Ghost Saves" — mutations of JPA detached entities that are silently ignored because there is no active Hibernate session to flush the changes. Sources include Spring Data repository finders, EntityManager calls, @Query methods, and aliases through Optional unwraps, casts, ternaries, assignments, and helper method parameters. Visual flow available: shows detached entity source, local/alias propagation, and mutator sink in the Ghost-Save Flow tool window.</div>
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringJacksonDeserializedFieldAccessInspection</div>
@@ -813,8 +828,8 @@ h2 .count {
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringJpaNPlusOnePredictionDataFlowInspection</div>
-<div class="display-name">N+1 query predicted via DataFlow taint analysis<span class="badge yellow">WARNING</span></div>
-<div class="description">Predicts N+1 query problems by detecting lazy getter calls on JPA entities inside loops or stream operations, where the entities came from a collection returned by a Spring Data repository or EntityManager query. Uses the DataFlow taint engine to track detached entity collections: SOURCE: List&lt;Order&gt; orders = orderRepo.findAll(); ALIAS: for (Order order : orders) — order is tainted SINK: order.getItems().size() — triggers N+1 select per iteration Unlike the PSI-only N+1 inspection, this only flags when the collection variable traces back to a repository/EntityManager source, eliminating false positives on DTO projections or already-fetched join results passed as method parameters.</div>
+<div class="display-name">N+1 query predicted via DataFlow taint analysis<span class="badge yellow">WARNING</span><span class="badge flow">FLOW</span></div>
+<div class="description">Predicts N+1 query problems by detecting lazy getter calls on JPA entities inside loops or stream operations, where the entities came from a collection returned by a Spring Data repository or EntityManager query. Uses the DataFlow taint engine to track detached entity collections: SOURCE: List&lt;Order&gt; orders = orderRepo.findAll(); ALIAS: for (Order order : orders) — order is tainted SINK: order.getItems().size() — triggers N+1 select per iteration Unlike the PSI-only N+1 inspection, this only flags when the collection variable traces back to a repository/EntityManager source, eliminating false positives on DTO projections or already-fetched join results passed as method parameters. Visual flow available: shows repository collection source, loop/stream element, and lazy association sink in the N+1 Flow tool window.</div>
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringJpaInvalidMappedByInspection</div>
@@ -853,8 +868,8 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringLazyInitializationPredictionDataFlowInspection</div>
-<div class="display-name">LazyInitializationException predicted on detached entity access<span class="badge red">ERROR</span></div>
-<div class="description">Predicts <pre class="code"> LazyInitializationException</pre> by detecting lazy getter calls on JPA entities that were obtained from a repository or EntityManager source outside an active <pre class="code"> @Transactional</pre> context. Uses the DataFlow taint engine (<pre class="code"> com.sarhan.dataFlow</pre>) to track detached entity references through assignments, <pre class="code"> Optional</pre> unwrapping, casts, and ternary expressions within a single method scope. Architecture: SOURCE: repo.findById(...), em.find(...), @Query methods, etc. ALIAS: fixed-point propagation of tainted references SINK: getXxx() / isXxx() / fetchXxx() on a tainted entity that triggers lazy loading (collection return, @OneToMany, entity return, etc.)</div>
+<div class="display-name">LazyInitializationException predicted on detached entity access<span class="badge red">ERROR</span><span class="badge flow">FLOW</span></div>
+<div class="description">Predicts <pre class="code"> LazyInitializationException</pre> by detecting lazy getter calls on JPA entities that were obtained from a repository or EntityManager source outside an active <pre class="code"> @Transactional</pre> context. Uses the DataFlow taint engine (<pre class="code"> com.sarhan.dataFlow</pre>) to track detached entity references through assignments, <pre class="code"> Optional</pre> unwrapping, casts, and ternary expressions within a single method scope. Visual flow available: shows repository/EntityManager source, detached entity alias, and lazy-loading sink in the Lazy-Init Flow tool window.</div>
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringLeakyValueInNonBeanInspection</div>
@@ -878,8 +893,8 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringReadOnlyEntityMutationDataFlowInspection</div>
-<div class="display-name">JPA entity mutation inside @Transactional(readOnly = true)<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
-<div class="description">Detects JPA entity mutations inside @Transactional(readOnly = true) methods. Calling setters or collection mutators on managed entities (those loaded from a repository or EntityManager) inside a read-only transaction still triggers dirty checking and may attempt a flush, causing TransactionSystemException or UnexpectedRollbackException at commit time. Uses the DataFlow taint engine to distinguish managed entities from transient ones (<pre class="code"> new Entity()</pre>), eliminating false positives.</div>
+<div class="display-name">JPA entity mutation inside @Transactional(readOnly = true)<span class="badge red">ERROR</span><span class="badge fix">FIX</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects JPA entity mutations inside @Transactional(readOnly = true) methods. Calling setters or collection mutators on managed entities (those loaded from a repository or EntityManager) inside a read-only transaction still triggers dirty checking and may attempt a flush, causing TransactionSystemException or UnexpectedRollbackException at commit time. Uses the DataFlow taint engine to distinguish managed entities from transient ones (<pre class="code"> new Entity()</pre>), eliminating false positives. Visual flow available: shows repository/EntityManager source, managed entity variable, and mutator sink in the Entity Mutation Flow tool window.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringRepositoryFindAllWithoutPageableInspection</div>
@@ -938,8 +953,8 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringSqlInjectionTaintFlowInspection</div>
-<div class="display-name">SQL injection through tainted variable flow into query execution<span class="badge red">ERROR</span></div>
-<div class="description">Detects intra-procedural SQL injection taint flow: method parameters annotated with @RequestParam or @PathVariable (or HttpServletRequest access) that are concatenated into strings and passed to query execution methods such as EntityManager.createNativeQuery, JdbcTemplate.query, etc.</div>
+<div class="display-name">SQL injection through tainted variable flow into query execution<span class="badge red">ERROR</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects intra-procedural SQL injection taint flow: method parameters annotated with @RequestParam or @PathVariable (or HttpServletRequest access) that are concatenated into strings and passed to query execution methods such as EntityManager.createNativeQuery, JdbcTemplate.query, etc. Visual flow available: shows request/input source, tainted string variable, and query execution sink in the SQL Injection Flow tool window.</div>
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringTransactionalAbstractClassInspection</div>
@@ -978,8 +993,8 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringTransactionalDirtyCheckingDataFlowInspection</div>
-<div class="display-name">@Transactional read method mutates a managed entity<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
-<div class="description">Detects @Transactional methods that load entities from a repository or EntityManager and then mutate them without readOnly=true and without an explicit write operation (save, delete, etc.). Hibernate dirty checking may persist those temporary changes unexpectedly. Uses the DataFlow taint engine to track loaded entities through assignments, Optional unwraps, casts, and ternaries — replacing brittle string-name matching.</div>
+<div class="display-name">@Transactional read method mutates a managed entity<span class="badge red">ERROR</span><span class="badge fix">FIX</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects @Transactional methods that load entities from a repository or EntityManager and then mutate them without readOnly=true and without an explicit write operation (save, delete, etc.). Hibernate dirty checking may persist those temporary changes unexpectedly. Uses the DataFlow taint engine to track loaded entities through assignments, Optional unwraps, casts, and ternaries — replacing brittle string-name matching. Visual flow available: shows repository/EntityManager source, managed entity variable, and mutator sink in the Entity Mutation Flow tool window.</div>
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringTransactionalEventListenerWithoutTransactionInspection</div>
@@ -1078,7 +1093,7 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringTransactionalSelfInvocationIndirectionInspection</div>
-<div class="display-name">@Transactional self-invocation through indirection<span class="badge red">ERROR</span></div>
+<div class="display-name">@Transactional self-invocation through indirection<span class="badge red">ERROR</span><span class="badge flow">FLOW</span></div>
 <div class="description">Detects @Transactional self-invocation through indirection within the same class. When a non-transactional method calls another method that eventually calls a</div>
 </article>
 <article class="card" data-level="error">
@@ -1113,8 +1128,8 @@ h2 .count {
 </article>
 <article class="card" data-level="error">
 <div class="class-name">SpringUnexpectedRollbackExceptionInspection</div>
-<div class="display-name">Caught RuntimeException from @Transactional call may cause UnexpectedRollbackException<span class="badge red">ERROR</span></div>
-<div class="description">Detects @Transactional methods that call another @Transactional method and catch RuntimeException without re-throwing it. The nested transaction may already be marked rollback-only, causing an UnexpectedRollbackException when the outer transaction commits.</div>
+<div class="display-name">Caught RuntimeException from @Transactional call may cause UnexpectedRollbackException<span class="badge red">ERROR</span><span class="badge flow">FLOW</span></div>
+<div class="description">Detects @Transactional methods that call another @Transactional method and catch RuntimeException without re-throwing it. The nested transaction may already be marked rollback-only, causing an UnexpectedRollbackException when the outer transaction commits. Visual flow available: shows outer transaction, inner transactional call, swallowed catch block, rollback-only state, and failing commit in the Unexpected Rollback Flow tool window.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringValidOnPrimitiveInspection</div>
