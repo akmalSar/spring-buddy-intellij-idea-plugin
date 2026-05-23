@@ -77,6 +77,11 @@ public final class TransactionJcefPanel {
     /** JS→Java bridge for node-click navigation. */
     private final JBCefJSQuery navigateQuery;
 
+    /** JS→Java bridge for rebuilding the graph after PSI or theme changes. */
+    private final JBCefJSQuery refreshQuery;
+
+    private boolean loading;
+
     // -----------------------------------------------------------------------
     // Constructor
     // -----------------------------------------------------------------------
@@ -95,15 +100,19 @@ public final class TransactionJcefPanel {
             JPanel panel = new JPanel(this.cardLayout);
             panel.add(this.statusLabel, "status");
             panel.add(this.browser.getComponent(), "browser");
+            this.cardLayout.show(panel, "status");
             this.root    = panel;
             this.root.setPreferredSize(new Dimension(720, 480));
             this.navigateQuery = JBCefJSQuery.create(this.browser);
             this.navigateQuery.addHandler(this::onNavigateRequest);
+            this.refreshQuery = JBCefJSQuery.create(this.browser);
+            this.refreshQuery.addHandler(this::onRefreshRequest);
         } else {
             this.browser       = null;
             this.cardLayout    = null;
             this.statusLabel   = null;
             this.navigateQuery = null;
+            this.refreshQuery  = null;
             JLabel label = new JLabel(
                     "<html><center>JCEF not supported in this environment.<br/>" +
                     "Transaction diagram requires a JetBrains IDE with JCEF enabled.</center></html>",
@@ -120,6 +129,7 @@ public final class TransactionJcefPanel {
         if (this.browser == null) {
             return;
         }
+        this.loading = true;
         loadSpinner();
         buildAndLoad();
     }
@@ -137,6 +147,14 @@ public final class TransactionJcefPanel {
      * Runs the JS snippet that shows the "Code changed — click to refresh" banner.
      */
     public void onPsiModified() {
+        showRefreshBanner();
+    }
+
+    public void onThemeChanged() {
+        showRefreshBanner();
+    }
+
+    private void showRefreshBanner() {
         if (this.browser == null) {
             return;
         }
@@ -161,6 +179,7 @@ public final class TransactionJcefPanel {
         if (this.browser == null) {
             return;
         }
+        this.loading = false;
         boolean dark = GraphTheme.isDark();
         String html = this.service.renderHtml(graph, dark);
         String bridge = buildNavigationBridgeScript();
@@ -176,8 +195,24 @@ public final class TransactionJcefPanel {
     @NotNull
     private String buildNavigationBridgeScript() {
         String inject = this.navigateQuery.inject("methodId");
+        String refresh = this.refreshQuery.inject("'refresh'");
         return "<script>window.intellijNavigateNode = function(methodId) { "
-                + inject + " };</script>";
+                + inject + " }; window.intellijRefreshGraph = function() { "
+                + refresh + " };</script>";
+    }
+
+    @NotNull
+    private JBCefJSQuery.Response onRefreshRequest(@NotNull String request) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            if (this.loading) {
+                return;
+            }
+            this.loading = true;
+            loadSpinner();
+            this.service.invalidate(this.rootMethod);
+            buildAndLoad();
+        });
+        return new JBCefJSQuery.Response("ok");
     }
 
     @NotNull
@@ -245,6 +280,7 @@ public final class TransactionJcefPanel {
         if (this.browser == null) {
             return;
         }
+        this.loading = false;
         String details = escapeHtml(error.getClass().getSimpleName() + ": "
                 + String.valueOf(error.getMessage()));
         String html =

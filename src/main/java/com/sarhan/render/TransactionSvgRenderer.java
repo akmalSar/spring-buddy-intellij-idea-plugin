@@ -643,7 +643,7 @@ public final class TransactionSvgRenderer {
                 "</head><body>" +
 
                 "<div id=\"svg-tooltip\"></div>" +
-                "<div id=\"refresh-banner\" onclick=\"location.reload()\">" +
+                "<div id=\"refresh-banner\" onclick=\"window.intellijRefreshGraph&&window.intellijRefreshGraph()\">" +
                 "  ⟳ Code changed — click to refresh</div>" +
                 "<div id=\"viewport\">" +
                 bannerHtml +

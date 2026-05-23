@@ -17,8 +17,10 @@
 package com.sarhan.render;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.ide.ui.LafManagerListener;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -76,6 +78,10 @@ public final class TransactionDiagramToolWindowFactory implements ToolWindowFact
                 .connect(disposable)
                 .subscribe(PsiModificationTracker.TOPIC,
                         panel::onPsiModified);
+        ApplicationManager.getApplication().getMessageBus()
+                .connect(disposable)
+                .subscribe(LafManagerListener.TOPIC,
+                        (__source) -> panel.onThemeChanged());
 
         toolWindow.getContentManager().removeAllContents(true);
         toolWindow.getContentManager().addContent(content);

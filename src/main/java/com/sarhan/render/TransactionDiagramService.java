@@ -173,6 +173,10 @@ public final class TransactionDiagramService implements Disposable {
         return ReadAction.compute(() -> this.cache.get(computeCacheKey(method)));
     }
 
+    public void invalidate(@NotNull PsiMethod method) {
+        ReadAction.run(() -> this.cache.remove(computeCacheKey(method)));
+    }
+
     /**
      * Renders the graph as a full HTML page string suitable for
      * {@code JBCefBrowser.loadHTML(html, "about:blank")}.
