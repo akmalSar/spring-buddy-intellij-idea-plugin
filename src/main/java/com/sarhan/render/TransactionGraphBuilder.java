@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaRecursiveElementWalkingVisitor;
@@ -177,6 +178,7 @@ public final class TransactionGraphBuilder {
         enqueueCallers(rootMethod, rootNode.getId(), queue, 1);
 
         while (!queue.isEmpty()) {
+            ProgressManager.checkCanceled();
             WorkItem item = queue.poll();
 
             if (nodeMap.size() >= TransactionGraph.MAX_NODES + 1) {
@@ -475,6 +477,7 @@ public final class TransactionGraphBuilder {
         body.accept(new JavaRecursiveElementWalkingVisitor() {
             @Override
             public void visitMethodCallExpression(@NotNull PsiMethodCallExpression call) {
+                ProgressManager.checkCanceled();
                 super.visitMethodCallExpression(call);
                 if (found[0]) {
                     return;
@@ -504,9 +507,15 @@ public final class TransactionGraphBuilder {
                     return;
                 }
                 PsiClass resolvedClass = resolved.getContainingClass();
-                if (resolvedClass == null || isTestClass(resolvedClass)
-                        || !isProjectClass(resolvedClass)
-                        || !isSpringBeanOrTransactional(resolvedClass)) {
+                if (resolvedClass == null || isTestClass(resolvedClass)) {
+                    return;
+                }
+                // Include project classes and Spring Data repository methods (which live in jars)
+                boolean inProject = isProjectClass(resolvedClass);
+                boolean isSpring  = resolvedClass.isInterface()
+                        ? isSpringDataRepository(resolvedClass)
+                        : isSpringBeanOrTransactional(resolvedClass);
+                if (!inProject && !isSpring) {
                     return;
                 }
 
@@ -521,13 +530,16 @@ public final class TransactionGraphBuilder {
     private void enqueueCallers(@NotNull PsiMethod method, @NotNull String parentId,
                                 Deque<WorkItem> queue, int depth) {
         MethodReferencesSearch.search(method, GlobalSearchScope.projectScope(this.project), false).forEach((PsiReference ref) -> {
+            ProgressManager.checkCanceled();
             PsiElement element = ref.getElement();
             PsiMethod caller = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
             if (caller != null) {
                 PsiClass callerClass = caller.getContainingClass();
                 if (callerClass == null || isTestClass(callerClass)
-                        || !isProjectClass(callerClass)
-                        || !isSpringBeanOrTransactional(callerClass)) {
+                        || !isProjectClass(callerClass)) {
+                    return true;
+                }
+                if (!callerClass.isInterface() && !isSpringBeanOrTransactional(callerClass)) {
                     return true;
                 }
                 queue.add(new WorkItem(caller, depth, parentId, false, false));

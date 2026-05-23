@@ -36,45 +36,9 @@
         <!-- ──────────────────────────────────────────────────────────────
              Transaction Flow Diagram — Tool Window Panel
              ────────────────────────────────────────────────────────────── -->
-        <toolWindow id="Spring Buddy Tx Flow"
+        <toolWindow id="Spring Buddy Flow"
                     anchor="right"
                     factoryClass="com.sarhan.render.TransactionDiagramToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Ghost-Save Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.GhostSaveFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Boundary-Escape Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.boundary.BoundaryEscapeFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Lazy-Init Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.lazyinit.LazyInitFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Self-Invocation Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.selfinvocation.SelfInvocationFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy SQL Injection Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.sqlinjection.SqlInjectionFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Bag Problem Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.bag.BagProblemFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy N+1 Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.nplusone.NPlusOneFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Unexpected Rollback Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.rollback.UnexpectedRollbackFlowToolWindowFactory"/>
-
-        <toolWindow id="Spring Buddy Entity Mutation Flow"
-                    anchor="right"
-                    factoryClass="com.sarhan.render.flow.mutation.JpaEntityMutationFlowToolWindowFactory"/>
 
         <!-- ===== Spring Buddy > Built-in ===== -->
 

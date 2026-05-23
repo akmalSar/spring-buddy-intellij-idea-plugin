@@ -36,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class NPlusOneFlowToolWindowFactory implements ToolWindowFactory {
 
-    public static final String TOOL_WINDOW_ID = "Spring Buddy N+1 Flow";
+    public static final String TOOL_WINDOW_ID = "Spring Buddy Flow";
 
     @Override
     public void createToolWindowContent(@NotNull Project project,

@@ -34,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class TransactionDiagramToolWindowFactory implements ToolWindowFactory {
 
-    static final String TOOL_WINDOW_ID = "Spring Buddy Tx Flow";
+    static final String TOOL_WINDOW_ID = "Spring Buddy Flow";
 
     @Override
     public void createToolWindowContent(@NotNull Project project,
@@ -78,8 +78,7 @@ public final class TransactionDiagramToolWindowFactory implements ToolWindowFact
                         panel::onPsiModified);
 
         toolWindow.getContentManager().removeAllContents(true);
-
         toolWindow.getContentManager().addContent(content);
-        toolWindow.show(null);
+        toolWindow.show(() -> panel.startLoading());
     }
 }

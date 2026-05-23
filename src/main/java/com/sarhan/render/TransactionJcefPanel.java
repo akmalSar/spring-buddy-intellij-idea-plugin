@@ -88,14 +88,7 @@ public final class TransactionJcefPanel {
             this.root.setPreferredSize(new Dimension(720, 480));
             this.navigateQuery = JBCefJSQuery.create(this.browser);
             this.navigateQuery.addHandler(this::onNavigateRequest);
-
-            // Show spinner immediately while graph builds
-            loadSpinner();
-
-            // Dispatch async graph construction
-            buildAndLoad();
         } else {
-            // Headless / no JCEF — degrade gracefully
             this.browser       = null;
             this.navigateQuery = null;
             JLabel label = new JLabel(
@@ -104,6 +97,18 @@ public final class TransactionJcefPanel {
                     SwingConstants.CENTER);
             this.root = label;
         }
+    }
+
+    /**
+     * Must be called after the component has been added to the tool window and shown.
+     * Shows the spinner and kicks off async graph construction.
+     */
+    public void startLoading() {
+        if (this.browser == null) {
+            return;
+        }
+        loadSpinner();
+        buildAndLoad();
     }
 
     // -----------------------------------------------------------------------
@@ -156,9 +161,7 @@ public final class TransactionJcefPanel {
         String html = this.service.renderHtml(graph, dark);
         String bridge = buildNavigationBridgeScript();
         String wrapped = html.replace("</body>", bridge + "</body>");
-        // loadHTML must be called on the EDT
-        ApplicationManager.getApplication().invokeLater(() ->
-                this.browser.loadHTML(wrapped, "about:blank"));
+        this.browser.loadHTML(wrapped, "about:blank");
     }
 
     // -----------------------------------------------------------------------

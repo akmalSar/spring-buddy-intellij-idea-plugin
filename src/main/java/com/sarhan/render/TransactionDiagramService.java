@@ -22,22 +22,20 @@ import java.util.function.Consumer;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.MethodSignatureUtil;
 import com.intellij.psi.util.PsiModificationTracker;
-import kotlin.Unit;
-import kotlin.coroutines.Continuation;
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.CoroutineScopeKt;
-import kotlinx.coroutines.Dispatchers;
-import kotlinx.coroutines.Job;
-import kotlinx.coroutines.SupervisorKt;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.concurrency.CancellablePromise;
 
 
 /**
@@ -45,8 +43,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Responsibilities:
  * <ol>
- *   <li>Owns the plugin coroutine scope ({@code SupervisorJob + Dispatchers.Default})</li>
- *   <li>Dispatches graph construction off the EDT via coroutines</li>
+ *   <li>Dispatches graph construction off the EDT</li>
  *   <li>Caches {@link TransactionGraph} instances keyed by method signature fingerprint</li>
  *   <li>Invalidates cache on  events</li>
  * </ol>
@@ -69,6 +66,8 @@ import org.jetbrains.annotations.Nullable;
 @Service(Service.Level.PROJECT)
 public final class TransactionDiagramService implements Disposable {
 
+    private static final Logger LOG = Logger.getInstance(TransactionDiagramService.class);
+
     // -----------------------------------------------------------------------
     // Fields
     // -----------------------------------------------------------------------
@@ -84,12 +83,6 @@ public final class TransactionDiagramService implements Disposable {
     private final ConcurrentHashMap<String, TransactionGraph> cache =
             new ConcurrentHashMap<>();
 
-    /**
-     * Plugin-owned coroutine scope.  All graph-building coroutines are children
-     * of this scope and are cancelled automatically when the project closes.
-     */
-    private final CoroutineScope cs;
-
     // -----------------------------------------------------------------------
     // Constructor (called by the platform)
     // -----------------------------------------------------------------------
@@ -98,9 +91,6 @@ public final class TransactionDiagramService implements Disposable {
         this.project  = project;
         this.builder  = new TransactionGraphBuilder(project);
         this.renderer = new TransactionSvgRenderer();
-
-        // SupervisorJob: a failing child does not cancel other children.
-        this.cs = CoroutineScopeKt.CoroutineScope(SupervisorKt.SupervisorJob((Job) null).plus(Dispatchers.getDefault()));
 
         // Invalidate cache on any PSI change
         project.getMessageBus()
@@ -117,16 +107,16 @@ public final class TransactionDiagramService implements Disposable {
      * Asynchronously builds or retrieves from cache the {@link TransactionGraph}
      * for {@code method} and delivers the result on the EDT via {@code onReady}.
      *
-     * <p>The returned {@link Job} can be cancelled if the popup is closed before
-     * the graph is ready.
+     * <p>The returned {@link CancellablePromise} can be cancelled if the panel is
+     * closed before the graph is ready.
      *
      * @param method  the PSI method at the caret
      * @param onReady called on the EDT with the completed graph
-     * @return the coroutine {@link Job} (cancel to abort)
+     * @return the background task promise (cancel to abort)
      */
     @NotNull
-    public Job requestGraph(@NotNull PsiMethod method,
-                              @NotNull Consumer<TransactionGraph> onReady) {
+    public CancellablePromise<TransactionGraph> requestGraph(@NotNull PsiMethod method,
+                               @NotNull Consumer<TransactionGraph> onReady) {
         return requestGraph(method, onReady, null);
     }
 
@@ -135,49 +125,43 @@ public final class TransactionDiagramService implements Disposable {
      * through {@code onError} when provided.
      */
     @NotNull
-    public Job requestGraph(@NotNull PsiMethod method,
+    public CancellablePromise<TransactionGraph> requestGraph(@NotNull PsiMethod method,
                              @NotNull Consumer<TransactionGraph> onReady,
                              @Nullable BiConsumer<String, Throwable> onError) {
 
-        return kotlinx.coroutines.BuildersKt.launch(
-                this.cs,
-                this.cs.getCoroutineContext(),
-                kotlinx.coroutines.CoroutineStart.DEFAULT,
-                (CoroutineScope scope, Continuation<? super Unit> continuation) -> {
-                    // Off EDT: build the graph
-                    TransactionGraph graph;
-                    try {
-                        graph = kotlinx.coroutines.BuildersKt.runBlocking(
-                                Dispatchers.getDefault(),
-                                (CoroutineScope innerScope, Continuation<? super TransactionGraph> innerContinuation) -> ReadAction.compute(() -> {
-                                    String cacheKey = computeCacheKey(method);
-                                    TransactionGraph cached = this.cache.get(cacheKey);
-                                    if (cached != null) {
-                                        return cached;
-                                    }
-
-                                    TransactionGraph built = this.builder.buildGraph(method);
-                                    this.cache.put(cacheKey, built);
-                                    return built;
-                                }));
-                    } catch (InterruptedException ex) {
-                        // Thread interrupted while building graph — abort
-                        Thread.currentThread().interrupt();
-                        return kotlin.Unit.INSTANCE;
-                    } catch (Throwable ex) {
-                        if (onError != null) {
-                            ApplicationManager.getApplication().invokeLater(
-                                    () -> onError.accept("Unable to build transaction graph.", ex));
-                        }
-                        return kotlin.Unit.INSTANCE;
+        CancellablePromise<TransactionGraph> promise = ReadAction.nonBlocking(() -> {
+                    String cacheKey = computeCacheKey(method);
+                    TransactionGraph cached = this.cache.get(cacheKey);
+                    if (cached != null) {
+                        return cached;
                     }
+                    TransactionGraph built = this.builder.buildGraph(method);
+                    this.cache.put(cacheKey, built);
+                    return built;
+                })
+                .expireWith(this)
+                .submit(AppExecutorUtil.getAppExecutorService());
 
-                    // Back on EDT: deliver result
-                    ApplicationManager.getApplication().invokeLater(
-                            () -> onReady.accept(graph));
+        promise.onSuccess((TransactionGraph g) ->
+                ApplicationManager.getApplication().invokeLater(
+                        () -> onReady.accept(g), ModalityState.any()));
 
-                    return kotlin.Unit.INSTANCE;
-                });
+        promise.onError((Throwable ex) -> {
+            if (!(ex instanceof ProcessCanceledException)) {
+                LOG.warn("Transaction graph build failed", ex);
+                reportError(onError, "Unable to build transaction graph: " + ex.getMessage(), ex);
+            }
+        });
+        return promise;
+    }
+
+    private static void reportError(@Nullable BiConsumer<String, Throwable> onError,
+                                    @NotNull String message,
+                                    @NotNull Throwable error) {
+        if (onError != null) {
+            ApplicationManager.getApplication().invokeLater(
+                    () -> onError.accept(message, error));
+        }
     }
 
     /**
@@ -204,11 +188,6 @@ public final class TransactionDiagramService implements Disposable {
 
     @Override
     public void dispose() {
-        // Cancel all coroutines in the plugin scope
-        kotlinx.coroutines.JobKt.cancel(
-                (Job) this.cs.getCoroutineContext()
-                        .get(Job.Key),
-                null);
         this.cache.clear();
     }
 

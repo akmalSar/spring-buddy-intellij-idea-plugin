@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class UnexpectedRollbackFlowToolWindowFactory implements ToolWindowFactory {
 
-    public static final String TOOL_WINDOW_ID = "Spring Buddy Unexpected Rollback Flow";
+    public static final String TOOL_WINDOW_ID = "Spring Buddy Flow";
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {

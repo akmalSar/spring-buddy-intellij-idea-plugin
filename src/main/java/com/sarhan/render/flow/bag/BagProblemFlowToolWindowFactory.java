@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class BagProblemFlowToolWindowFactory implements ToolWindowFactory {
 
-    public static final String TOOL_WINDOW_ID = "Spring Buddy Bag Problem Flow";
+    public static final String TOOL_WINDOW_ID = "Spring Buddy Flow";
 
     @Override
     public void createToolWindowContent(@NotNull Project project,

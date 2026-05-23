@@ -39,7 +39,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class BoundaryEscapeFlowToolWindowFactory implements ToolWindowFactory {
 
-    public static final String TOOL_WINDOW_ID = "Spring Buddy Boundary-Escape Flow";
+    public static final String TOOL_WINDOW_ID = "Spring Buddy Flow";
 
     @Override
     public void createToolWindowContent(@NotNull Project project,

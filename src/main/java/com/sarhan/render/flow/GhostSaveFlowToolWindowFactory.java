@@ -53,7 +53,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class GhostSaveFlowToolWindowFactory implements ToolWindowFactory {
 
-    public static final String TOOL_WINDOW_ID = "Spring Buddy Ghost-Save Flow";
+    public static final String TOOL_WINDOW_ID = "Spring Buddy Flow";
 
     @Override
     public void createToolWindowContent(@NotNull Project project,
