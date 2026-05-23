@@ -28,11 +28,13 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.editor.Document;
 import com.intellij.psi.ElementManipulators;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiArrayType;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
@@ -95,7 +97,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     private static final Pattern CAST_IN_ON_CLAUSE = Pattern.compile(
             "(?i)\\bon\\b[^\\n\\r]*\\b(?:to_char|cast|function)\\s*\\(");
     private static final Pattern TO_CHAR_FUNCTION_COMPARE = Pattern.compile(
-            "(?i)\\(?\\s*function\\(\\s*'to_char'\\s*,\\s*([^,()]+?)\\s*,\\s*'[^']+'\\s*\\)\\s*\\)?\\s*([<>=])\\s*(:\\w+)");
+            "(?i)(\\(?\\s*)function\\(\\s*'to_char'\\s*,\\s*([^,()]+?)\\s*,\\s*'[^']+'\\s*\\)(\\s*\\)?)\\s*([<>=])\\s*(:\\w+)");
     private static final Pattern TO_CHAR_FUNCTION = Pattern.compile("\\bto_char\\s*\\(([^()]+)\\)",
             Pattern.CASE_INSENSITIVE);
     private static final Pattern CONCAT_FUNCTION = Pattern.compile("\\bconcat\\s*\\(", Pattern.CASE_INSENSITIVE);
@@ -551,7 +553,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         }
         PsiElement target = field.getNameIdentifier() != null ? field.getNameIdentifier() : field;
         holder.registerProblem(target, "Hibernate 6 changes default array storage; pin legacy VARBINARY mapping if needed",
-                ProblemHighlightType.WARNING);
+                ProblemHighlightType.WARNING, new AddJdbcTypeCodeFix("java.sql.Types.VARBINARY"));
     }
 
     private void visitCompositeUserType(@NotNull PsiField field, @NotNull ProblemsHolder holder) {
@@ -861,8 +863,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         Matcher matcher = TO_CHAR_FUNCTION_COMPARE.matcher(query);
         StringBuffer out = new StringBuffer();
         while (matcher.find()) {
-            matcher.appendReplacement(out, Matcher.quoteReplacement(matcher.group(1).trim()
-                    + " " + matcher.group(2) + " " + matcher.group(3)));
+            matcher.appendReplacement(out, Matcher.quoteReplacement(matcher.group(1)
+                    + matcher.group(2).trim() + matcher.group(3) + " " + matcher.group(4) + " " + matcher.group(5)));
         }
         matcher.appendTail(out);
         return out.toString();
@@ -1384,11 +1386,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 PsiExpression replacementExpression = JavaPsiFacade.getElementFactory(project)
                         .createExpressionFromText(textBlockLiteral(this.replacement), element);
                 element.replace(replacementExpression);
-            } else if (element instanceof PsiLiteralExpression) {
-                ElementManipulators.handleContentChange(element, this.replacement);
             } else {
-                element.replace(JavaPsiFacade.getElementFactory(project)
-                        .createExpressionFromText(doubleQuoteLiteral(this.replacement), element));
+                ElementManipulators.handleContentChange(element, this.replacement);
             }
         }
 
@@ -1396,12 +1395,6 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         private static String textBlockLiteral(@NotNull String content) {
             String escaped = content.replace("\\", "\\\\").replace("\"\"\"", "\\\"\"\"");
             return "\"\"\"\n" + escaped + "\"\"\"";
-        }
-
-        @NotNull
-        private static String doubleQuoteLiteral(@NotNull String content) {
-            String escaped = content.replace("\\", "\\\\").replace("\"", "\\\"");
-            return "\"" + escaped + "\"";
         }
     }
 
@@ -1657,26 +1650,25 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return this.getName();
         }
 
-        @Override
+@Override
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             PsiFile file = descriptor.getPsiElement().getContainingFile();
             if (file == null) {
                 return;
             }
-            PsiFile replacement = PsiFileFactoryUtil.createFile(project, file, file.getText().replace(this.oldText, this.newText));
-            file.replace(replacement);
-        }
-    }
-
-    private static final class PsiFileFactoryUtil {
-
-        private PsiFileFactoryUtil() {
-        }
-
-        @NotNull
-        private static PsiFile createFile(@NotNull Project project, @NotNull PsiFile original, @NotNull String text) {
-            return com.intellij.psi.PsiFileFactory.getInstance(project)
-                    .createFileFromText(original.getName(), original.getFileType(), text);
+            Document document = PsiDocumentManager.getInstance(project).getDocument(file);
+            if (document == null) {
+                return;
+            }
+            String text = file.getText();
+            int index = text.indexOf(this.oldText);
+            if (index < 0) {
+                return;
+            }
+            while (index >= 0) {
+                document.replaceString(index, index + this.oldText.length(), this.newText);
+                index = text.indexOf(this.oldText, index + this.oldText.length());
+            }
         }
     }
 }
