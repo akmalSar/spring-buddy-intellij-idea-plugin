@@ -77,14 +77,14 @@ public final class UnexpectedRollbackFlowBuilder {
         PsiCatchSection catchSection = PsiTreeUtil.getParentOfType(problemElement, PsiCatchSection.class);
         FlowGraph.Node caught = new FlowGraph.Node("catch", "catch(RuntimeException)",
                 "Exception is swallowed; rollback-only flag remains", FlowGraph.NodeKind.PROXY_BYPASS,
-                FlowPsiUtil.fileName(catchSection != null ? catchSection : problemElement),
-                FlowPsiUtil.lineOf(catchSection != null ? catchSection : problemElement));
+                FlowPsiUtil.fileName((catchSection != null) ? catchSection : problemElement),
+                FlowPsiUtil.lineOf((catchSection != null) ? catchSection : problemElement));
         FlowGraph.Node commit = new FlowGraph.Node("commit", "commit()",
                 "Spring detects rollback-only and throws UnexpectedRollbackException", FlowGraph.NodeKind.SINK,
                 FlowPsiUtil.fileName(outer), FlowPsiUtil.lineOf(outer));
         nodes.add(caught);
         nodes.add(commit);
-        edges.add(new FlowGraph.Edge(call != null ? "inner" : "entry", "catch", "rollback-only"));
+        edges.add(new FlowGraph.Edge((call != null) ? "inner" : "entry", "catch", "rollback-only"));
         edges.add(new FlowGraph.Edge("catch", "commit", "throws"));
 
         return FlowGraph.builder(entry)

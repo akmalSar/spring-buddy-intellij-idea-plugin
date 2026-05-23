@@ -38,6 +38,7 @@
              ────────────────────────────────────────────────────────────── -->
         <toolWindow id="Spring Buddy Flow"
                     anchor="right"
+                    icon="/icons/springBuddyFlow.svg"
                     factoryClass="com.sarhan.render.TransactionDiagramToolWindowFactory"/>
 
         <!-- ===== Spring Buddy > Built-in ===== -->

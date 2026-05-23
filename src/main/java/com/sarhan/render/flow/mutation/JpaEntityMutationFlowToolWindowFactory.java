@@ -62,6 +62,6 @@ public final class JpaEntityMutationFlowToolWindowFactory implements ToolWindowF
                 return name;
             }
         }
-        return mode == MutationFlowMode.READ_ONLY ? "read-only mutation" : "dirty checking";
+        return (mode == MutationFlowMode.READ_ONLY) ? "read-only mutation" : "dirty checking";
     }
 }

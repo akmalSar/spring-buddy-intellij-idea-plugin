@@ -40,7 +40,7 @@ public final class ShowJpaEntityMutationFlowFix implements LocalQuickFix {
     @Nls
     @NotNull
     public String getFamilyName() {
-        return this.mode == MutationFlowMode.READ_ONLY
+        return (this.mode == MutationFlowMode.READ_ONLY)
                 ? "Show read-only entity mutation flow diagram"
                 : "Show dirty-checking flow diagram";
     }

@@ -80,7 +80,7 @@ public final class JpaEntityMutationFlowBuilder {
         String sinkName = mutationCall.getMethodExpression().getReferenceName();
         FlowGraph.Node sinkNode = new FlowGraph.Node(
                 "sink",
-                ((sinkName != null) ? sinkName : "mutate") + "(...)" ,
+                ((sinkName != null) ? sinkName : "mutate") + "(...)",
                 sinkDetail(mode),
                 FlowGraph.NodeKind.SINK,
                 FlowPsiUtil.fileName(mutationCall),
