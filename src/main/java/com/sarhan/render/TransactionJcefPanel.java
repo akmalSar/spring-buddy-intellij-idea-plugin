@@ -40,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <h3>Lifecycle</h3>
  * <ol>
- *   <li>On construction: show spinner HTML, kick off async graph build.</li>
+ *   <li>On construction: show Swing status text, kick off async graph build.</li>
  *   <li>On graph ready: load full diagram HTML via {@code loadHTML()}.</li>
  *   <li>On PSI modification: call {@code browser.cefBrowser.executeJavaScript}
  *       to reveal the refresh banner without a full page reload.</li>
@@ -68,6 +68,12 @@ public final class TransactionJcefPanel {
     /** Root Swing component — either the JCEF component or a fallback label. */
     private final JComponent root;
 
+    /** Card layout used to show Swing status text until the JCEF graph is ready. */
+    private final CardLayout cardLayout;
+
+    /** Swing status label avoids racing a spinner page against the graph page in JCEF. */
+    private final JLabel statusLabel;
+
     /** JS→Java bridge for node-click navigation. */
     private final JBCefJSQuery navigateQuery;
 
@@ -84,12 +90,19 @@ public final class TransactionJcefPanel {
 
         if (JBCefApp.isSupported()) {
             this.browser = new JBCefBrowser();
-            this.root    = this.browser.getComponent();
+            this.cardLayout = new CardLayout();
+            this.statusLabel = new JLabel("Building transaction graph...", SwingConstants.CENTER);
+            JPanel panel = new JPanel(this.cardLayout);
+            panel.add(this.statusLabel, "status");
+            panel.add(this.browser.getComponent(), "browser");
+            this.root    = panel;
             this.root.setPreferredSize(new Dimension(720, 480));
             this.navigateQuery = JBCefJSQuery.create(this.browser);
             this.navigateQuery.addHandler(this::onNavigateRequest);
         } else {
             this.browser       = null;
+            this.cardLayout    = null;
+            this.statusLabel   = null;
             this.navigateQuery = null;
             JLabel label = new JLabel(
                     "<html><center>JCEF not supported in this environment.<br/>" +
@@ -141,16 +154,7 @@ public final class TransactionJcefPanel {
         if (this.browser == null) {
             return;
         }
-        String spinnerHtml =
-                "<!DOCTYPE html><html><head><style>" +
-                "body{margin:0;display:flex;align-items:center;justify-content:center;" +
-                "height:100vh;font-family:monospace;}" +
-                "@keyframes spin{to{transform:rotate(360deg)}}" +
-                ".s{font-size:24px;animation:spin 1s linear infinite;display:inline-block;}" +
-                "</style></head><body>" +
-                "<div><span class=\"s\">⟳</span>&nbsp;Building transaction graph…</div>" +
-                "</body></html>";
-        this.browser.loadHTML(spinnerHtml, "about:blank");
+        showStatus("Building transaction graph...");
     }
 
     private void loadGraph(@NotNull TransactionGraph graph) {
@@ -161,6 +165,7 @@ public final class TransactionJcefPanel {
         String html = this.service.renderHtml(graph, dark);
         String bridge = buildNavigationBridgeScript();
         String wrapped = html.replace("</body>", bridge + "</body>");
+        this.cardLayout.show(this.root, "browser");
         this.browser.loadHTML(wrapped, "about:blank");
     }
 
@@ -252,7 +257,10 @@ public final class TransactionJcefPanel {
                 "<div class=\"details\">" + details + "</div></div>" +
                 "</body></html>";
         ApplicationManager.getApplication().invokeLater(() ->
-                this.browser.loadHTML(html, "about:blank"));
+                {
+                    this.cardLayout.show(this.root, "browser");
+                    this.browser.loadHTML(html, "about:blank");
+                });
     }
 
     @NotNull
@@ -267,13 +275,13 @@ public final class TransactionJcefPanel {
         if (this.browser == null) {
             return;
         }
-        String html =
-                "<!DOCTYPE html><html><head><style>" +
-                "body{margin:0;display:flex;align-items:center;justify-content:center;" +
-                "height:100vh;font-family:monospace;}" +
-                "</style></head><body>" +
-                "<div>⏳ Waiting for IDE index to be ready…</div>" +
-                "</body></html>";
-        this.browser.loadHTML(html, "about:blank");
+        showStatus("Waiting for IDE index to be ready...");
+    }
+
+    private void showStatus(@NotNull String message) {
+        if (this.statusLabel != null && this.cardLayout != null) {
+            this.statusLabel.setText(message);
+            this.cardLayout.show(this.root, "status");
+        }
     }
 }

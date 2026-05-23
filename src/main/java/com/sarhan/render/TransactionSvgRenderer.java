@@ -223,7 +223,7 @@ public final class TransactionSvgRenderer {
         String strokeWidth = node.isWriteInReadOnly() ? "2.5" : isRoot ? "2.5" : "1.5";
         String actualStroke = node.isWriteInReadOnly() ? errorColor(dark)
                 : isRoot ? (dark ? "#F5C842" : "#E6A817") : strokeColor;
-        String fillRgba    = hexToRgba(fillColor, 0.2f);
+        String nodeFill    = nodeFill(fillColor, dark);
 
         String[] parts     = node.getDisplayName().split("#", 2);
         String className   = (parts.length > 1) ? parts[0] : node.getDisplayName();
@@ -241,7 +241,7 @@ public final class TransactionSvgRenderer {
         sb.append(String.format(
                 "  <rect class=\"node-bg\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" rx=\"8\" ry=\"8\" " +
                         "fill=\"%s\" stroke=\"%s\" stroke-width=\"%s\" style=\"transition:filter 0.15s;\"/>%n",
-                NODE_W, NODE_H, fillRgba, actualStroke, strokeWidth));
+                NODE_W, NODE_H, nodeFill, actualStroke, strokeWidth));
 
         // Class name
         sb.append(String.format(
@@ -561,6 +561,8 @@ public final class TransactionSvgRenderer {
         String mmBorder = dark ? "#444"                  : "#CCC";
         String hintFg   = dark ? "rgba(180,180,180,0.5)" : "rgba(80,80,80,0.5)";
         String zPctFg   = dark ? "#AAAAAA"               : "#666666";
+        String bodyBg   = dark ? "#1e1e1e"               : "#ffffff";
+        String bodyFg   = dark ? "#eeeeee"               : "#333333";
 
         String bannerHtml = "";
         if (graph.isTruncated()) {
@@ -584,7 +586,7 @@ public final class TransactionSvgRenderer {
                 "<style>" +
 
                 // ── Base ───────────────────────────────────────────────────
-                "body{margin:0;padding:0;overflow:hidden;}" +
+                "body{margin:0;padding:0;overflow:hidden;background:" + bodyBg + ";color:" + bodyFg + ";}" +
                 "#refresh-banner{display:none;background:#4A90D9;color:white;" +
                 "  padding:6px 12px;font-size:12px;font-family:monospace;" +
                 "  cursor:pointer;border-bottom:1px solid #357ABD;}" +
@@ -1051,12 +1053,28 @@ public final class TransactionSvgRenderer {
     }
 
     @NotNull
-    private static String hexToRgba(@NotNull String hex, float alpha) {
+    private static String nodeFill(@NotNull String hex, boolean dark) {
+        return mix(hex, dark ? "#1e1e1e" : "#ffffff", dark ? 0.28d : 0.16d);
+    }
+
+    @NotNull
+    private static String mix(@NotNull String foreground, @NotNull String background, double foregroundWeight) {
+        int[] fg = rgb(foreground);
+        int[] bg = rgb(background);
+        int r = (int) Math.round(fg[0] * foregroundWeight + bg[0] * (1d - foregroundWeight));
+        int g = (int) Math.round(fg[1] * foregroundWeight + bg[1] * (1d - foregroundWeight));
+        int b = (int) Math.round(fg[2] * foregroundWeight + bg[2] * (1d - foregroundWeight));
+        return String.format("#%02X%02X%02X", r, g, b);
+    }
+
+    @NotNull
+    private static int[] rgb(@NotNull String hex) {
         hex = hex.startsWith("#") ? hex.substring(1) : hex;
-        int r = Integer.parseInt(hex.substring(0, 2), 16);
-        int g = Integer.parseInt(hex.substring(2, 4), 16);
-        int b = Integer.parseInt(hex.substring(4, 6), 16);
-        return String.format("rgba(%d,%d,%d,%.2f)", r, g, b, alpha);
+        return new int[] {
+                Integer.parseInt(hex.substring(0, 2), 16),
+                Integer.parseInt(hex.substring(2, 4), 16),
+                Integer.parseInt(hex.substring(4, 6), 16)
+        };
     }
 
     @NotNull
