@@ -196,7 +196,7 @@ public final class TransactionGraphBuilder {
 
             TransactionNode callerNode = (item.parentId() != null) ? nodeMap.get(item.parentId()) : null;
             TransactionNode node = resolveNode(item.method(), callerNode,
-                    item.proxyBypass() ? Boolean.TRUE : null);
+                    item.isCallee() ? Boolean.valueOf(item.proxyBypass()) : null);
             nodeMap.put(node.getId(), node);
             addEdge(edges, item, node, nodeMap);
 
@@ -223,7 +223,7 @@ public final class TransactionGraphBuilder {
                 String key  = methodId(item.method());
                 if (!depth1Nodes.containsKey(key)) {
                     TransactionNode n = resolveNode(item.method(), rootNode,
-                            item.proxyBypass() ? Boolean.TRUE : null);
+                            item.isCallee() ? Boolean.valueOf(item.proxyBypass()) : null);
                     depth1Nodes.put(key, n);
                 }
                 addEdge(depth1Edges, item, depth1Nodes.get(key), depth1Nodes);
@@ -523,7 +523,8 @@ public final class TransactionGraphBuilder {
                 }
 
                 PsiExpression qualifier = call.getMethodExpression().getQualifierExpression();
-                boolean isSelf = qualifier == null || qualifier instanceof PsiThisExpression;
+                boolean isSelf = (qualifier == null || qualifier instanceof PsiThisExpression)
+                        && hasMethodLevelTransaction(resolved);
 
                 queue.add(new WorkItem(resolved, depth, parentId, isSelf, true));
             }
@@ -577,7 +578,7 @@ private void addEdge(@NotNull List<TransactionGraph.Edge> edges,
     private static String computeEdgeLabel(@NotNull TransactionNode callee,
                                             @Nullable TransactionNode caller) {
         if (callee.getStatus() == TransactionNode.TxStatus.IGNORED) {
-            return "tx ignored";
+            return "proxy bypass";
         }
         boolean callerActive = caller != null
                 && caller.getStatus() != TransactionNode.TxStatus.NON_TX
@@ -689,6 +690,10 @@ private void addEdge(@NotNull List<TransactionGraph.Edge> edges,
             return !"jar".equals(protocol) && !"jrt".equals(protocol);
         }
         return false;
+    }
+
+    private static boolean hasMethodLevelTransaction(@NotNull PsiMethod method) {
+        return findTxAnnotation(method) != null;
     }
 
     private boolean isTransactionRelevant(@NotNull PsiMethod method) {

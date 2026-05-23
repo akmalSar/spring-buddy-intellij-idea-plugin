@@ -153,6 +153,10 @@ public final class TransactionInlayHintsProvider
     // -----------------------------------------------------------------------
 
     private static boolean shouldShowHint(@NotNull PsiMethod method) {
+        if (method.isConstructor()) {
+            return false;
+        }
+
         // 1. Direct @Transactional annotation
         if (isTransactional(method)) {
             return true;

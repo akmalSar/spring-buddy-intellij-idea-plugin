@@ -32,7 +32,7 @@ import java.util.Objects;
 public final class TransactionGraph {
 
     /** Maximum node count before the graph is truncated to depth 1. */
-    public static final int MAX_NODES = 50;
+    public static final int MAX_NODES = 20;
 
     // -----------------------------------------------------------------------
     // Fields

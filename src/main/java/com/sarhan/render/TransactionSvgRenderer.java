@@ -356,6 +356,9 @@ public final class TransactionSvgRenderer {
         if (node.getStatus() == TransactionNode.TxStatus.NON_TX) {
             return "∅";
         }
+        if (node.getStatus() == TransactionNode.TxStatus.IGNORED) {
+            return "!";
+        }
         return switch (node.getPropagation()) {
             case REQUIRED      -> "⟳";
             case REQUIRES_NEW  -> "★";
@@ -372,6 +375,9 @@ public final class TransactionSvgRenderer {
         if (node.getStatus() == TransactionNode.TxStatus.NON_TX) {
             return "NO TX";
         }
+        if (node.getStatus() == TransactionNode.TxStatus.IGNORED) {
+            return "BYPASS";
+        }
         return switch (node.getPropagation()) {
             case REQUIRED      -> "REQUIRED";
             case REQUIRES_NEW  -> "NEW TX";
@@ -387,6 +393,9 @@ public final class TransactionSvgRenderer {
     private static String propagationTooltip(@NotNull TransactionNode node) {
         if (node.getStatus() == TransactionNode.TxStatus.NON_TX) {
             return "NON_TX — this method has no @Transactional annotation and runs outside any transaction boundary.";
+        }
+        if (node.getStatus() == TransactionNode.TxStatus.IGNORED) {
+            return "Proxy bypass — this @Transactional method is called via this.method() or an unqualified same-class call, so Spring AOP does not apply its transaction attributes.";
         }
         String status = " [" + node.getStatus().name() + "]";
         return switch (node.getPropagation()) {
@@ -474,7 +483,7 @@ public final class TransactionSvgRenderer {
         if (edge.proxyBypass()) {
             color     = errorColor(dark);
             dashArray = "stroke-dasharray=\"6 4\"";
-            tooltip   = "⚠ Proxy bypass: this.method() skips the Spring proxy — @Transactional is ignored";
+            tooltip   = "Proxy bypass: same-class call skips the Spring proxy, so method-level @Transactional is ignored. Extract to another bean or call through proxy.";
             markerEnd = "url(#m-red)";
         } else if (edge.suspension()) {
             color     = dark ? "#F5C842" : "#E6A817";
@@ -570,7 +579,7 @@ public final class TransactionSvgRenderer {
                     "background:#F5C842;color:#333;padding:6px 12px;font-size:12px;" +
                     "font-family:monospace;border-bottom:1px solid #E6A817;\">" +
                     "⚠ Graph truncated — showing direct callers and callees only " +
-                    "(50-node limit)</div>";
+                    "(" + TransactionGraph.MAX_NODES + "-node limit)</div>";
         }
 
         String emptyStateHtml = "";

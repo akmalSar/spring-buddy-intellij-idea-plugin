@@ -126,6 +126,37 @@ public class    TransactionGraphBuilderTest extends BasePlatformTestCase {
             }
         }
         assertFalse("At least one edge must be marked as proxy bypass", proxyEdges.isEmpty());
+        assertEquals("Proxy-bypass edge label should explain what happened",
+                "proxy bypass", proxyEdges.get(0).statusLabel());
+    }
+
+    public void testClassLevelTransactionalPrivateHelperIsNotProxyBypass() {
+        this.myFixture.configureByText("ClassLevelTransactionalService.java",
+                """
+                @interface Transactional { }
+                @Transactional
+                class ClassLevelTransactionalService {
+                    public void save() {
+                        normalize();
+                    }
+                    private void normalize() {
+                    }
+                }
+                """);
+
+        PsiMethod psiMethod = findMethod("ClassLevelTransactionalService", "save");
+        assertNotNull(psiMethod);
+
+        TransactionGraph graph = buildGraph(psiMethod);
+
+        Optional<TransactionNode> helperNode = graph.getNodes().stream()
+                .filter((TransactionNode node) -> node.getId().endsWith("ClassLevelTransactionalService#normalize"))
+                .findFirst();
+        assertTrue("Private helper should stay visible as part of class-level transaction flow", helperNode.isPresent());
+        assertEquals("Class-level @Transactional already applies at public entry; helper is not a skipped boundary",
+                TxStatus.JOINS, helperNode.get().getStatus());
+        assertFalse("Class-level @Transactional helper call must not be shown as proxy bypass",
+                helperNode.get().isProxyBypass());
     }
 
     // -----------------------------------------------------------------------
@@ -251,22 +282,22 @@ public class    TransactionGraphBuilderTest extends BasePlatformTestCase {
     }
 
     // -----------------------------------------------------------------------
-    // Test 5 — Truncation (>50 nodes)
+    // Test 5 — Truncation (>20 nodes)
     // -----------------------------------------------------------------------
 
     public void testTruncation() {
-        // Use a stub builder that returns a pre-built graph with 51 nodes.
+        // Use a stub builder that returns a pre-built graph over the node limit.
         // This validates TransactionGraphBuilder's truncation logic in isolation.
         TransactionNode rootNode = TransactionNode.builder("Root#root", "Root#root")
                 .propagation(Propagation.REQUIRED)
                 .status(TxStatus.STARTS)
                 .build();
 
-        // Build 51-node list: root + 50 callees
+        // Build 21-node list: root + 20 callees
         List<TransactionNode> nodes = new ArrayList<>();
         nodes.add(rootNode);
         List<TransactionGraph.Edge> edges = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 20; i++) {
             String id = "Callee" + i + "#method";
             TransactionNode node = TransactionNode.builder(id, id)
                     .propagation(Propagation.REQUIRED)
@@ -277,7 +308,7 @@ public class    TransactionGraphBuilderTest extends BasePlatformTestCase {
         }
 
         // Simulate what the builder does: if > MAX_NODES, collapse to depth 1
-        // The builder is designed so that when node count crosses 50 it stops
+        // The builder is designed so that when node count crosses MAX_NODES it stops
         // and collapses. We test the model/flag here.
         TransactionGraph graph = TransactionGraph.builder(rootNode)
                 .nodes(nodes.subList(0, Math.min(nodes.size(), 10))) // collapsed subset
@@ -285,7 +316,7 @@ public class    TransactionGraphBuilderTest extends BasePlatformTestCase {
                 .truncated(true)
                 .build();
 
-        assertTrue("Graph with >50 raw nodes must be marked truncated", graph.isTruncated());
+        assertTrue("Graph with more than MAX_NODES raw nodes must be marked truncated", graph.isTruncated());
         assertTrue("Truncated graph must not exceed MAX_NODES (" + TransactionGraph.MAX_NODES + ")",
                 graph.getNodes().size() <= TransactionGraph.MAX_NODES);
     }
