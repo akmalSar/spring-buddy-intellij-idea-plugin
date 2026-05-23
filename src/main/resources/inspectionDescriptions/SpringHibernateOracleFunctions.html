@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports JPQL <code>@Query</code> strings that call Oracle-specific functions such as <code>NVL</code>
+or <code>ADD_MONTHS</code> outside a native query.
+<p>
+    Hibernate 6 validates JPQL functions more strictly. Replace <code>NVL</code> with standard
+    <code>coalesce</code>, or register/vendor-wrap non-standard functions with
+    <code>FUNCTION(...)</code> or a Hibernate <code>FunctionContributor</code>.
+</p>
+</body>
+</html>

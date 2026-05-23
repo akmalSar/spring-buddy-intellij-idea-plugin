@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports JPQL <code>ON</code> clauses that contain casts or function calls.
+<p>
+    Hibernate 6 strictly validates join predicates. Function-based joins such as
+    <code>on to_char(p.customerNumber) = sr.partnerId</code> should use standard JPQL
+    <code>cast(... as string)</code> or move the comparison to a simpler predicate.
+</p>
+</body>
+</html>

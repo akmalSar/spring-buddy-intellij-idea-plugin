@@ -53,6 +53,10 @@ public final class SpringBuddySettingsState implements PersistentStateComponent<
         this.state = state;
         if (this.state.enabledGroups == null || this.state.enabledGroups.isEmpty()) {
             this.state.enabledGroups = new ArrayList<>(SpringBuddySettingsUtil.defaultGroupIds());
+        } else {
+            Set<String> migratedGroups = new LinkedHashSet<>(this.state.enabledGroups);
+            migratedGroups.addAll(SpringBuddySettingsUtil.defaultGroupIds());
+            this.state.enabledGroups = new ArrayList<>(migratedGroups);
         }
         if (this.state.inspectionLevel == null || this.state.inspectionLevel.isBlank()) {
             this.state.inspectionLevel = SpringBuddySettingsUtil.DEFAULT_LEVEL;

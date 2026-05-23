@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports JPQL <code>FUNCTION('trunc', ...)</code> usage in <code>@Query</code> strings.
+<p>
+    Hibernate 6 cannot always infer the return type of vendor functions during SQM type checking.
+    Prefer explicit standard casts such as <code>cast(value as LocalDate)</code> when comparing date
+    values.
+</p>
+</body>
+</html>

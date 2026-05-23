@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports JPQL <code>@Query</code> strings that use Oracle <code>ROWNUM</code> outside a native query.
+<p>
+    Hibernate 6 parses JPQL through SQM and treats unknown identifiers as entity attributes, so
+    <code>ROWNUM</code> can fail with a semantic error. Use standard row limiting such as
+    <code>FETCH FIRST 1 ROWS ONLY</code> or a Spring Data <code>Pageable</code>/<code>findFirst</code>
+    method.
+</p>
+</body>
+</html>

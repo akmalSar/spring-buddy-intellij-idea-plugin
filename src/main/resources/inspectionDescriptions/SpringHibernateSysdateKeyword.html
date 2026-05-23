@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports JPQL <code>@Query</code> strings that use Oracle <code>sysdate</code> outside a native query.
+<p>
+    Hibernate 6 expects standard temporal keywords in JPQL. Replace <code>sysdate</code> with
+    <code>current_date</code> or <code>current_timestamp</code> depending on the intended precision.
+</p>
+</body>
+</html>

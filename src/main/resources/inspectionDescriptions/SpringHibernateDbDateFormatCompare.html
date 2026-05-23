@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports JPQL date comparisons that format database dates with
+<code>FUNCTION('to_char', dateField, ...)</code> before comparing them.
+<p>
+    Formatting dates in the database prevents normal index usage and creates string comparison
+    semantics. Compare native date values directly and change the repository method parameter to a
+    date type such as <code>LocalDate</code>.
+</p>
+</body>
+</html>

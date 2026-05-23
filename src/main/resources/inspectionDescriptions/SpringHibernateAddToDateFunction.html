@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports non-native JPQL queries that call the proprietary Oracle <code>add_to_date(...)</code> function.
+<p>
+    Hibernate 6 does not resolve bare vendor functions during SQM compilation. Prefer the standard
+    JPA <code>FUNCTION</code> wrapper with Hibernate's built-in <code>date_add</code>:
+    <code>function('date_add', cast(dateValue as LocalDate), 305, day)</code>.
+</p>
+</body>
+</html>

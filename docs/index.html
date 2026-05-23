@@ -460,12 +460,12 @@
             <span class="badge blue" style="background:rgba(53,197,255,0.12);border-color:rgba(53,197,255,0.34);">DataFlow taint engine</span>
         </div>
         <div class="stat-row">
-            <div class="stat"><strong>219</strong><span>Registered inspections across Spring runtime pitfalls, style, tests, Lombok, persistence, and configuration.</span></div>
+            <div class="stat"><strong>261</strong><span>Registered inspections across Spring runtime pitfalls, style, tests, Lombok, persistence, and configuration.</span></div>
             <div class="stat"><strong>85</strong><span>ERROR-level checks for definite runtime breakage that can block commits before broken code enters history.</span></div>
             <div class="stat"><strong>8</strong><span>Dedicated flow views for transactions, Ghost Save, boundary escape, lazy init, self-invocation, SQL injection, bag problems, and N+1.</span></div>
             <div class="stat"><strong>IDE</strong><span>Precise editor warnings, quick fixes, inlay hints, runner actions, and commit checks with no context switch.</span></div>
         </div>
-        <a class="tour-link" href="inspections-list.html">See all 219 inspections</a>
+        <a class="tour-link" href="inspections-list.html">See all 261 inspections</a>
     </section>
 
     <section class="slide">
@@ -556,7 +556,7 @@
     <section class="slide">
         <span class="eyebrow">Inspection Coverage</span>
         <h2>One plugin, multiple Spring failure modes.</h2>
-        <p class="lead">219 registered checks cover 85 ERROR, 130 WARNING, and 4 WEAK WARNING findings. Style checks, test improvements, lifecycle traps, transaction failures, Lombok pitfalls, and Spring-specific persistence issues are flagged in the IDE before they become real problems.</p>
+        <p class="lead">261 registered checks cover 85 ERROR, 172 WARNING, and 4 WEAK WARNING findings. Style checks, test improvements, lifecycle traps, transaction failures, Lombok pitfalls, and Spring-specific persistence issues are flagged in the IDE before they become real problems.</p>
         <div class="grid-4">
             <article class="card compact"><h3>Spring Java Format</h3><p>Imports, modifiers, method order, test names, utility constructors, visibility, and ternary style.</p></article>
             <article class="card compact"><h3>Testing Style</h3><p>AssertJ migration, Mockito style, unused stubbing, matcher mixing, no-assertion and WebTestClient detection.</p></article>
@@ -637,7 +637,7 @@ void givenClasses_whenRestControllerHasCorrectProduces_thenSuccess() {
         <p class="lead">Spring Buddy does not force every finding into one format. It uses <span class="red">errors</span> for definite runtime breakage, <span class="yellow">warnings</span> for likely design risks, quick fixes for safe edits, inlay hints for runtime explanation, and runner actions for broad sweeps.</p>
         <div class="grid-2">
             <article class="card"><h3><span class="red">Errors</span></h3><p>Mark definite runtime breakage: ignored proxy advice, @Transactional on private/final/static methods, self-invocation, readOnly transactions with writes, swallowed exceptions, unclosed repository Streams, missing no-arg constructors, cascade delete risks, stale persistence context, SQL injection via @Query concatenation and taint flow, @Async without Executor, Jackson lazy serialization, hardcoded secrets, Jakarta @Transactional migration, transaction boundary escape, LazyInitializationException prediction, and read-only entity mutation.</p></article>
-            <article class="card"><h3><span class="yellow">Warnings</span></h3><p>Flag likely design risks and style drift: import ordering, modifier placement, method visibility, test naming, TODO/FIXME without tickets, collection return nulls, @RequestMapping without HTTP method, fixedRate without initialDelay, findAll without Pageable, unvalidated MultipartFile uploads, mutable @Configuration state, and Ghost Save (detached entity mutation).</p></article>
+            <article class="card"><h3><span class="yellow">Warnings</span></h3><p>Flag likely design risks and style drift: import ordering, modifier placement, method visibility, test naming, TODO/FIXME without tickets, collection return nulls, @RequestMapping without HTTP method, fixedRate without initialDelay, findAll without Pageable, unvalidated MultipartFile uploads, mutable @Configuration state, Hibernate 6 migration hazards, and Ghost Save (detached entity mutation).</p></article>
             <article class="card"><h3><span class="ok">Quick Fixes</span></h3><p>Add @Transactional, choose REQUIRES_NEW, remove final, add EnumType.STRING, add auditing listeners, add mappedBy, wrap Stream in try-with-resources, convert to contextual orElseThrow, or replace string concatenation with parameter placeholders.</p></article>
             <article class="card"><h3><span class="blue">Inlay Hints + Flow Views</span></h3><p>Show transaction behavior inline and open navigable flow diagrams for transaction paths, Ghost Save, boundary escape, lazy-init, self-invocation, SQL injection, bag problem, and N+1 findings.</p></article>
             <article class="card"><h3>Inspection Runners</h3><p>Run Spring Buddy and Lombok Buddy inspection profiles from context menu actions against the current scope.</p></article>

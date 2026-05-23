@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports non-native JPQL <code>@Query</code> strings that call Oracle functions such as
+<code>trunc</code>, <code>to_char</code>, <code>ADD_MONTHS</code>, or <code>add_to_date</code> without
+the JPA <code>FUNCTION(...)</code> wrapper.
+<p>
+    Hibernate 6 resolves JPQL functions during SQM compilation. Wrap vendor functions as
+    <code>FUNCTION('name', args)</code> or register them with a Hibernate function contributor.
+</p>
+</body>
+</html>

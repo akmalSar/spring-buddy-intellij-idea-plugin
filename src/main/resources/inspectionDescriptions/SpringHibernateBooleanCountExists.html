@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports boolean JPQL queries written as <code>select case when count(...) &gt; 0 then true else false end</code>.
+<p>
+    This forces the database to count all matching rows. Hibernate 6 has improved support for
+    <code>exists</code>, which lets the database stop after the first match. Rewrite the query to an
+    <code>exists(select 1 ...)</code> expression.
+</p>
+</body>
+</html>

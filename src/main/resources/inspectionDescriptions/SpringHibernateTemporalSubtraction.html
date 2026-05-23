@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports JPQL date subtraction expressions such as <code>trunc(aDate) - trunc(current_date) &lt;= 8</code>.
+<p>
+    Hibernate 6 uses stricter temporal type checking and can reject date-minus-date expressions that
+    are compared to numbers. Rewrite the predicate as an interval comparison such as
+    <code>aDate &lt;= current_date + 8 day</code>.
+</p>
+</body>
+</html>

@@ -365,6 +365,7 @@ h2 .count {
 <a href="#lombok">Lombok<span class="nav-count">25</span></a>
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
+<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">42</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
@@ -378,9 +379,9 @@ h2 .count {
 
 <div class="stat-row">
 <div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>85</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>130</strong><span>WARNING</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>172</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>4</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>219</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>261</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -648,6 +649,223 @@ h2 .count {
 <div class="class-name">SpringTestNoAssertionsInspection</div>
 <div class="display-name">@Test method has no assertion or verify() call<span class="badge yellow">WARNING</span></div>
 <div class="description">SpringTestNoAssertions: a <pre class="code"> @Test</pre> method whose body contains no assertion-like call (AssertJ <pre class="code"> assertThat</pre>, JUnit <pre class="code"> assertX</pre>, Mockito <pre class="code"> verify</pre>, AssertJ <pre class="code"> assertThatThrownBy</pre> / <pre class="code"> assertThatCode</pre>, or Hamcrest <pre class="code"> assertThat</pre>).</div>
+</article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow misc">Hiberante Migration</div>
+<h2 id="hiberante-migration">Hiberante Migration<span class="count">42 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateAddToDateFunction</div>
+<div class="display-name">Hibernate 6 add_to_date JPQL migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports bare Oracle <pre class="code"> add_to_date(...)</pre> in non-native JPQL. Hibernate 6 cannot resolve it as a standard function. Quick-fix rewrites clear cases to <pre class="code"> function('date_add', cast(dateValue as LocalDate), N, day)</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateArrayMapping</div>
+<div class="display-name">Hibernate 6 array mapping default shift<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports Java array fields without explicit JDBC type mapping. Hibernate 6 can map arrays to dialect-native JSON/XML array storage instead of legacy binary storage, so legacy schemas should be pinned or migrated intentionally.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateBarePositionalParameters</div>
+<div class="display-name">Hibernate 6 bare positional query parameters<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports HQL <pre class="code"> @Query</pre> strings that still use bare <pre class="code"> ?</pre> placeholders. Hibernate 6 requires numbered parameters such as <pre class="code"> ?1</pre> and <pre class="code"> ?2</pre>. Quick-fix numbers placeholders in query order.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateBareOracleFunctions</div>
+<div class="display-name">Hibernate 6 bare Oracle JPQL function leak<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports non-native JPQL queries that call Oracle functions such as <pre class="code"> trunc</pre>, <pre class="code"> to_char</pre>, <pre class="code"> ADD_MONTHS</pre>, or <pre class="code"> add_to_date</pre> without <pre class="code"> FUNCTION(...)</pre>. Quick-fix wraps simple calls in the JPA function wrapper.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateBooleanCountExists</div>
+<div class="display-name">Hibernate 6 boolean COUNT existence query<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports boolean JPQL queries written as <pre class="code"> select case when count(...) &gt; 0 then true else false end</pre>. This counts every match before returning. Quick-fix rewrites the wrapper to an <pre class="code"> exists(select 1 ...)</pre> expression.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateConcatTypeCast</div>
+<div class="display-name">Hibernate 6 CONCAT argument type check<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports likely non-string entity paths inside JPQL <pre class="code"> concat(...)</pre>. Hibernate 6 requires string arguments. Quick-fix wraps likely numeric or date paths with <pre class="code"> cast(... as string)</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateCascadeTypes</div>
+<div class="display-name">Hibernate proprietary cascade type migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports proprietary Hibernate cascade constants <pre class="code"> SAVE_UPDATE</pre> and <pre class="code"> DELETE</pre>. Migrate them to standard JPA cascade behavior or explicit Hibernate 6-compatible cascade choices.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateCastInOnClause</div>
+<div class="display-name">Hibernate 6 JPQL ON-clause cast/function migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports JPQL <pre class="code"> ON</pre> clauses that contain <pre class="code"> to_char</pre>, <pre class="code"> cast</pre>, or <pre class="code"> FUNCTION</pre>. Hibernate 6 validates join predicates strictly. Quick-fix replaces Oracle <pre class="code"> to_char(x)</pre> with standard <pre class="code"> cast(x as string)</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateCompositeUserType</div>
+<div class="display-name">Hibernate 6 CompositeUserType attribute override migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports likely custom <pre class="code"> CompositeUserType</pre> field mappings without standard <pre class="code"> @AttributeOverride</pre> declarations. Hibernate 6 treats composite user types like embeddable components, so column overrides belong on the owning field.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateDialectRemoval</div>
+<div class="display-name">Hibernate 6 version-specific dialect removal<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports version-specific dialect class names such as <pre class="code"> PostgreSQL10Dialect</pre> or <pre class="code"> MySQL8Dialect</pre> in configuration files. Hibernate 6 removed these classes and resolves versions from JDBC metadata. Quick-fix uses the base dialect class.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateDbDateFormatCompare</div>
+<div class="display-name">Hibernate 6 DB-side date formatting comparison<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports JPQL comparisons that format date columns with <pre class="code"> FUNCTION('to_char', dateField, ...)</pre>. This blocks index-friendly date comparisons. Quick-fix removes the formatting wrapper and compares the date field directly.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateDistinctFetch</div>
+<div class="display-name">Hibernate 6 redundant DISTINCT in fetch query<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports HQL queries combining <pre class="code"> SELECT DISTINCT</pre> and <pre class="code"> JOIN FETCH</pre>. Hibernate 6 de-duplicates root entities in memory; SQL-level <pre class="code"> DISTINCT</pre> can now be needless overhead. Quick-fix removes <pre class="code"> DISTINCT</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateEmbeddableReuse</div>
+<div class="display-name">Hibernate 6 embeddable structural reuse ban<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports entity classes that embed the same component type multiple times with different override structures. Hibernate 6 expects distinct Java component classes for structurally distinct embeddable mappings.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateEmbeddedSubPropertyOverride</div>
+<div class="display-name">Hibernate 6 embedded sub-property override path<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports ambiguous <pre class="code"> @AttributeOverride</pre> names on nested embedded components. Hibernate 6 validates embedded sub-property paths strictly; use an explicit dot path that mirrors the embedded object hierarchy.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateFetchJoinProjection</div>
+<div class="display-name">Hibernate 6 JOIN FETCH projection mismatch<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports scalar or DTO HQL projections that use <pre class="code"> JOIN FETCH</pre> without selecting the owning entity. Hibernate 6 rejects this. Quick-fix removes <pre class="code"> FETCH</pre> for scalar projections.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateFunctionRegistration</div>
+<div class="display-name">Hibernate 6 SQL function registration migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports legacy <pre class="code"> registerFunction(...)</pre> calls inside custom Hibernate dialect constructors. Hibernate 6 removed the old SQLFunction path; move registrations to a <pre class="code"> FunctionContributor</pre> service.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateFunctionParameterType</div>
+<div class="display-name">Hibernate 6 FUNCTION parameter type blindness<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports JPQL <pre class="code"> FUNCTION(...)</pre> calls where an immediate argument is a query parameter. Hibernate 6 may not infer the hidden parameter type. Quick-fix rewrites simple trunc parameter calls to explicit <pre class="code"> cast(:param as LocalDate)</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateFunctionReturnType</div>
+<div class="display-name">Hibernate 6 FUNCTION return type check<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports JPQL <pre class="code"> FUNCTION('trunc', ...)</pre> usage. Hibernate 6 cannot always infer vendor function return types during strict SQM checks. Quick-fix rewrites simple trunc calls to <pre class="code"> cast(... as LocalDate)</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateGlobalSequence</div>
+<div class="display-name">Hibernate 6 implicit global sequence drop<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports <pre class="code"> @GeneratedValue(strategy = SEQUENCE)</pre> without an explicit generator or <pre class="code"> @SequenceGenerator</pre>. Hibernate 6 may look for table-specific sequences instead of the legacy global <pre class="code"> hibernate_sequence</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateIdentifierGenerator</div>
+<div class="display-name">Hibernate 6 IdentifierGenerator signature change<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports custom <pre class="code"> IdentifierGenerator.generate</pre> implementations that return <pre class="code"> Serializable</pre>. Hibernate 6 expects <pre class="code"> Object</pre>. Quick-fix changes the return type.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateImplicitSelect</div>
+<div class="display-name">Hibernate 6 implicit SELECT in joined HQL<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports HQL <pre class="code"> @Query</pre> strings that start with <pre class="code"> FROM</pre> and contain joins. Hibernate 6 requires an explicit projection. Quick-fix prepends <pre class="code"> SELECT alias</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateInterceptorSignature</div>
+<div class="display-name">Hibernate 6 Interceptor signature migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports old <pre class="code"> EmptyInterceptor</pre> override signatures using legacy <pre class="code"> Type[]</pre> parameters. Hibernate 6 changed these callback contracts, so custom interceptors must update their method signatures.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateLegacyType</div>
+<div class="display-name">Hibernate 6 legacy @Type/@TypeDef usage<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports removed <pre class="code"> @TypeDef</pre> registrations and string-alias <pre class="code"> @Type(type = "...")</pre> mappings. Quick-fixes remove <pre class="code"> @TypeDef</pre> or replace simple legacy text mappings with <pre class="code"> @JdbcTypeCode</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateNativeCountCast</div>
+<div class="display-name">Hibernate 6 native COUNT BigInteger cast<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports native SQL <pre class="code"> COUNT</pre> results cast directly to <pre class="code"> BigInteger</pre>. Hibernate 6 commonly normalizes aggregate results to <pre class="code"> Long</pre>; use <pre class="code"> Long</pre> or <pre class="code"> ((Number) result).longValue()</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateOracleFunctions</div>
+<div class="display-name">Hibernate 6 Oracle JPQL function migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports Oracle-specific <pre class="code"> NVL(...)</pre> and <pre class="code"> ADD_MONTHS(...)</pre> in non-native JPQL queries. Hibernate 6 validates functions strictly. Quick-fix replaces <pre class="code"> NVL</pre> with standard <pre class="code"> coalesce</pre>; <pre class="code"> ADD_MONTHS</pre> should be wrapped or registered explicitly.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateQueryCacheProperties</div>
+<div class="display-name">Hibernate 6 query cache property migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports legacy query cache configuration keys such as <pre class="code"> hibernate.cache.region_prefix</pre> and <pre class="code"> hibernate.cache.use_structured_entries</pre>. Hibernate 6 changed cache region configuration and provider integration.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateResultTransformer</div>
+<div class="display-name">Hibernate 6 ResultTransformer removal<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports <pre class="code"> setResultTransformer(...)</pre> calls on Hibernate queries. Hibernate 6 split this API into tuple and list transformers. Quick-fix renames the call to <pre class="code"> setTupleTransformer</pre> as a starting point.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateRownumPseudoColumn</div>
+<div class="display-name">Hibernate 6 Oracle ROWNUM JPQL migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports Oracle <pre class="code"> ROWNUM</pre> inside non-native JPQL queries. Hibernate 6 treats unknown identifiers as entity attributes. Quick-fix removes the rownum predicate and appends <pre class="code"> FETCH FIRST 1 ROWS ONLY</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateSchemaTypeDefaults</div>
+<div class="display-name">Hibernate 6 schema-breaking type defaults<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports <pre class="code"> Duration</pre>, <pre class="code"> Instant</pre>, and <pre class="code"> UUID</pre> fields without <pre class="code"> @JdbcTypeCode</pre>. Hibernate 6 changed default JDBC mappings for these types. Quick-fix adds a legacy-compatible type code.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateScrollableResultsAccess</div>
+<div class="display-name">Hibernate 6 ScrollableResults access migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports <pre class="code"> ScrollableResults.get(int)</pre> calls. Hibernate 6 changed scroll access semantics and made cursor results closeable; prefer typed streams or rewrite the cursor loop explicitly.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateScrollModeUsage</div>
+<div class="display-name">Hibernate 6 ScrollMode streaming migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports legacy <pre class="code"> ScrollMode.SCROLL_SENSITIVE</pre> and forward-only cursor initializations. Hibernate 6 favors forward-only streaming or <pre class="code"> Query.stream()</pre>. Quick-fix converts sensitive scrolling to forward-only.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateSequenceAllocation</div>
+<div class="display-name">Hibernate 6 sequence allocation size should be explicit<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports <pre class="code"> @SequenceGenerator</pre> declarations that omit <pre class="code"> allocationSize</pre>. Hibernate 6 sequence optimizers can expose mismatches with legacy schemas. Quick-fix adds <pre class="code"> allocationSize = 1</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateSessionLifecycle</div>
+<div class="display-name">Hibernate Session lifecycle method migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports native Hibernate <pre class="code"> Session.save</pre>, <pre class="code"> update</pre>, and <pre class="code"> saveOrUpdate</pre> calls. Hibernate 6 deprecates these proprietary lifecycle methods. Quick-fix maps <pre class="code"> save</pre> to <pre class="code"> persist</pre> and the others to <pre class="code"> merge</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateSessionEventListener</div>
+<div class="display-name">Hibernate 6 SessionEventListener registration migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports manual listener registration through internal <pre class="code"> SessionImplementor</pre> event managers and legacy <pre class="code"> BaseSessionEventListener</pre> inheritance. Hibernate 6 moved this toward public <pre class="code"> SessionEventListener</pre> and <pre class="code"> SessionBuilder</pre> registration.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateSpatialType</div>
+<div class="display-name">Hibernate 6 legacy spatial @Type mapping<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports spatial <pre class="code"> @Type(type = "org.hibernate.spatial...")</pre> aliases. Hibernate 6 recognizes common JTS and Geolatte geometry types natively. Quick-fix removes the redundant type annotation.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateSysdateKeyword</div>
+<div class="display-name">Hibernate 6 sysdate JPQL migration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports Oracle <pre class="code"> sysdate</pre> inside non-native JPQL queries. Hibernate 6 expects standard temporal keywords. Quick-fix replaces it with <pre class="code"> current_date</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateTemporalSubtraction</div>
+<div class="display-name">Hibernate 6 illegal temporal subtraction<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports JPQL expressions like <pre class="code"> trunc(dateA) - trunc(dateB) &lt;= 8</pre>. Hibernate 6 rejects date-minus-date math compared to numbers. Quick-fix rewrites clear cases to <pre class="code"> dateA &lt;= dateB + 8 day</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateTableAnnotation</div>
+<div class="display-name">Hibernate 6 proprietary @Table deprecation<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports proprietary <pre class="code"> org.hibernate.annotations.Table</pre> usage. Hibernate 6 deprecates this wrapper in favor of standard JPA table annotations and more targeted Hibernate annotations.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateTemporalJavaTime</div>
+<div class="display-name">Hibernate 6 @Temporal on java.time type<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports <pre class="code"> @Temporal</pre> on modern <pre class="code"> java.time</pre> fields such as <pre class="code"> LocalDateTime</pre> and <pre class="code"> Instant</pre>. Hibernate 6 rejects this metadata. Quick-fix removes <pre class="code"> @Temporal</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateUpdateFrom</div>
+<div class="display-name">Hibernate 6 invalid UPDATE FROM HQL<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports HQL update statements starting with <pre class="code"> UPDATE FROM</pre>. Hibernate 6 enforces standard JPA update syntax. Quick-fix removes the extra <pre class="code"> FROM</pre>.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateUntypedCreateQuery</div>
+<div class="display-name">Hibernate 6 untyped createQuery deprecation<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports <pre class="code"> createQuery(String)</pre> calls without an expected result class. Hibernate 6 deprecates the untyped overload; pass <pre class="code"> User.class</pre> or another explicit result type.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateUserTypeSignature</div>
+<div class="display-name">Hibernate 6 UserType signature change<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports old Hibernate 5 <pre class="code"> UserType</pre> method signatures such as legacy <pre class="code"> nullSafeGet</pre> and <pre class="code"> nullSafeSet</pre> overrides. Update custom user types to the Hibernate 6 contract.</div>
 </article>
 </div>
 </div>
