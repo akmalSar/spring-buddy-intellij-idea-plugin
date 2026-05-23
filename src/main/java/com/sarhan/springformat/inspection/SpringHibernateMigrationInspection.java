@@ -247,8 +247,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (hasAnnotation(field.getModifierList(), "JdbcTypeCode")) {
             return;
         }
-        PsiClass containingClass = field.getContainingClass();
-        if (containingClass == null || !SpringInspectionUtil.isJpaEntity(containingClass)) {
+        if (!isJpaField(field)) {
             return;
         }
         String canonical = field.getType().getCanonicalText();
@@ -527,6 +526,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     }
 
     private void visitTemporalJavaTime(@NotNull PsiField field, @NotNull ProblemsHolder holder) {
+        if (!isJpaField(field)) {
+            return;
+        }
         PsiAnnotation temporal = findAnnotation(field.getModifierList(), "Temporal");
         if (temporal == null || !isModernJavaTime(field.getType().getCanonicalText())) {
             return;
@@ -536,6 +538,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     }
 
     private void visitGlobalSequence(@NotNull PsiField field, @NotNull ProblemsHolder holder) {
+        if (!isJpaField(field)) {
+            return;
+        }
         PsiAnnotation generatedValue = findAnnotation(field.getModifierList(), "GeneratedValue");
         if (generatedValue == null || !annotationTextContains(generatedValue, "GenerationType.SEQUENCE")) {
             return;
@@ -555,12 +560,18 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (!(field.getType() instanceof PsiArrayType) || hasAnnotation(field.getModifierList(), "JdbcTypeCode")) {
             return;
         }
+        if (!isJpaField(field)) {
+            return;
+        }
         PsiElement target = field.getNameIdentifier() != null ? field.getNameIdentifier() : field;
         holder.registerProblem(target, "Hibernate 6 changes default array storage; pin legacy VARBINARY mapping if needed",
                 ProblemHighlightType.WARNING, new AddJdbcTypeCodeFix("java.sql.Types.VARBINARY"));
     }
 
     private void visitCompositeUserType(@NotNull PsiField field, @NotNull ProblemsHolder holder) {
+        if (!isJpaField(field)) {
+            return;
+        }
         PsiAnnotation type = findAnnotation(field.getModifierList(), "Type");
         if (type == null || hasAnnotation(field.getModifierList(), "AttributeOverride")
                 || hasAnnotation(field.getModifierList(), "AttributeOverrides")) {
@@ -572,6 +583,11 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         }
         holder.registerProblem(type, "Hibernate 6 treats CompositeUserType as embeddable; use @AttributeOverride on the field",
                 ProblemHighlightType.WARNING);
+    }
+
+    private static boolean isJpaField(@NotNull PsiField field) {
+        PsiClass containingClass = field.getContainingClass();
+        return containingClass != null && SpringInspectionUtil.isJpaEntity(containingClass);
     }
 
     private void visitSessionEventListenerRegistration(@NotNull PsiMethodCallExpression expression,

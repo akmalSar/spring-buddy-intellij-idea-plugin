@@ -157,6 +157,7 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 @interface Embedded { }
                 @interface AttributeOverride { String name(); }
                 @interface Type { Class value(); }
+                @interface Entity { }
                 enum TemporalType { TIMESTAMP }
                 enum GenerationType { SEQUENCE }
                 interface MyCompositeUserType { }
@@ -168,6 +169,7 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                     Object leftFetchProjection();
                 }
                 @Table(appliesTo = "users")
+                @Entity
                 class Entity {
                     @GeneratedValue(strategy = GenerationType.SEQUENCE)
                     Long id;
@@ -467,6 +469,8 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
     public void testArrayMappingFixClearsWarning() {
         this.myFixture.enableInspections(new SpringHibernateMigrationInspection.ArrayMapping());
         this.myFixture.configureByText("Sample.java", """
+                @interface Entity { }
+                @Entity
                 class Entity {
                     byte[] <caret>payload;
                 }
@@ -478,6 +482,41 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
 
         Assertions.assertThat(countWarnings(highlights))
                 .as("array mapping warning after quick fix")
+                .isZero();
+    }
+
+    public void testDoesNotReportArrayMappingOnSerializableDto() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.ArrayMapping());
+        this.myFixture.configureByText("Sample.java", """
+                import java.io.Serializable;
+                import java.util.Base64;
+                import java.util.Optional;
+                @interface Getter { }
+                @interface Setter { }
+                @interface AllArgsConstructor { }
+                @interface NoArgsConstructor { }
+                @Getter
+                @Setter
+                @AllArgsConstructor
+                @NoArgsConstructor
+                class ByteStream implements Serializable {
+                    private String mimeType;
+                    private String filename;
+                    private byte[] data;
+                    Base64File toBase64File() {
+                        return new Base64File(mimeType, filename,
+                                Optional.ofNullable(data).map(d -> Base64.getEncoder().encodeToString(d)).orElse(null));
+                    }
+                }
+                class Base64File {
+                    Base64File(String mimeType, String filename, String data) { }
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("serializable DTO array mapping warnings")
                 .isZero();
     }
 
@@ -555,7 +594,9 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
         this.myFixture.enableInspections(new SpringHibernateMigrationInspection.TemporalJavaTime());
         this.myFixture.configureByText("Sample.java", """
                 @interface Temporal { TemporalType value(); }
+                @interface Entity { }
                 enum TemporalType { TIMESTAMP }
+                @Entity
                 class Entity {
                     @<caret>Temporal(TemporalType.TIMESTAMP)
                     java.time.Instant createdAt;
@@ -568,6 +609,36 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
 
         Assertions.assertThat(countWarnings(highlights))
                 .as("temporal Java time warning after quick fix")
+                .isZero();
+    }
+
+    public void testDoesNotReportJpaFieldMappingsOnDto() {
+        this.myFixture.enableInspections(
+                new SpringHibernateMigrationInspection.TemporalJavaTime(),
+                new SpringHibernateMigrationInspection.GlobalSequence(),
+                new SpringHibernateMigrationInspection.CompositeUserType());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Temporal { TemporalType value(); }
+                @interface GeneratedValue { GenerationType strategy(); String generator() default ""; }
+                @interface Type { Class value(); }
+                enum TemporalType { TIMESTAMP }
+                enum GenerationType { SEQUENCE }
+                interface MyCompositeUserType { }
+                class MyMonetaryAmountType implements MyCompositeUserType { }
+                class RequestDto {
+                    @Temporal(TemporalType.TIMESTAMP)
+                    java.time.Instant createdAt;
+                    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+                    Long id;
+                    @Type(MyMonetaryAmountType.class)
+                    Object price;
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("DTO JPA field mapping warnings")
                 .isZero();
     }
 
