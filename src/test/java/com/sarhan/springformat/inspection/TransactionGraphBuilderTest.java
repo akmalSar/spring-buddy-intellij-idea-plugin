@@ -435,6 +435,73 @@ public class    TransactionGraphBuilderTest extends BasePlatformTestCase {
                 graph.getNodes().stream().anyMatch((TransactionNode node) -> node.getId().startsWith("java.")));
     }
 
+    public void testNonTransactionalEntitySetterExcludedFromGraph() {
+        this.myFixture.configureByText("GhostSaveDemo.java",
+                """
+                @interface Service { }
+                @interface Transactional { }
+                @Service
+                class GhostSaveDemo {
+                    private final GhostUserRepository ghostUserRepository;
+                    GhostSaveDemo(GhostUserRepository ghostUserRepository) {
+                        this.ghostUserRepository = ghostUserRepository;
+                    }
+                    void safeTransactionalHelper() {
+                        GhostUser u = this.ghostUserRepository.findById(1L);
+                        persistUpdate(u);
+                    }
+                    @Transactional
+                    private void persistUpdate(GhostUser ghostUser) {
+                        ghostUser.setName("Ivan");
+                    }
+                }
+                interface GhostUserRepository {
+                    GhostUser findById(long id);
+                }
+                class GhostUser {
+                    void setName(String name) {
+                    }
+                }
+                """);
+
+        PsiMethod psiMethod = findMethod("GhostSaveDemo", "safeTransactionalHelper");
+        assertNotNull(psiMethod);
+
+        TransactionGraph graph = buildGraph(psiMethod);
+
+        assertFalse("Plain entity setters are not transaction boundaries and must stay out of Tx Flow",
+                graph.getNodes().stream().anyMatch((TransactionNode node) -> node.getId().equals("GhostUser#setName")));
+    }
+
+    public void testNonTransactionalCalleeEdgeIsNotLabeledStarts() {
+        this.myFixture.configureByText("ServiceGraph.java",
+                """
+                @interface Transactional { }
+                class CallerService {
+                    void root() {
+                        plain();
+                    }
+                    void plain() {
+                    }
+                    @Transactional
+                    void transactionalBoundary() {
+                    }
+                }
+                """);
+
+        PsiMethod psiMethod = findMethod("CallerService", "root");
+        assertNotNull(psiMethod);
+
+        TransactionGraph graph = buildGraph(psiMethod);
+
+        Optional<TransactionGraph.Edge> edge = graph.getEdges().stream()
+                .filter((TransactionGraph.Edge item) -> item.toId().endsWith("CallerService#plain"))
+                .findFirst();
+        assertTrue("Non-transactional Spring bean callee edge must exist", edge.isPresent());
+        assertEquals("Non-transactional callee must not be described as starting a transaction",
+                "non-tx", edge.get().statusLabel());
+    }
+
     // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------

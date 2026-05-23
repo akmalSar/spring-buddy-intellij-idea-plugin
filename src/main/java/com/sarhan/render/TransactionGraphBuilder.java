@@ -518,6 +518,9 @@ public final class TransactionGraphBuilder {
                 if (!inProject && !isSpring) {
                     return;
                 }
+                if (inProject && !isSpring && !isTransactionRelevant(resolved)) {
+                    return;
+                }
 
                 PsiExpression qualifier = call.getMethodExpression().getQualifierExpression();
                 boolean isSelf = qualifier == null || qualifier instanceof PsiThisExpression;
@@ -579,6 +582,9 @@ private void addEdge(@NotNull List<TransactionGraph.Edge> edges,
         boolean callerActive = caller != null
                 && caller.getStatus() != TransactionNode.TxStatus.NON_TX
                 && caller.getStatus() != TransactionNode.TxStatus.IGNORED;
+        if (callee.getStatus() == TransactionNode.TxStatus.NON_TX) {
+            return "non-tx";
+        }
         return switch (callee.getPropagation()) {
             case REQUIRED     -> callerActive ? "joins" : "starts";
             case REQUIRES_NEW -> "suspends";
@@ -683,6 +689,17 @@ private void addEdge(@NotNull List<TransactionGraph.Edge> edges,
             return !"jar".equals(protocol) && !"jrt".equals(protocol);
         }
         return false;
+    }
+
+    private boolean isTransactionRelevant(@NotNull PsiMethod method) {
+        if (resolveAnnotation(method) != null || containsProgrammaticTransaction(method)) {
+            return true;
+        }
+        PsiClass containingClass = method.getContainingClass();
+        if (containingClass == null) {
+            return false;
+        }
+        return isSpringBeanOrTransactional(containingClass);
     }
 
     private boolean isSpringBeanOrTransactional(@NotNull PsiClass clazz) {
