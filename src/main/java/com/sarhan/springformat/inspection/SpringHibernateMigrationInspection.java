@@ -1086,7 +1086,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (name == null && annotation.getNameReferenceElement() != null) {
             name = annotation.getNameReferenceElement().getText();
         }
-        return shortName.equals(name) || fqn.equals(name);
+        return shortName.equals(name) || fqn.equals(name) || (name != null && name.endsWith("." + shortName));
     }
 
     @Nullable
@@ -1514,12 +1514,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             sb.append(")");
             PsiAnnotation newAnnotation = JavaPsiFacade.getElementFactory(project)
                     .createAnnotationFromText(sb.toString(), oldAnnotation);
-            PsiElement replaced = oldAnnotation.replace(newAnnotation);
-            PsiJavaFile javaFile = PsiTreeUtil.getParentOfType(replaced, PsiJavaFile.class);
-            if (javaFile != null) {
-                SpringImportUtil.ensureImport(project, javaFile, "jakarta.persistence.Table");
-                JavaCodeStyleManager.getInstance(project).shortenClassReferences(javaFile);
-            }
+            oldAnnotation.replace(newAnnotation);
         }
     }
 

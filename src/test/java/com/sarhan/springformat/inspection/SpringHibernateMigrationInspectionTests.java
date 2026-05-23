@@ -456,6 +456,97 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 .isZero();
     }
 
+    public void testArrayMappingFixClearsWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.ArrayMapping());
+        this.myFixture.configureByText("Sample.java", """
+                class Entity {
+                    byte[] <caret>payload;
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Add @JdbcTypeCode"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("array mapping warning after quick fix")
+                .isZero();
+    }
+
+    public void testSchemaTypeDefaultFixClearsUuidWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.SchemaTypeDefaults());
+        this.myFixture.configureByText("Sample.java", """
+                class Entity {
+                    java.util.UUID <caret>id;
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Add @JdbcTypeCode"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("UUID schema mapping warning after quick fix")
+                .isZero();
+    }
+
+    public void testSequenceAllocationFixClearsWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.SequenceAllocation());
+        this.myFixture.configureByText("Sample.java", """
+                @interface SequenceGenerator { String name(); int allocationSize() default 50; }
+                @<caret>SequenceGenerator(name = "entity_seq")
+                class Entity {
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Add allocationSize = 1"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("sequence allocation warning after quick fix")
+                .isZero();
+    }
+
+    public void testTemporalJavaTimeFixClearsWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.TemporalJavaTime());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Temporal { TemporalType value(); }
+                enum TemporalType { TIMESTAMP }
+                class Entity {
+                    @<caret>Temporal(TemporalType.TIMESTAMP)
+                    java.time.Instant createdAt;
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Remove @Temporal"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("temporal Java time warning after quick fix")
+                .isZero();
+    }
+
+    public void testLegacyTextTypeFixClearsWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.LegacyType());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Type { String type(); }
+                class Entity {
+                    @<caret>Type(type = "org.hibernate.type.TextType")
+                    String body;
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Replace with @JdbcTypeCode"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("legacy text type warning after quick fix")
+                .isZero();
+    }
+
     public void testFixesStringConcatenatedQuery() {
         this.myFixture.enableInspections(new SpringHibernateMigrationInspection.ImplicitSelect());
         this.myFixture.configureByText("Sample.java", """
