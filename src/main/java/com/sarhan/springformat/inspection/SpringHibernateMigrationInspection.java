@@ -247,6 +247,10 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (hasAnnotation(field.getModifierList(), "JdbcTypeCode")) {
             return;
         }
+        PsiClass containingClass = field.getContainingClass();
+        if (containingClass == null || !SpringInspectionUtil.isJpaEntity(containingClass)) {
+            return;
+        }
         String canonical = field.getType().getCanonicalText();
         String code = switch (canonical) {
             case "java.time.Duration" -> "java.sql.Types.BIGINT";
@@ -404,7 +408,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     }
 
     private void visitHibernateTable(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
-        if (isAnnotation(annotation, "org.hibernate.annotations.Table", "Table")) {
+        if (isExactAnnotation(annotation, "org.hibernate.annotations.Table")) {
             holder.registerProblem(annotation, "Hibernate 6 deprecates proprietary @org.hibernate.annotations.Table",
                     ProblemHighlightType.WARNING, new ReplaceHibernateTableFix());
         }
@@ -1089,6 +1093,18 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         return shortName.equals(name) || fqn.equals(name) || (name != null && name.endsWith("." + shortName));
     }
 
+    private static boolean isExactAnnotation(@NotNull PsiAnnotation annotation, @NotNull String fqn) {
+        String name = annotation.getQualifiedName();
+        if (fqn.equals(name)) {
+            return true;
+        }
+        if (annotation.getNameReferenceElement() != null
+                && annotation.getNameReferenceElement().resolve() instanceof PsiClass psiClass) {
+            return fqn.equals(psiClass.getQualifiedName());
+        }
+        return false;
+    }
+
     @Nullable
     private static PsiNameValuePair findPair(@NotNull PsiAnnotation annotation, @NotNull String name) {
         for (PsiNameValuePair pair : annotation.getParameterList().getAttributes()) {
@@ -1496,9 +1512,11 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             }
             StringBuilder sb = new StringBuilder("@jakarta.persistence.Table(");
             boolean first = true;
+            PsiAnnotationMemberValue name = oldAnnotation.findDeclaredAttributeValue("name");
             PsiAnnotationMemberValue appliesTo = oldAnnotation.findDeclaredAttributeValue("appliesTo");
-            if (appliesTo != null) {
-                sb.append("name = ").append(appliesTo.getText());
+            PsiAnnotationMemberValue tableName = name != null ? name : appliesTo;
+            if (tableName != null) {
+                sb.append("name = ").append(tableName.getText());
                 first = false;
             }
             for (String attr : new String[]{"schema", "catalog", "comment"}) {

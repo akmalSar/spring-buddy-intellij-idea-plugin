@@ -68,7 +68,9 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 @interface Type { String type(); }
                 @interface SequenceGenerator { String name(); int allocationSize() default 50; }
                 @interface Cascade { CascadeType[] value(); }
+                @interface Entity { }
                 enum CascadeType { SAVE_UPDATE, DELETE, PERSIST, MERGE }
+                @Entity
                 class Entity {
                     @TypeDef
                     Object def;
@@ -143,14 +145,18 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 new SpringHibernateMigrationInspection.ArrayMapping(),
                 new SpringHibernateMigrationInspection.CompositeUserType(),
                 new SpringHibernateMigrationInspection.EmbeddableReuse());
+        this.myFixture.addFileToProject("org/hibernate/annotations/Table.java", """
+                package org.hibernate.annotations;
+                public @interface Table { String appliesTo(); }
+                """);
         this.myFixture.configureByText("Sample.java", """
+                import org.hibernate.annotations.Table;
                 @interface Query { String value(); }
                 @interface Temporal { TemporalType value(); }
                 @interface GeneratedValue { GenerationType strategy(); String generator() default ""; }
                 @interface Embedded { }
                 @interface AttributeOverride { String name(); }
                 @interface Type { Class value(); }
-                @interface Table { String appliesTo(); }
                 enum TemporalType { TIMESTAMP }
                 enum GenerationType { SEQUENCE }
                 interface MyCompositeUserType { }
@@ -428,6 +434,7 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 @interface SequenceGenerator { String name(); int allocationSize() default 50; }
                 @interface JdbcTypeCode { int value(); }
                 @interface GeneratedValue { GenerationType strategy(); String generator() default ""; }
+                @interface Entity { }
                 enum GenerationType { SEQUENCE }
                 interface Repo {
                     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = ?1")
@@ -437,6 +444,7 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                     @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles")
                     Object leftFetch();
                 }
+                @Entity
                 class Entity {
                     @SequenceGenerator(name = "seq", allocationSize = 1)
                     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
@@ -476,6 +484,8 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
     public void testSchemaTypeDefaultFixClearsUuidWarning() {
         this.myFixture.enableInspections(new SpringHibernateMigrationInspection.SchemaTypeDefaults());
         this.myFixture.configureByText("Sample.java", """
+                @interface Entity { }
+                @Entity
                 class Entity {
                     java.util.UUID <caret>id;
                 }
@@ -487,6 +497,39 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
 
         Assertions.assertThat(countWarnings(highlights))
                 .as("UUID schema mapping warning after quick fix")
+                .isZero();
+    }
+
+    public void testDoesNotReportSchemaTypeDefaultsOnDto() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.SchemaTypeDefaults());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Getter { }
+                @interface Setter { }
+                @interface AllArgsConstructor { }
+                @interface NoArgsConstructor { }
+                @interface Builder { }
+                class UUID { }
+                @Getter
+                @Setter
+                @AllArgsConstructor
+                @NoArgsConstructor
+                @Builder
+                class ListSubscriberServiceReducedAddonsRequest {
+                    java.util.UUID clientId;
+                    java.util.UUID mandantId;
+                    java.util.UUID tenantId;
+                    java.util.UUID subscriberServiceId;
+                    SubscriberServiceReducedAssignedAddonFilterDto filter;
+                    UserInfoWithPermissions userInfoWithPermissions;
+                }
+                class SubscriberServiceReducedAssignedAddonFilterDto { }
+                class UserInfoWithPermissions { }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("DTO schema mapping warnings")
                 .isZero();
     }
 
@@ -605,9 +648,17 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
 
     public void testReplacesHibernateTableAnnotation() {
         this.myFixture.enableInspections(new SpringHibernateMigrationInspection.HibernateTable());
+        this.myFixture.addFileToProject("org/hibernate/annotations/Table.java", """
+                package org.hibernate.annotations;
+                public @interface Table {
+                    String appliesTo() default "";
+                    String name() default "";
+                    String schema() default "";
+                }
+                """);
         this.myFixture.configureByText("Sample.java", """
-                @interface Table { String appliesTo(); String schema() default ""; }
-                @Table(<caret>appliesTo = "users", schema = "public")
+                import org.hibernate.annotations.Table;
+                @Table(<caret>name = "V_ARCHIVABLE_PROCESSES", schema = "public")
                 class Entity {
                 }
                 """);
@@ -616,11 +667,31 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
         this.myFixture.launchAction(this.myFixture.findSingleIntention("Replace with @jakarta.persistence.Table"));
 
         this.myFixture.checkResult("""
-                @interface Table { String appliesTo(); String schema() default ""; }
-                @jakarta.persistence.Table(name = "users", schema = "public")
+                import org.hibernate.annotations.Table;
+                @jakarta.persistence.Table(name = "V_ARCHIVABLE_PROCESSES", schema = "public")
                 class Entity {
                 }
                 """);
+    }
+
+    public void testDoesNotReportJakartaTableWildcardImport() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.HibernateTable());
+        this.myFixture.addFileToProject("jakarta/persistence/Table.java", """
+                package jakarta.persistence;
+                public @interface Table { String name() default ""; }
+                """);
+        this.myFixture.configureByText("Sample.java", """
+                import jakarta.persistence.*;
+                @Table(name = "V_ARCHIVABLE_PROCESSES")
+                class Entity {
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("jakarta Table warning count")
+                .isZero();
     }
 
     private static long countWarnings(List<HighlightInfo> highlights) {

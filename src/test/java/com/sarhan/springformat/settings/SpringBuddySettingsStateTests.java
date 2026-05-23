@@ -29,7 +29,7 @@ import org.assertj.core.api.Assertions;
  */
 public class SpringBuddySettingsStateTests extends BasePlatformTestCase {
 
-    public void testLoadState_existingSettings_addsNewDefaultGroups() {
+    public void testLoadState_existingSettings_preservesDisabledGroups() {
         SpringBuddySettingsState settings = new SpringBuddySettingsState();
         SpringBuddySettingsState.State state = new SpringBuddySettingsState.State();
         state.enabledGroups = new ArrayList<>(List.of("spring-javaformat"));
@@ -37,7 +37,7 @@ public class SpringBuddySettingsStateTests extends BasePlatformTestCase {
         settings.loadState(state);
 
         Assertions.assertThat(settings.getEnabledGroups())
-                .as("migrated enabled groups")
-                .contains("spring-javaformat", "hiberante migration");
+                .as("enabled groups after restart")
+                .containsExactly("spring-javaformat");
     }
 }
