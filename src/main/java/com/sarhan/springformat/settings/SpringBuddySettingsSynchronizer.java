@@ -58,7 +58,7 @@ public final class SpringBuddySettingsSynchronizer {
 
     public static void syncProfile(@NotNull Project project, @NotNull InspectionProfileImpl profile) {
         SpringBuddySettingsState settings = SpringBuddySettingsState.getInstance();
-        HighlightDisplayLevel level = SpringBuddySettingsUtil.level(settings.getInspectionLevel());
+        HighlightDisplayLevel minimumLevel = SpringBuddySettingsUtil.level(settings.getInspectionLevel());
         Set<String> enabledGroups = settings.getEnabledGroups();
         for (Element tool : SpringBuddySettingsUtil.loadBundledProfileTools()) {
             String toolName = tool.getAttributeValue("class");
@@ -69,17 +69,18 @@ public final class SpringBuddySettingsSynchronizer {
             if (state == null) {
                 continue;
             }
+            HighlightDisplayLevel toolLevel = SpringBuddySettingsUtil.toolLevel(tool);
             boolean enabled = SpringBuddySettingsUtil.isEnabled(toolGroups(tool), enabledGroups)
-                    && SpringBuddySettingsUtil.isAtLeastLevel(tool, level);
-            state.setEnabled(true);
-            state.setLevel(level);
+                    && toolLevel.getSeverity().compareTo(minimumLevel.getSeverity()) >= 0;
+            state.setEnabled(enabled);
+            state.setLevel(toolLevel);
             ToolsImpl tools = profile.getToolsOrNull(toolName, project);
             if (tools != null) {
-                tools.setDefaultState(state.getTool(), enabled, level);
+                tools.setDefaultState(state.getTool(), enabled, toolLevel);
             }
             HighlightDisplayKey key = state.getTool().getDisplayKey();
             if (key != null) {
-                profile.setErrorLevel(key, level, project);
+                profile.setErrorLevel(key, toolLevel, project);
             }
         }
         profile.profileChanged();

@@ -58,7 +58,7 @@ public class SpringBuddyConfigurable implements Configurable {
                 builder.addComponent(checkBox, 1);
             }
             this.levelComboBox = new ComboBox<>(SpringBuddySettingsUtil.LEVELS.toArray(new String[0]));
-            builder.addLabeledComponent("Inspection level:", this.levelComboBox, 1, false);
+            builder.addLabeledComponent("Minimum inspection level:", this.levelComboBox, 1, false);
             this.gitCommitCheckBox = new JBCheckBox("Run Spring Buddy inspections before Git commit");
             builder.addComponent(this.gitCommitCheckBox, 1);
             this.panel = builder.addComponentFillVertically(new JPanel(), 0).getPanel();
