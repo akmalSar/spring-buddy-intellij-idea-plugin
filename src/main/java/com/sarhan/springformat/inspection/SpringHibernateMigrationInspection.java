@@ -406,7 +406,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     private void visitHibernateTable(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
         if (isAnnotation(annotation, "org.hibernate.annotations.Table", "Table")) {
             holder.registerProblem(annotation, "Hibernate 6 deprecates proprietary @org.hibernate.annotations.Table",
-                    ProblemHighlightType.WARNING);
+                    ProblemHighlightType.WARNING, new ReplaceHibernateTableFix());
         }
     }
 
@@ -1386,8 +1386,13 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 PsiExpression replacementExpression = JavaPsiFacade.getElementFactory(project)
                         .createExpressionFromText(textBlockLiteral(this.replacement), element);
                 element.replace(replacementExpression);
-            } else {
+            } else if (element instanceof PsiLiteralExpression) {
                 ElementManipulators.handleContentChange(element, this.replacement);
+            } else {
+                String escaped = this.replacement.replace("\\", "\\\\").replace("\"", "\\\"");
+                PsiExpression replacementExpression = JavaPsiFacade.getElementFactory(project)
+                        .createExpressionFromText("\"" + escaped + "\"", element);
+                element.replace(replacementExpression);
             }
         }
 
@@ -1463,6 +1468,56 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             PsiJavaFile javaFile = PsiTreeUtil.getParentOfType(replaced, PsiJavaFile.class);
             if (javaFile != null) {
                 SpringImportUtil.ensureImport(project, javaFile, this.importName);
+                JavaCodeStyleManager.getInstance(project).shortenClassReferences(javaFile);
+            }
+        }
+    }
+
+    private static final class ReplaceHibernateTableFix implements LocalQuickFix {
+
+        @Override
+        @NotNull
+        public String getName() {
+            return "Replace with @jakarta.persistence.Table";
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return this.getName();
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiAnnotation oldAnnotation = descriptor.getPsiElement() instanceof PsiAnnotation a ? a
+                    : PsiTreeUtil.getParentOfType(descriptor.getPsiElement(), PsiAnnotation.class);
+            if (oldAnnotation == null) {
+                return;
+            }
+            StringBuilder sb = new StringBuilder("@jakarta.persistence.Table(");
+            boolean first = true;
+            PsiAnnotationMemberValue appliesTo = oldAnnotation.findDeclaredAttributeValue("appliesTo");
+            if (appliesTo != null) {
+                sb.append("name = ").append(appliesTo.getText());
+                first = false;
+            }
+            for (String attr : new String[]{"schema", "catalog", "comment"}) {
+                PsiAnnotationMemberValue value = oldAnnotation.findDeclaredAttributeValue(attr);
+                if (value != null) {
+                    if (!first) {
+                        sb.append(", ");
+                    }
+                    sb.append(attr).append(" = ").append(value.getText());
+                    first = false;
+                }
+            }
+            sb.append(")");
+            PsiAnnotation newAnnotation = JavaPsiFacade.getElementFactory(project)
+                    .createAnnotationFromText(sb.toString(), oldAnnotation);
+            PsiElement replaced = oldAnnotation.replace(newAnnotation);
+            PsiJavaFile javaFile = PsiTreeUtil.getParentOfType(replaced, PsiJavaFile.class);
+            if (javaFile != null) {
+                SpringImportUtil.ensureImport(project, javaFile, "jakarta.persistence.Table");
                 JavaCodeStyleManager.getInstance(project).shortenClassReferences(javaFile);
             }
         }

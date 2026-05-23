@@ -456,6 +456,82 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 .isZero();
     }
 
+    public void testFixesStringConcatenatedQuery() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.ImplicitSelect());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Query { String value(); }
+                interface Repo {
+                    @Query(<caret>"FROM User u JOIN u.roles r " + "WHERE r.name = :role")
+                    Object implicit();
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Add explicit SELECT"));
+
+        this.myFixture.checkResult("""
+                @interface Query { String value(); }
+                interface Repo {
+                    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :role")
+                    Object implicit();
+                }
+                """);
+    }
+
+    public void testFixesConcatenatedFetchJoinProjection() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.FetchJoinProjection());
+        this.myFixture.configureByText("Sample.java", """
+                import java.util.List;
+                import java.util.UUID;
+                @interface Query { String value(); }
+                @interface Param { String value(); }
+                interface Repo {
+                    @Query(<caret>"SELECT r from SubscriberServiceReplacementAssignment ra " +
+                            "join fetch SubscriberServiceExtended r on ra.replacementServiceId = r.id " +
+                            "where ra.originServiceId = :originId")
+                    List<SubscriberServiceExtended> getReplacements(@Param("originId") UUID originId);
+                }
+                class SubscriberServiceExtended { }
+                class SubscriberServiceReplacementAssignment { }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Remove FETCH from scalar projection"));
+
+        this.myFixture.checkResult("""
+                import java.util.List;
+                import java.util.UUID;
+                @interface Query { String value(); }
+                @interface Param { String value(); }
+                interface Repo {
+                    @Query("SELECT r from SubscriberServiceReplacementAssignment ra JOIN SubscriberServiceExtended r on ra.replacementServiceId = r.id where ra.originServiceId = :originId")
+                    List<SubscriberServiceExtended> getReplacements(@Param("originId") UUID originId);
+                }
+                class SubscriberServiceExtended { }
+                class SubscriberServiceReplacementAssignment { }
+                """);
+    }
+
+    public void testReplacesHibernateTableAnnotation() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.HibernateTable());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Table { String appliesTo(); String schema() default ""; }
+                @Table(<caret>appliesTo = "users", schema = "public")
+                class Entity {
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Replace with @jakarta.persistence.Table"));
+
+        this.myFixture.checkResult("""
+                @interface Table { String appliesTo(); String schema() default ""; }
+                @jakarta.persistence.Table(name = "users", schema = "public")
+                class Entity {
+                }
+                """);
+    }
+
     private static long countWarnings(List<HighlightInfo> highlights) {
         return highlights.stream()
                 .filter((HighlightInfo h) -> h.getSeverity() == HighlightSeverity.WARNING)
