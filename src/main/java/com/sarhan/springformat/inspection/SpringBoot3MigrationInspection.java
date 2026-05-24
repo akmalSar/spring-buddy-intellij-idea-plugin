@@ -32,15 +32,24 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementFactory;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiExpression;
+import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiImportStatement;
 import com.intellij.psi.PsiJavaCodeReferenceElement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiLiteralExpression;
 import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiNameValuePair;
+import com.intellij.psi.PsiNewExpression;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.PsiReturnStatement;
+import com.intellij.psi.PsiStatement;
+import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiTypeElement;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -125,6 +134,18 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
             public void visitAnnotation(@NotNull PsiAnnotation annotation) {
                 super.visitAnnotation(annotation);
                 SpringBoot3MigrationInspection.this.visitAnnotationDeclaration(annotation, holder);
+            }
+
+            @Override
+            public void visitField(@NotNull PsiField field) {
+                super.visitField(field);
+                SpringBoot3MigrationInspection.this.visitFieldDeclaration(field, holder);
+            }
+
+            @Override
+            public void visitMethodCallExpression(@NotNull PsiMethodCallExpression expression) {
+                super.visitMethodCallExpression(expression);
+                SpringBoot3MigrationInspection.this.visitMethodCall(expression, holder);
             }
         };
     }
@@ -223,38 +244,96 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
                         new DeleteElementFix("Remove @EnableBatchProcessing"));
             }
         }
+        if (this.kind == Kind.SECURITY_CONFIGURATION) {
+            PsiAnnotation annotation = findEnableSecurityAnnotation(modifiers);
+            if (annotation != null && !SpringInspectionUtil.hasAnnotation(modifiers,
+                    "org.springframework.context.annotation.Configuration", "Configuration")) {
+                holder.registerProblem(annotationTarget(annotation),
+                        "@Enable*Security no longer implies @Configuration in Spring Security 6",
+                        new AddAnnotationToClassFix("Add @Configuration", "Configuration"));
+            }
+        }
     }
 
     private void visitMethodDeclaration(PsiMethod method, ProblemsHolder holder) {
-        if (this.kind != Kind.JVM_INFO_METRICS) {
-            return;
-        }
         PsiModifierList modifiers = method.getModifierList();
-        if (!SpringInspectionUtil.hasAnnotation(modifiers, "Bean")) {
-            return;
+        if (this.kind == Kind.JVM_INFO_METRICS) {
+            if (!SpringInspectionUtil.hasAnnotation(modifiers, "Bean")) {
+                return;
+            }
+            String returnType = method.getReturnTypeElement() == null ? null : method.getReturnTypeElement().getText();
+            if (method.getReturnType() != null
+                    && ("io.micrometer.core.instrument.binder.jvm.JvmInfoMetrics".equals(method.getReturnType().getCanonicalText())
+                            || "io.micrometer.core.instrument.binder.jvm.JvmInfoMetrics".equals(returnType)
+                            || "JvmInfoMetrics".equals(returnType))) {
+                holder.registerProblem(method.getNameIdentifier() == null ? method : method.getNameIdentifier(),
+                        "JvmInfoMetrics is auto-configured in Spring Boot 3");
+            }
         }
-        String returnType = method.getReturnTypeElement() == null ? null : method.getReturnTypeElement().getText();
-        if (method.getReturnType() != null
-                && ("io.micrometer.core.instrument.binder.jvm.JvmInfoMetrics".equals(method.getReturnType().getCanonicalText())
-                        || "io.micrometer.core.instrument.binder.jvm.JvmInfoMetrics".equals(returnType)
-                        || "JvmInfoMetrics".equals(returnType))) {
-            holder.registerProblem(method.getNameIdentifier() == null ? method : method.getNameIdentifier(),
-                    "JvmInfoMetrics is auto-configured in Spring Boot 3");
+        if (this.kind == Kind.PRECISE_BEAN_TYPE && SpringInspectionUtil.hasAnnotation(modifiers,
+                "org.springframework.context.annotation.Bean", "Bean")) {
+            PsiTypeElement returnTypeElement = method.getReturnTypeElement();
+            String concreteType = returnedNewType(method);
+            if (returnTypeElement != null && concreteType != null && isImpreciseBeanReturnType(method.getReturnType())) {
+                holder.registerProblem(returnTypeElement, "@Bean methods should return concrete types for Spring 6 AOT",
+                        new ReplaceTextFix("Use concrete @Bean return type", returnTypeElement.getText(), concreteType));
+            }
         }
     }
 
     private void visitAnnotationDeclaration(PsiAnnotation annotation, ProblemsHolder holder) {
-        if (this.kind != Kind.TRAILING_SLASH_MATCHING || !isMappingAnnotation(annotation)) {
+        if (this.kind == Kind.TRAILING_SLASH_MATCHING && isMappingAnnotation(annotation)) {
+            for (PsiNameValuePair attribute : annotation.getParameterList().getAttributes()) {
+                PsiElement value = attribute.getValue();
+                if (value instanceof PsiLiteralExpression literal && literal.getValue() instanceof String text
+                        && text.length() > 1 && text.endsWith("/")) {
+                    holder.registerProblem(value, "Trailing slash route will not match slashless requests in Spring Boot 3",
+                            new ReplaceTextFix("Remove trailing slash", value.getText(), quote(text.substring(0,
+                                    text.length() - 1))));
+                }
+            }
+        }
+        if (this.kind == Kind.SOLR_AUTO_CONFIGURATION_EXCLUDE && isAutoConfigurationAnnotation(annotation)) {
+            for (PsiNameValuePair attribute : annotation.getParameterList().getAttributes()) {
+                PsiElement value = attribute.getValue();
+                if ("exclude".equals(attribute.getName()) && value != null && value.getText().contains("SolrAutoConfiguration")) {
+                    holder.registerProblem(value, "SolrAutoConfiguration was removed in Spring Boot 3");
+                }
+            }
+        }
+    }
+
+    private void visitFieldDeclaration(PsiField field, ProblemsHolder holder) {
+        if (this.kind != Kind.NESTED_CONFIGURATION_PROPERTIES_VALID) {
             return;
         }
-        for (PsiNameValuePair attribute : annotation.getParameterList().getAttributes()) {
-            PsiElement value = attribute.getValue();
-            if (value instanceof PsiLiteralExpression literal && literal.getValue() instanceof String text
-                    && text.length() > 1 && text.endsWith("/")) {
-                holder.registerProblem(value, "Trailing slash route will not match slashless requests in Spring Boot 3",
-                        new ReplaceTextFix("Remove trailing slash", value.getText(), quote(text.substring(0,
-                                text.length() - 1))));
-            }
+        PsiClass containingClass = field.getContainingClass();
+        if (containingClass == null || !SpringInspectionUtil.hasAnnotation(containingClass.getModifierList(),
+                CONFIGURATION_PROPERTIES, "ConfigurationProperties")
+                || !SpringInspectionUtil.hasAnnotation(containingClass.getModifierList(),
+                        "org.springframework.validation.annotation.Validated", "Validated")
+                || field.hasModifierProperty("static")
+                || SpringInspectionUtil.hasAnnotation(field.getModifierList(), "jakarta.validation.Valid", "Valid")
+                || SpringInspectionUtil.hasAnnotation(field.getModifierList(), "javax.validation.Valid", "Valid")
+                || isCommonType(field.getType())) {
+            return;
+        }
+        holder.registerProblem(field.getNameIdentifier() == null ? field : field.getNameIdentifier(),
+                "Nested @ConfigurationProperties field should be annotated with @Valid",
+                new AddAnnotationToFieldFix("Add @Valid", "Valid"));
+    }
+
+    private void visitMethodCall(PsiMethodCallExpression expression, ProblemsHolder holder) {
+        String methodName = expression.getMethodExpression().getReferenceName();
+        if (this.kind == Kind.REACTOR_CONTEXT_PROPAGATION && "enableAutomaticContextPropagation".equals(methodName)
+                && expression.getMethodExpression().getText().contains("Hooks.enableAutomaticContextPropagation")) {
+            holder.registerProblem(expression, "Use spring.reactor.context-propagation=auto instead of Reactor Hooks call",
+                    new DeleteCallStatementFix("Remove Hooks.enableAutomaticContextPropagation call"));
+        }
+        if (this.kind == Kind.REST_TEMPLATE_REQUEST_FACTORY_BUILDER && "requestFactory".equals(methodName)
+                && expression.getArgumentList().getExpressionCount() == 1) {
+            holder.registerProblem(expression.getMethodExpression(),
+                    "RestTemplateBuilder.requestFactory(Function) was replaced by requestFactoryBuilder in Spring Boot 3.4");
         }
     }
 
@@ -305,6 +384,66 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
                 || "org.springframework.web.bind.annotation.DeleteMapping".equals(name);
     }
 
+    private static PsiAnnotation findEnableSecurityAnnotation(PsiModifierList modifiers) {
+        if (modifiers == null) {
+            return null;
+        }
+        for (PsiAnnotation annotation : modifiers.getAnnotations()) {
+            String name = annotationName(annotation);
+            if (name != null && (name.startsWith("org.springframework.security.config.annotation.")
+                    || !name.contains(".")) && name.startsWith("Enable") && name.endsWith("Security")
+                    && !"EnableRSocketSecurity".equals(name)) {
+                return annotation;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isAutoConfigurationAnnotation(PsiAnnotation annotation) {
+        String name = annotationName(annotation);
+        return "SpringBootApplication".equals(name) || "EnableAutoConfiguration".equals(name)
+                || "org.springframework.boot.autoconfigure.SpringBootApplication".equals(name)
+                || "org.springframework.boot.autoconfigure.EnableAutoConfiguration".equals(name);
+    }
+
+    private static String annotationName(PsiAnnotation annotation) {
+        String name = annotation.getQualifiedName();
+        if (name == null && annotation.getNameReferenceElement() != null) {
+            name = annotation.getNameReferenceElement().getText();
+        }
+        if (name != null && name.contains(".")) {
+            return name.substring(name.lastIndexOf('.') + 1);
+        }
+        return name;
+    }
+
+    private static boolean isCommonType(PsiType type) {
+        String text = type.getCanonicalText();
+        return type instanceof com.intellij.psi.PsiPrimitiveType || text.startsWith("java.lang.")
+                || text.startsWith("java.time.") || text.startsWith("java.util.") || text.equals("String");
+    }
+
+    private static boolean isImpreciseBeanReturnType(PsiType type) {
+        if (type == null) {
+            return false;
+        }
+        String text = type.getCanonicalText();
+        return "java.lang.Object".equals(text) || text.startsWith("java.util.") || !text.contains(".");
+    }
+
+    private static String returnedNewType(PsiMethod method) {
+        PsiReturnStatement[] returns = PsiTreeUtil.findChildrenOfType(method, PsiReturnStatement.class)
+                .toArray(PsiReturnStatement[]::new);
+        if (returns.length != 1) {
+            return null;
+        }
+        PsiExpression value = returns[0].getReturnValue();
+        if (!(value instanceof PsiNewExpression newExpression) || newExpression.getClassReference() == null) {
+            return null;
+        }
+        return newExpression.getClassReference().getReferenceName();
+    }
+
     private static String toJakarta(String name) {
         return name.replaceFirst("^javax\\.", "jakarta.");
     }
@@ -328,7 +467,13 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
         WEB_MVC_METRICS_FILTER,
         JVM_INFO_METRICS,
         ENABLE_BATCH_PROCESSING,
-        APACHE_HTTP_CLIENT
+        APACHE_HTTP_CLIENT,
+        SECURITY_CONFIGURATION,
+        NESTED_CONFIGURATION_PROPERTIES_VALID,
+        PRECISE_BEAN_TYPE,
+        SOLR_AUTO_CONFIGURATION_EXCLUDE,
+        REACTOR_CONTEXT_PROPAGATION,
+        REST_TEMPLATE_REQUEST_FACTORY_BUILDER
     }
 
     private static final class ReplaceTextFix implements LocalQuickFix {
@@ -418,10 +563,20 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
 
     private static final class DeleteCallStatementFix implements LocalQuickFix {
 
+        private final String name;
+
+        private DeleteCallStatementFix() {
+            this("Remove setUseTrailingSlashMatch call");
+        }
+
+        private DeleteCallStatementFix(String name) {
+            this.name = name;
+        }
+
         @Override
         @NotNull
         public String getName() {
-            return "Remove setUseTrailingSlashMatch call";
+            return this.name;
         }
 
         @Override
@@ -440,6 +595,76 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
             if (statement != null) {
                 statement.delete();
             }
+        }
+    }
+
+    private static final class AddAnnotationToClassFix implements LocalQuickFix {
+
+        private final String name;
+
+        private final String annotationText;
+
+        private AddAnnotationToClassFix(String name, String annotationText) {
+            this.name = name;
+            this.annotationText = annotationText;
+        }
+
+        @Override
+        @NotNull
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return this.name;
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiClass psiClass = PsiTreeUtil.getParentOfType(descriptor.getPsiElement(), PsiClass.class);
+            if (psiClass == null || psiClass.getModifierList() == null) {
+                return;
+            }
+            PsiAnnotation annotation = JavaPsiFacade.getElementFactory(project)
+                    .createAnnotationFromText("@" + this.annotationText, psiClass);
+            psiClass.getModifierList().addBefore(annotation, psiClass.getModifierList().getFirstChild());
+        }
+    }
+
+    private static final class AddAnnotationToFieldFix implements LocalQuickFix {
+
+        private final String name;
+
+        private final String annotationText;
+
+        private AddAnnotationToFieldFix(String name, String annotationText) {
+            this.name = name;
+            this.annotationText = annotationText;
+        }
+
+        @Override
+        @NotNull
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return this.name;
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiField field = PsiTreeUtil.getParentOfType(descriptor.getPsiElement(), PsiField.class);
+            if (field == null || field.getModifierList() == null) {
+                return;
+            }
+            PsiAnnotation annotation = JavaPsiFacade.getElementFactory(project)
+                    .createAnnotationFromText("@" + this.annotationText, field);
+            field.getModifierList().addBefore(annotation, field.getModifierList().getFirstChild());
         }
     }
 
@@ -500,6 +725,42 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
     public static class ApacheHttpClient extends SpringBoot3MigrationInspection {
         public ApacheHttpClient() {
             super(Kind.APACHE_HTTP_CLIENT);
+        }
+    }
+
+    public static class SecurityConfiguration extends SpringBoot3MigrationInspection {
+        public SecurityConfiguration() {
+            super(Kind.SECURITY_CONFIGURATION);
+        }
+    }
+
+    public static class NestedConfigurationPropertiesValid extends SpringBoot3MigrationInspection {
+        public NestedConfigurationPropertiesValid() {
+            super(Kind.NESTED_CONFIGURATION_PROPERTIES_VALID);
+        }
+    }
+
+    public static class PreciseBeanType extends SpringBoot3MigrationInspection {
+        public PreciseBeanType() {
+            super(Kind.PRECISE_BEAN_TYPE);
+        }
+    }
+
+    public static class SolrAutoConfigurationExclude extends SpringBoot3MigrationInspection {
+        public SolrAutoConfigurationExclude() {
+            super(Kind.SOLR_AUTO_CONFIGURATION_EXCLUDE);
+        }
+    }
+
+    public static class ReactorContextPropagation extends SpringBoot3MigrationInspection {
+        public ReactorContextPropagation() {
+            super(Kind.REACTOR_CONTEXT_PROPAGATION);
+        }
+    }
+
+    public static class RestTemplateRequestFactoryBuilder extends SpringBoot3MigrationInspection {
+        public RestTemplateRequestFactoryBuilder() {
+            super(Kind.REST_TEMPLATE_REQUEST_FACTORY_BUILDER);
         }
     }
 }

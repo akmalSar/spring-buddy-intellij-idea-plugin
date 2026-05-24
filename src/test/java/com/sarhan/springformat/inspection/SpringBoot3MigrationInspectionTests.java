@@ -290,6 +290,130 @@ public class SpringBoot3MigrationInspectionTests extends BasePlatformTestCase {
                 .isEqualTo(1);
     }
 
+    public void testSecurityConfiguration_reportsEnableSecurityWithoutConfiguration() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.SecurityConfiguration());
+        this.myFixture.configureByText("Sample.java", """
+                @interface EnableWebSecurity { }
+                @interface Configuration { }
+
+                @EnableWebSecurity
+                class SecurityConfig { }
+
+                @Configuration
+                @EnableWebSecurity
+                class ExistingConfig { }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "@Enable*Security"))
+                .as("security configuration annotation")
+                .isEqualTo(1);
+    }
+
+    public void testNestedConfigurationPropertiesValid_reportsNestedFieldWithoutValid() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.NestedConfigurationPropertiesValid());
+        this.myFixture.configureByText("Sample.java", """
+                @interface ConfigurationProperties { String value(); }
+                @interface Validated { }
+                @interface Valid { }
+
+                @ConfigurationProperties("app")
+                @Validated
+                class Sample {
+                    Nested nested;
+                    @Valid Nested valid;
+                    String name;
+                }
+
+                class Nested { String value; }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "Nested @ConfigurationProperties"))
+                .as("nested configuration properties validation")
+                .isEqualTo(1);
+    }
+
+    public void testPreciseBeanType_reportsImpreciseBeanReturnType() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.PreciseBeanType());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Bean { }
+                interface Service { }
+                class DefaultService implements Service { }
+                class Config {
+                    @Bean
+                    Service service() {
+                        return new DefaultService();
+                    }
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "@Bean methods should return concrete types"))
+                .as("precise bean return type")
+                .isEqualTo(1);
+    }
+
+    public void testSolrAutoConfigurationExclude_reportsRemovedExclusion() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.SolrAutoConfigurationExclude());
+        this.myFixture.configureByText("Sample.java", """
+                @interface SpringBootApplication { Class<?>[] exclude(); }
+                class SolrAutoConfiguration { }
+
+                @SpringBootApplication(exclude = { SolrAutoConfiguration.class })
+                class Sample { }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "SolrAutoConfiguration"))
+                .as("Solr auto-configuration exclusion")
+                .isEqualTo(1);
+    }
+
+    public void testReactorContextPropagation_reportsHooksCall() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.ReactorContextPropagation());
+        this.myFixture.configureByText("Sample.java", """
+                class Hooks {
+                    static void enableAutomaticContextPropagation() { }
+                }
+                class Sample {
+                    void init() {
+                        Hooks.enableAutomaticContextPropagation();
+                    }
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "spring.reactor.context-propagation"))
+                .as("Reactor context propagation hook")
+                .isEqualTo(1);
+    }
+
+    public void testRestTemplateRequestFactoryBuilder_reportsOldMethod() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.RestTemplateRequestFactoryBuilder());
+        this.myFixture.configureByText("Sample.java", """
+                class RestTemplateBuilder {
+                    RestTemplateBuilder requestFactory(Object factory) { return this; }
+                }
+                class Sample {
+                    void configure(RestTemplateBuilder builder, Object factory) {
+                        builder.requestFactory(factory);
+                    }
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "requestFactoryBuilder"))
+                .as("RestTemplateBuilder requestFactory migration")
+                .isEqualTo(1);
+    }
+
     private static long countErrors(List<HighlightInfo> highlights) {
         return highlights.stream()
                 .filter((HighlightInfo h) -> h.getSeverity() == HighlightSeverity.ERROR)

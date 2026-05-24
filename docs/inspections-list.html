@@ -366,7 +366,7 @@ h2 .count {
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
 <a href="#hiberante-migration">Hiberante Migration<span class="nav-count">49</span></a>
-<a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">43</span></a>
+<a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">50</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
@@ -380,9 +380,9 @@ h2 .count {
 
 <div class="stat-row">
 <div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>98</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>205</strong><span>WARNING</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>212</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>8</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>311</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>318</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -908,7 +908,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow misc">spring 2 -&gt; 3 migration</div>
-<h2 id="spring-2-3-migration">spring 2 -&gt; 3 migration<span class="count">43 inspections</span></h2>
+<h2 id="spring-2-3-migration">spring 2 -&gt; 3 migration<span class="count">50 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3ApacheHttpClientDependencyInspection</div><div class="display-name">Apache HttpClient 4 dependency should be migrated<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> org.apache.httpcomponents:httpclient</pre>. Spring Boot 3 uses Apache HttpClient 5 through <pre class="code"> org.apache.httpcomponents.client5:httpclient5</pre>.</div></article>
 <article class="card" data-level="warning">
@@ -927,6 +927,7 @@ h2 .count {
 <div class="description">Reports <pre class="code"> @EnableBatchProcessing</pre>. Spring Boot 3 auto-configures Batch, and adding this annotation can make auto-configuration back off unless the app intentionally owns Batch infrastructure.</div>
 </article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3ElasticsearchAutoConfigExclusionInspection</div><div class="display-name">Elasticsearch auto-configuration exclusion was renamed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> ReactiveElasticsearchRestClientAutoConfiguration</pre> exclusions. Spring Boot 3 renamed it to <pre class="code"> ReactiveElasticsearchClientAutoConfiguration</pre> under <pre class="code"> org.springframework.boot.autoconfigure.elasticsearch</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3LogbackSpringConfigInspection</div><div class="display-name">logback.xml uses Spring-specific tags<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> logback.xml</pre> files containing <pre class="code"> springProfile</pre> or <pre class="code"> springProperty</pre>. Rename to <pre class="code"> logback-spring.xml</pre> so Spring Boot can process Spring-specific Logback tags.</div></article>
 <article class="card" data-level="error">
 <div class="class-name">SpringBoot3HttpTraceRepositoryInspection</div>
 <div class="display-name">HTTP trace API was renamed to HTTP exchanges<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
@@ -944,6 +945,12 @@ h2 .count {
 </article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3IncompatibleJavaVersionInspection</div><div class="display-name">Java version must be 17 or later<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports Maven or Gradle Java version settings below <pre class="code"> 17</pre>. Spring Boot 3 requires Java 17 or later.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3LegacyJavaEeDependenciesInspection</div><div class="display-name">Legacy Java EE dependencies should be migrated<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports legacy Java EE <pre class="code"> javax.*</pre> API dependencies such as <pre class="code"> javax.persistence:javax.persistence-api</pre>. Spring Boot 3 uses Jakarta EE coordinates.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3NestedConfigurationPropertiesValidInspection</div><div class="display-name">Nested @ConfigurationProperties fields need @Valid<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports nested fields in validated <pre class="code"> @ConfigurationProperties</pre> classes that lack <pre class="code"> @Valid</pre>. Spring Boot 3 validation requires explicit cascade validation.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3PreciseBeanTypeInspection</div><div class="display-name">@Bean method should return a concrete type<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports imprecise <pre class="code"> @Bean</pre> return types when the method returns a concrete implementation. Spring 6 AOT needs precise bean types.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3ReactorContextPropagationInspection</div><div class="display-name">Reactor context propagation hook moved to property<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> Hooks.enableAutomaticContextPropagation()</pre>. Prefer <pre class="code"> spring.reactor.context-propagation=auto</pre> and remove the explicit hook call.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3RestTemplateRequestFactoryBuilderInspection</div><div class="display-name">RestTemplateBuilder requestFactory(Function) changed<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> RestTemplateBuilder.requestFactory(Function)</pre>. Spring Boot 3.4 replaced this style with <pre class="code"> requestFactoryBuilder</pre>; migrate the callback manually.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3SecurityConfigurationInspection</div><div class="display-name">@Enable*Security requires @Configuration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports Spring Security <pre class="code"> @Enable*Security</pre> classes without <pre class="code"> @Configuration</pre>. Spring Security 6 no longer implies configuration from these annotations.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3SolrAutoConfigurationExcludeInspection</div><div class="display-name">SolrAutoConfiguration exclusion was removed<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> SolrAutoConfiguration</pre> in auto-configuration exclusions. Spring Boot 3 removed Solr auto-configuration, so remove this exclusion.</div></article>
 <article class="card" data-level="weak">
 <div class="class-name">SpringBoot3JvmInfoMetricsInspection</div>
 <div class="display-name">JvmInfoMetrics manual bean is redundant<span class="badge purple">WEAK WARNING</span></div>

@@ -353,6 +353,12 @@
     <inspection_tool class="SpringBoot3JvmInfoMetrics" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3EnableBatchProcessing" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3ApacheHttpClient" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SecurityConfiguration" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3NestedConfigurationPropertiesValid" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3PreciseBeanType" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SolrAutoConfigurationExclude" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ReactorContextPropagation" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3RestTemplateRequestFactoryBuilder" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3JavaxServletDependency" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3IncompatibleJavaVersion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3LegacyJavaEeDependencies" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
@@ -385,6 +391,7 @@
     <inspection_tool class="SpringBoot3AtomikosRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3EhCache2Removed" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3SolrRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3LogbackSpringConfig" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3RenamedProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
 
     <inspection_tool class="SpringOrphanedApplicationEvent" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>

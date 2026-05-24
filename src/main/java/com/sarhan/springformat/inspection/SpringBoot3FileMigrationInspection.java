@@ -157,6 +157,8 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
             case SOLR_REMOVED -> text.contains("spring-boot-starter-data-solr")
                     || text.contains("spring-data-solr");
             case RENAMED_PROPERTIES -> hasRenamedProperty(text);
+            case LOGBACK_SPRING_CONFIG -> name.equals("logback.xml")
+                    && (text.contains("<springProfile") || text.contains("<springProperty"));
         };
     }
 
@@ -179,6 +181,7 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                     ACTUATOR_SANITIZATION, RENAMED_PROPERTIES -> isApplicationConfig(name);
             case ELASTICSEARCH_REST_CLIENT, ELASTICSEARCH_AUTO_CONFIG_EXCLUSION -> isBuildFile(name) || isJavaFile(name)
                     || isApplicationConfig(name);
+            case LOGBACK_SPRING_CONFIG -> name.equals("logback.xml");
         };
     }
 
@@ -277,6 +280,7 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
         ATOMIKOS_REMOVED("Atomikos auto-configuration was removed from Spring Boot 3"),
         EHCACHE2_REMOVED("EhCache 2 support was removed from Spring Boot 3"),
         SOLR_REMOVED("Apache Solr support was removed from Spring Boot 3"),
+        LOGBACK_SPRING_CONFIG("logback.xml uses Spring-specific tags and should be named logback-spring.xml"),
         RENAMED_PROPERTIES("Spring Boot 3 renamed or removed this configuration property");
 
         private final String message;
@@ -331,6 +335,7 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                         "io.github.git-commit-id:git-commit-id-maven-plugin");
                 case MAVEN_FORK_ATTRIBUTE -> new RegexReplaceFix("Remove spring-boot-maven-plugin fork option",
                         Pattern.compile("\\s*<fork>[^<]*</fork>"), "");
+                case LOGBACK_SPRING_CONFIG -> new RenameFileFix("Rename to logback-spring.xml", "logback-spring.xml");
                 case RENAMED_PROPERTIES -> renamedPropertyFix(text);
                 default -> null;
             };
@@ -532,6 +537,47 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
         }
     }
 
+    private static final class RenameFileFix implements LocalQuickFix {
+
+        private final String name;
+
+        private final String newName;
+
+        private RenameFileFix(String name, String newName) {
+            this.name = name;
+            this.newName = newName;
+        }
+
+        @Override
+        @NotNull
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return this.name;
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiFile file = descriptor.getPsiElement().getContainingFile();
+            VirtualFile virtualFile = file.getVirtualFile();
+            if (virtualFile == null) {
+                return;
+            }
+            WriteCommandAction.runWriteCommandAction(project, () -> {
+                try {
+                    virtualFile.rename(this, this.newName);
+                }
+                catch (java.io.IOException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            });
+        }
+    }
+
     private static void replaceFileText(Project project, PsiFile file, String text) {
         WriteCommandAction.runWriteCommandAction(project, () -> {
             com.intellij.openapi.editor.Document document = PsiDocumentManager.getInstance(project).getDocument(file);
@@ -668,6 +714,10 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
 
     public static class SolrRemoved extends SpringBoot3FileMigrationInspection {
         public SolrRemoved() { super(Kind.SOLR_REMOVED); }
+    }
+
+    public static class LogbackSpringConfig extends SpringBoot3FileMigrationInspection {
+        public LogbackSpringConfig() { super(Kind.LOGBACK_SPRING_CONFIG); }
     }
 
     public static class RenamedProperties extends SpringBoot3FileMigrationInspection {

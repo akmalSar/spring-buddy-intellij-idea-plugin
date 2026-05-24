@@ -164,6 +164,20 @@ public class SpringBoot3FileMigrationInspectionTests extends BasePlatformTestCas
                 .isEqualTo(0);
     }
 
+    public void testLogbackSpringConfig_reportsSpringTags() {
+        this.myFixture.configureByText("logback.xml", """
+                <configuration>
+                    <springProfile name="dev"></springProfile>
+                </configuration>
+                """);
+
+        long count = countFileProblems(new SpringBoot3FileMigrationInspection.LogbackSpringConfig());
+
+        Assertions.assertThat(count)
+                .as("logback Spring extensions")
+                .isEqualTo(1);
+    }
+
     public void testJavaVersionInspection_quickFixSetsVersionToSeventeen() {
         this.myFixture.configureByText("pom.xml", """
                 <project>
