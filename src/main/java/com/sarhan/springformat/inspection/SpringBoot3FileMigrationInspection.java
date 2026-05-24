@@ -127,6 +127,14 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                     || text.contains("org.hibernate:hibernate-core");
             case APACHE_HTTP_CLIENT -> text.contains("org.apache.httpcomponents:httpclient")
                     || hasAll(text, "<groupId>org.apache.httpcomponents</groupId>", "<artifactId>httpclient</artifactId>");
+            case THYMELEAF_SPRING6 -> text.contains("thymeleaf-spring5")
+                    || text.contains("thymeleaf-extras-springsecurity5");
+            case DROPWIZARD_JAKARTA_METRICS -> text.contains("metrics-servlet") || text.contains("metrics-servlets");
+            case SAP_CF_JAKARTA_LOGGING -> text.contains("cf-java-logging-support-servlet");
+            case SPRINGDOC_V2 -> text.contains("org.springdoc:springdoc-openapi-ui")
+                    || text.contains("org.springdoc:springdoc-openapi-webmvc-core")
+                    || hasAll(text, "<groupId>org.springdoc</groupId>", "<artifactId>springdoc-openapi-ui</artifactId>")
+                    || hasAll(text, "<groupId>org.springdoc</groupId>", "<artifactId>springdoc-openapi-webmvc-core</artifactId>");
             case ELASTICSEARCH_REST_CLIENT -> text.contains("org.elasticsearch.client.RestHighLevelClient")
                     || text.contains("org.elasticsearch.client.RequestOptions")
                     || text.contains("org.springframework.data.elasticsearch.client.erhlc")
@@ -157,6 +165,12 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
             case SOLR_REMOVED -> text.contains("spring-boot-starter-data-solr")
                     || text.contains("spring-data-solr");
             case RENAMED_PROPERTIES -> hasRenamedProperty(text);
+            case LIQUIBASE_LABEL_FILTER -> text.contains("spring.liquibase.labels");
+            case UNDERTOW_DECODE_SLASH -> text.contains("server.undertow.allow-encoded-slash");
+            case HTTP_TRACE_RECORDING_PROPERTIES -> text.contains("management.trace.http.")
+                    || text.contains("management.trace.include");
+            case OBSERVATION_METRIC_NAMES -> text.contains("management.metrics.web.client.request.metric-name")
+                    || text.contains("management.metrics.web.server.request.metric-name");
             case LOGBACK_SPRING_CONFIG -> name.equals("logback.xml")
                     && (text.contains("<springProfile") || text.contains("<springProperty"));
         };
@@ -171,14 +185,16 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
             case JAVAX_SERVLET_DEPENDENCY, MYSQL_DRIVER_COORDINATES, HIBERNATE_GROUP_ID, FLAPDOODLE_MONGO,
                     PROPERTIES_MIGRATOR_LEFT_IN_DEPS, GIT_COMMIT_ID_PLUGIN, MAVEN_FORK_ATTRIBUTE,
                     EHCACHE3_CLASSIFIER, R2DBC_BOM_VERSION, ACTIVEMQ_REMOVED, ATOMIKOS_REMOVED, EHCACHE2_REMOVED,
-                    SOLR_REMOVED, INCOMPATIBLE_JAVA_VERSION, LEGACY_JAVA_EE_DEPENDENCIES, APACHE_HTTP_CLIENT -> isBuildFile(name);
+                    SOLR_REMOVED, INCOMPATIBLE_JAVA_VERSION, LEGACY_JAVA_EE_DEPENDENCIES, APACHE_HTTP_CLIENT,
+                    THYMELEAF_SPRING6, DROPWIZARD_JAKARTA_METRICS, SAP_CF_JAKARTA_LOGGING, SPRINGDOC_V2 -> isBuildFile(name);
             case SPRING_FACTORIES_AUTO_CONFIG -> name.equals("spring.factories");
             case IMAGE_BANNER -> path.contains("/src/main/resources/")
                     && (name.equals("banner.gif") || name.equals("banner.jpg") || name.equals("banner.png"));
             case MAX_HTTP_HEADER_SIZE, HTTPTRACE_PROPERTY, METRICS_EXPORT_PROPERTY, CASSANDRA_PROPERTIES,
                     REDIS_PROPERTIES, HIBERNATE_ID_GENERATOR_PROPERTY, SAML2_IDENTITY_PROVIDER_PROPERTY,
                     SECURITY_DISPATCH_TYPES, BATCH_JOB_NAMES_PROPERTY, SESSION_STORE_TYPE, JMX_ENDPOINT_EXPOSURE,
-                    ACTUATOR_SANITIZATION, RENAMED_PROPERTIES -> isApplicationConfig(name);
+                    ACTUATOR_SANITIZATION, RENAMED_PROPERTIES, LIQUIBASE_LABEL_FILTER, UNDERTOW_DECODE_SLASH,
+                    HTTP_TRACE_RECORDING_PROPERTIES, OBSERVATION_METRIC_NAMES -> isApplicationConfig(name);
             case ELASTICSEARCH_REST_CLIENT, ELASTICSEARCH_AUTO_CONFIG_EXCLUSION -> isBuildFile(name) || isJavaFile(name)
                     || isApplicationConfig(name);
             case LOGBACK_SPRING_CONFIG -> name.equals("logback.xml");
@@ -262,6 +278,10 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
         HIBERNATE_ID_GENERATOR_PROPERTY("spring.jpa.hibernate.use-new-id-generator-mappings was removed in Spring Boot 3"),
         HIBERNATE_GROUP_ID("Hibernate ORM dependencies should use org.hibernate.orm groupId"),
         APACHE_HTTP_CLIENT("Apache HttpClient 4 should be migrated to HttpClient 5 for Spring Boot 3"),
+        THYMELEAF_SPRING6("Thymeleaf Spring 5 dependencies should be migrated to Spring 6 variants"),
+        DROPWIZARD_JAKARTA_METRICS("Dropwizard servlet metrics dependencies should use Jakarta artifacts"),
+        SAP_CF_JAKARTA_LOGGING("SAP Cloud Foundry logging support should use the Jakarta servlet artifact"),
+        SPRINGDOC_V2("Springdoc 1.x dependencies should be migrated to Springdoc 2 starters"),
         ELASTICSEARCH_REST_CLIENT("Elasticsearch high-level REST client was removed from Spring Boot 3 support"),
         ELASTICSEARCH_AUTO_CONFIG_EXCLUSION("ReactiveElasticsearchRestClientAutoConfiguration was renamed in Spring Boot 3"),
         FLAPDOODLE_MONGO("Flapdoodle embedded MongoDB is no longer auto-configured by Spring Boot 3"),
@@ -280,6 +300,10 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
         ATOMIKOS_REMOVED("Atomikos auto-configuration was removed from Spring Boot 3"),
         EHCACHE2_REMOVED("EhCache 2 support was removed from Spring Boot 3"),
         SOLR_REMOVED("Apache Solr support was removed from Spring Boot 3"),
+        LIQUIBASE_LABEL_FILTER("spring.liquibase.labels was renamed to spring.liquibase.label-filter"),
+        UNDERTOW_DECODE_SLASH("server.undertow.allow-encoded-slash was renamed to server.undertow.decode-slash"),
+        HTTP_TRACE_RECORDING_PROPERTIES("HTTP trace recording properties moved to httpexchanges recording properties"),
+        OBSERVATION_METRIC_NAMES("HTTP request metric-name properties moved to observation names"),
         LOGBACK_SPRING_CONFIG("logback.xml uses Spring-specific tags and should be named logback-spring.xml"),
         RENAMED_PROPERTIES("Spring Boot 3 renamed or removed this configuration property");
 
@@ -323,6 +347,23 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                                 replacement("<groupId>org.apache.httpcomponents</groupId>",
                                         "<groupId>org.apache.httpcomponents.client5</groupId>"),
                                 replacement("<artifactId>httpclient</artifactId>", "<artifactId>httpclient5</artifactId>")));
+                case THYMELEAF_SPRING6 -> new ReplaceFileTextFix("Replace Thymeleaf Spring 5 artifacts",
+                        List.of(replacement("thymeleaf-spring5", "thymeleaf-spring6"),
+                                replacement("thymeleaf-extras-springsecurity5", "thymeleaf-extras-springsecurity6")));
+                case DROPWIZARD_JAKARTA_METRICS -> new ReplaceFileTextFix("Replace Dropwizard servlet metrics artifacts",
+                        List.of(replacement("metrics-servlet", "metrics-jakarta-servlet"),
+                                replacement("metrics-servlets", "metrics-jakarta-servlets")));
+                case SAP_CF_JAKARTA_LOGGING -> replace("Replace SAP CF logging servlet artifact",
+                        "cf-java-logging-support-servlet", "cf-java-logging-support-servlet-jakarta");
+                case SPRINGDOC_V2 -> new ReplaceFileTextFix("Replace Springdoc dependency with Boot 3 starter",
+                        List.of(replacement("org.springdoc:springdoc-openapi-ui",
+                                "org.springdoc:springdoc-openapi-starter-webmvc-ui"),
+                                replacement("org.springdoc:springdoc-openapi-webmvc-core",
+                                        "org.springdoc:springdoc-openapi-starter-webmvc-api"),
+                                replacement("<artifactId>springdoc-openapi-ui</artifactId>",
+                                        "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>"),
+                                replacement("<artifactId>springdoc-openapi-webmvc-core</artifactId>",
+                                        "<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>")));
                 case ELASTICSEARCH_AUTO_CONFIG_EXCLUSION -> replace("Rename Elasticsearch auto-configuration exclusion",
                         "ReactiveElasticsearchRestClientAutoConfiguration",
                         "ReactiveElasticsearchClientAutoConfiguration");
@@ -335,6 +376,19 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                         "io.github.git-commit-id:git-commit-id-maven-plugin");
                 case MAVEN_FORK_ATTRIBUTE -> new RegexReplaceFix("Remove spring-boot-maven-plugin fork option",
                         Pattern.compile("\\s*<fork>[^<]*</fork>"), "");
+                case LIQUIBASE_LABEL_FILTER -> replace("Rename spring.liquibase.labels", "spring.liquibase.labels",
+                        "spring.liquibase.label-filter");
+                case UNDERTOW_DECODE_SLASH -> replace("Rename server.undertow.allow-encoded-slash",
+                        "server.undertow.allow-encoded-slash", "server.undertow.decode-slash");
+                case HTTP_TRACE_RECORDING_PROPERTIES -> new ReplaceFileTextFix("Rename HTTP trace recording properties",
+                        List.of(replacement("management.trace.http.enabled", "management.httpexchanges.recording.enabled"),
+                                replacement("management.trace.http.include", "management.httpexchanges.recording.include"),
+                                replacement("management.trace.include", "management.httpexchanges.recording.include")));
+                case OBSERVATION_METRIC_NAMES -> new ReplaceFileTextFix("Rename HTTP observation metric properties",
+                        List.of(replacement("management.metrics.web.client.request.metric-name",
+                                "management.observations.http.client.requests.name"),
+                                replacement("management.metrics.web.server.request.metric-name",
+                                        "management.observations.http.server.requests.name")));
                 case LOGBACK_SPRING_CONFIG -> new RenameFileFix("Rename to logback-spring.xml", "logback-spring.xml");
                 case RENAMED_PROPERTIES -> renamedPropertyFix(text);
                 default -> null;
@@ -644,6 +698,22 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
         public ApacheHttpClient() { super(Kind.APACHE_HTTP_CLIENT); }
     }
 
+    public static class ThymeleafSpring6 extends SpringBoot3FileMigrationInspection {
+        public ThymeleafSpring6() { super(Kind.THYMELEAF_SPRING6); }
+    }
+
+    public static class DropwizardJakartaMetrics extends SpringBoot3FileMigrationInspection {
+        public DropwizardJakartaMetrics() { super(Kind.DROPWIZARD_JAKARTA_METRICS); }
+    }
+
+    public static class SapCfJakartaLogging extends SpringBoot3FileMigrationInspection {
+        public SapCfJakartaLogging() { super(Kind.SAP_CF_JAKARTA_LOGGING); }
+    }
+
+    public static class SpringdocV2 extends SpringBoot3FileMigrationInspection {
+        public SpringdocV2() { super(Kind.SPRINGDOC_V2); }
+    }
+
     public static class ElasticsearchRestClient extends SpringBoot3FileMigrationInspection {
         public ElasticsearchRestClient() { super(Kind.ELASTICSEARCH_REST_CLIENT); }
     }
@@ -714,6 +784,22 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
 
     public static class SolrRemoved extends SpringBoot3FileMigrationInspection {
         public SolrRemoved() { super(Kind.SOLR_REMOVED); }
+    }
+
+    public static class LiquibaseLabelFilter extends SpringBoot3FileMigrationInspection {
+        public LiquibaseLabelFilter() { super(Kind.LIQUIBASE_LABEL_FILTER); }
+    }
+
+    public static class UndertowDecodeSlash extends SpringBoot3FileMigrationInspection {
+        public UndertowDecodeSlash() { super(Kind.UNDERTOW_DECODE_SLASH); }
+    }
+
+    public static class HttpTraceRecordingProperties extends SpringBoot3FileMigrationInspection {
+        public HttpTraceRecordingProperties() { super(Kind.HTTP_TRACE_RECORDING_PROPERTIES); }
+    }
+
+    public static class ObservationMetricNames extends SpringBoot3FileMigrationInspection {
+        public ObservationMetricNames() { super(Kind.OBSERVATION_METRIC_NAMES); }
     }
 
     public static class LogbackSpringConfig extends SpringBoot3FileMigrationInspection {

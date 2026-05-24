@@ -178,6 +178,48 @@ public class SpringBoot3FileMigrationInspectionTests extends BasePlatformTestCas
                 .isEqualTo(1);
     }
 
+    public void testAdditionalDependencyMigrations_reportLegacyArtifacts() {
+        this.myFixture.configureByText("pom.xml", """
+                <project>
+                    <dependencies>
+                        <dependency><artifactId>thymeleaf-spring5</artifactId></dependency>
+                        <dependency><artifactId>metrics-servlet</artifactId></dependency>
+                        <dependency><artifactId>cf-java-logging-support-servlet</artifactId></dependency>
+                        <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-ui</artifactId></dependency>
+                    </dependencies>
+                </project>
+                """);
+
+        long count = countFileProblems(
+                new SpringBoot3FileMigrationInspection.ThymeleafSpring6(),
+                new SpringBoot3FileMigrationInspection.DropwizardJakartaMetrics(),
+                new SpringBoot3FileMigrationInspection.SapCfJakartaLogging(),
+                new SpringBoot3FileMigrationInspection.SpringdocV2());
+
+        Assertions.assertThat(count)
+                .as("additional dependency migrations")
+                .isEqualTo(4);
+    }
+
+    public void testAdditionalPropertyMigrations_reportLegacyKeys() {
+        this.myFixture.configureByText("application.properties", """
+                spring.liquibase.labels=prod
+                server.undertow.allow-encoded-slash=true
+                management.trace.http.enabled=true
+                management.metrics.web.server.request.metric-name=http.server.requests
+                """);
+
+        long count = countFileProblems(
+                new SpringBoot3FileMigrationInspection.LiquibaseLabelFilter(),
+                new SpringBoot3FileMigrationInspection.UndertowDecodeSlash(),
+                new SpringBoot3FileMigrationInspection.HttpTraceRecordingProperties(),
+                new SpringBoot3FileMigrationInspection.ObservationMetricNames());
+
+        Assertions.assertThat(count)
+                .as("additional property migrations")
+                .isEqualTo(4);
+    }
+
     public void testJavaVersionInspection_quickFixSetsVersionToSeventeen() {
         this.myFixture.configureByText("pom.xml", """
                 <project>
@@ -246,6 +288,32 @@ public class SpringBoot3FileMigrationInspectionTests extends BasePlatformTestCas
                 .as("removed property quick-fix")
                 .doesNotContain("spring.jpa.hibernate.use-new-id-generator-mappings")
                 .contains("spring.application.name=sample");
+    }
+
+    public void testSpringdocV2_quickFixUsesBootThreeStarter() {
+        this.myFixture.configureByText("pom.xml", """
+                <project>
+                    <dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-ui</artifactId></dependency>
+                </project>
+                """);
+
+        applySingleFix(new SpringBoot3FileMigrationInspection.SpringdocV2());
+
+        Assertions.assertThat(this.myFixture.getFile().getText())
+                .as("Springdoc starter quick-fix")
+                .contains("<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>");
+    }
+
+    public void testHttpTraceRecordingProperties_quickFixRenamesKey() {
+        this.myFixture.configureByText("application.properties", """
+                management.trace.http.enabled=true
+                """);
+
+        applySingleFix(new SpringBoot3FileMigrationInspection.HttpTraceRecordingProperties());
+
+        Assertions.assertThat(this.myFixture.getFile().getText())
+                .as("HTTP trace recording quick-fix")
+                .contains("management.httpexchanges.recording.enabled=true");
     }
 
     private long countFileProblems(SpringBoot3FileMigrationInspection... inspections) {

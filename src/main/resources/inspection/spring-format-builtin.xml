@@ -373,6 +373,10 @@
     <inspection_tool class="SpringBoot3HibernateIdGeneratorProperty" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3HibernateGroupId" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3ApacheHttpClientDependency" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ThymeleafSpring6" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3DropwizardJakartaMetrics" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SapCfJakartaLogging" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SpringdocV2" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3ElasticsearchRestClient" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3ElasticsearchAutoConfigExclusion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3FlapdoodleMongo" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
@@ -391,6 +395,10 @@
     <inspection_tool class="SpringBoot3AtomikosRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3EhCache2Removed" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3SolrRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3LiquibaseLabelFilter" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3UndertowDecodeSlash" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3HttpTraceRecordingProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ObservationMetricNames" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3LogbackSpringConfig" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3RenamedProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
 
