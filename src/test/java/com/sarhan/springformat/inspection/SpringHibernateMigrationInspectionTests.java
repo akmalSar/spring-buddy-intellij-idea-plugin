@@ -289,20 +289,38 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 package org.hibernate.dialect;
                 public class Dialect {
                     protected void registerFunction(String name, Object function) { }
+                    protected void registerHibernateType(int code, String name) { }
                 }
+                """);
+        this.myFixture.addFileToProject("org/hibernate/cfg/AvailableSettings.java", """
+                package org.hibernate.cfg;
+                public interface AvailableSettings {
+                    String MULTI_TENANT = "hibernate.multiTenancy";
+                }
+                """);
+        this.myFixture.addFileToProject("org/hibernate/MultiTenancyStrategy.java", """
+                package org.hibernate;
+                public enum MultiTenancyStrategy { SCHEMA }
                 """);
         this.myFixture.enableInspections(
                 new SpringHibernateMigrationInspection.ResultTransformer(),
                 new SpringHibernateMigrationInspection.ScrollableResultsAccess(),
                 new SpringHibernateMigrationInspection.UntypedCreateQuery(),
-                new SpringHibernateMigrationInspection.FunctionRegistration());
+                new SpringHibernateMigrationInspection.FunctionRegistration(),
+                new SpringHibernateMigrationInspection.DialectRegisterHibernateType(),
+                new SpringHibernateMigrationInspection.MultiTenancyApi());
         this.myFixture.configureByText("Sample.java", """
+                import org.hibernate.MultiTenancyStrategy;
+                import org.hibernate.cfg.AvailableSettings;
                 class MyDialect extends org.hibernate.dialect.Dialect {
                     MyDialect() {
                         this.registerFunction("custom_match", new Object());
+                        this.registerHibernateType(2003, "text-array");
                     }
                 }
                 class Service {
+                    String setting = AvailableSettings.MULTI_TENANT;
+                    MultiTenancyStrategy strategy = MultiTenancyStrategy.SCHEMA;
                     void run(org.hibernate.query.Query query, org.hibernate.ScrollableResults rows, org.hibernate.Session session) {
                         query.setResultTransformer(new Object());
                         rows.get(0);
@@ -315,7 +333,62 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
 
         Assertions.assertThat(countWarnings(highlights))
                 .as("additional contract migration warnings")
-                .isEqualTo(4);
+                .isEqualTo(7);
+    }
+
+    public void testReportsLazyCollectionMigrationProblems() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.LazyCollection());
+        this.myFixture.configureByText("Sample.java", """
+                @interface LazyCollection { LazyCollectionOption value(); }
+                enum LazyCollectionOption { TRUE, FALSE, EXTRA }
+                class Entity {
+                    @LazyCollection(LazyCollectionOption.TRUE)
+                    java.util.List<String> names;
+                    @LazyCollection(LazyCollectionOption.FALSE)
+                    java.util.List<String> eagerNames;
+                    @LazyCollection(LazyCollectionOption.EXTRA)
+                    java.util.List<String> extraNames;
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("lazy collection migration warnings")
+                .isEqualTo(3);
+    }
+
+    public void testLazyCollectionTrueFixClearsWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.LazyCollection());
+        this.myFixture.configureByText("Sample.java", """
+                @interface LazyCollection { LazyCollectionOption value(); }
+                enum LazyCollectionOption { TRUE, FALSE, EXTRA }
+                class Entity {
+                    @<caret>LazyCollection(LazyCollectionOption.TRUE)
+                    java.util.List<String> names;
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Remove redundant @LazyCollection"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("lazy collection warning after quick fix")
+                .isZero();
+    }
+
+    public void testReportsMultiTenancyConfigurationMigrationProblem() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.MultiTenancyConfiguration());
+        this.myFixture.configureByText("application.properties", """
+                hibernate.multiTenancy=SCHEMA
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("multi-tenancy configuration migration warnings")
+                .isEqualTo(1);
     }
 
     public void testReportsNewestHibernateMigrationProblems() {

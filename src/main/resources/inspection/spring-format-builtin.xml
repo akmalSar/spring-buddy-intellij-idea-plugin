@@ -150,6 +150,7 @@
     <inspection_tool class="SpringHibernateTemporalJavaTime" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateDistinctFetch" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateFunctionRegistration" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
+    <inspection_tool class="SpringHibernateDialectRegisterHibernateType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateFunctionParameterType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateFunctionReturnType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateGlobalSequence" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
@@ -160,6 +161,7 @@
     <inspection_tool class="SpringHibernateArrayMapping" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateCompositeUserType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateCollectionTypeString" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
+    <inspection_tool class="SpringHibernateLazyCollection" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateSessionEventListener" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateSpatialType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateNativeCountCast" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
@@ -174,6 +176,8 @@
     <inspection_tool class="SpringHibernateDbDateFormatCompare" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateAddToDateFunction" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateQueryCacheProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
+    <inspection_tool class="SpringHibernateMultiTenancyConfiguration" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
+    <inspection_tool class="SpringHibernateMultiTenancyApi" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateEmbeddedSubPropertyOverride" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <!-- Lombok issues moved here from plugin.xml so the bundled profile includes them -->
     <inspection_tool class="LombokConstructorToBuilder" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>

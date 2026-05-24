@@ -161,6 +161,12 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 super.visitField(field);
                 SpringHibernateMigrationInspection.this.visitFieldDeclaration(field, holder);
             }
+
+            @Override
+            public void visitReferenceExpression(@NotNull PsiReferenceExpression expression) {
+                super.visitReferenceExpression(expression);
+                SpringHibernateMigrationInspection.this.visitReferenceExpression(expression, holder);
+            }
         };
     }
 
@@ -196,6 +202,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             this.visitCollectionType(annotation, holder);
         } else if (this.kind == Kind.CALLABLE_NAMED_NATIVE_QUERY) {
             this.visitCallableNamedNativeQuery(annotation, holder);
+        } else if (this.kind == Kind.LAZY_COLLECTION) {
+            this.visitLazyCollection(annotation, holder);
         }
     }
 
@@ -221,6 +229,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             this.visitNativeCountCast(expression, holder);
         } else if (this.kind == Kind.SCROLL_MODE) {
             this.visitScrollMode(expression, holder);
+        } else if (this.kind == Kind.DIALECT_REGISTER_HIBERNATE_TYPE) {
+            this.visitRegisterHibernateType(expression, holder);
         }
     }
 
@@ -231,6 +241,21 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             this.visitIdentifierGeneratorMethod(method, holder);
         } else if (this.kind == Kind.INTERCEPTOR_SIGNATURE) {
             this.visitInterceptorMethod(method, holder);
+        }
+    }
+
+    private void visitReferenceExpression(@NotNull PsiReferenceExpression expression,
+                                          @NotNull ProblemsHolder holder) {
+        if (this.kind != Kind.MULTI_TENANCY_API) {
+            return;
+        }
+        String name = expression.getReferenceName();
+        if ("MULTI_TENANT".equals(name) && isAvailableSettingsReference(expression)) {
+            holder.registerProblem(expression, "Hibernate 6 removed AvailableSettings.MULTI_TENANT",
+                    ProblemHighlightType.WARNING);
+        } else if ("MultiTenancyStrategy".equals(name)) {
+            holder.registerProblem(expression, "Hibernate 6 removed MultiTenancyStrategy; remove explicit strategy configuration",
+                    ProblemHighlightType.WARNING);
         }
     }
 
@@ -470,6 +495,18 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 ProblemHighlightType.WARNING);
     }
 
+    private void visitLazyCollection(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
+        if (!isAnnotation(annotation, "org.hibernate.annotations.LazyCollection", "LazyCollection")) {
+            return;
+        }
+        PsiAnnotationMemberValue value = annotation.findAttributeValue("value");
+        LocalQuickFix[] fixes = isLazyCollectionTrue(value)
+                ? new LocalQuickFix[] { new DeleteAnnotationFix("Remove redundant @LazyCollection") }
+                : LocalQuickFix.EMPTY_ARRAY;
+        holder.registerProblem(annotation, "Hibernate 6 deprecates @LazyCollection; use JPA fetch metadata or Hibernate collection helpers",
+                ProblemHighlightType.WARNING, fixes);
+    }
+
     private void visitUserTypeMethod(@NotNull PsiMethod method, @NotNull ProblemsHolder holder) {
         if (!"nullSafeGet".equals(method.getName()) && !"nullSafeSet".equals(method.getName())) {
             return;
@@ -542,6 +579,20 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         }
         PsiElement target = expression.getMethodExpression().getReferenceNameElement();
         holder.registerProblem(target, "Hibernate 6 removed Dialect.registerFunction; use FunctionContributor",
+                ProblemHighlightType.WARNING);
+    }
+
+    private void visitRegisterHibernateType(@NotNull PsiMethodCallExpression expression,
+                                            @NotNull ProblemsHolder holder) {
+        if (!"registerHibernateType".equals(expression.getMethodExpression().getReferenceName())) {
+            return;
+        }
+        PsiClass containingClass = PsiTreeUtil.getParentOfType(expression, PsiClass.class);
+        if (containingClass == null || !extendsHibernateDialect(containingClass)) {
+            return;
+        }
+        PsiElement target = expression.getMethodExpression().getReferenceNameElement();
+        holder.registerProblem(target, "Hibernate 6 removed Dialect.registerHibernateType; migrate type contribution to the Hibernate 6 type system",
                 ProblemHighlightType.WARNING);
     }
 
@@ -1221,6 +1272,25 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         return strategy == null || hasEnumConstant(strategy.getValue(), "GenerationType", "AUTO", "SEQUENCE");
     }
 
+    private static boolean isLazyCollectionTrue(@Nullable PsiAnnotationMemberValue value) {
+        if (value == null) {
+            return false;
+        }
+        if (!(value instanceof PsiReferenceExpression reference)) {
+            return false;
+        }
+        return isEnumOwner(reference, "LazyCollectionOption") && "TRUE".equals(reference.getReferenceName());
+    }
+
+    private static boolean isAvailableSettingsReference(@NotNull PsiReferenceExpression expression) {
+        PsiExpression qualifier = expression.getQualifierExpression();
+        if (qualifier == null) {
+            return false;
+        }
+        String text = qualifier.getText();
+        return "AvailableSettings".equals(text) || "org.hibernate.cfg.AvailableSettings".equals(text);
+    }
+
     private static boolean isNestedInAnnotation(@NotNull PsiAnnotation annotation, @NotNull String shortName) {
         PsiAnnotation parent = PsiTreeUtil.getParentOfType(annotation, PsiAnnotation.class);
         return parent != null && parent != annotation && isAnnotation(parent, "", shortName);
@@ -1534,7 +1604,10 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         ADD_TO_DATE_FUNCTION,
         FUNCTION_PARAMETER_TYPE,
         COLLECTION_TYPE_STRING,
-        CALLABLE_NAMED_NATIVE_QUERY
+        CALLABLE_NAMED_NATIVE_QUERY,
+        LAZY_COLLECTION,
+        DIALECT_REGISTER_HIBERNATE_TYPE,
+        MULTI_TENANCY_API
     }
 
     public static class ImplicitSelect extends SpringHibernateMigrationInspection {
@@ -1705,6 +1778,18 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         public CallableNamedNativeQuery() { super(Kind.CALLABLE_NAMED_NATIVE_QUERY); }
     }
 
+    public static class LazyCollection extends SpringHibernateMigrationInspection {
+        public LazyCollection() { super(Kind.LAZY_COLLECTION); }
+    }
+
+    public static class DialectRegisterHibernateType extends SpringHibernateMigrationInspection {
+        public DialectRegisterHibernateType() { super(Kind.DIALECT_REGISTER_HIBERNATE_TYPE); }
+    }
+
+    public static class MultiTenancyApi extends SpringHibernateMigrationInspection {
+        public MultiTenancyApi() { super(Kind.MULTI_TENANCY_API); }
+    }
+
     public static class DialectRemoval extends LocalInspectionTool {
 
         private static final Pattern DIALECT = Pattern.compile(
@@ -1754,6 +1839,30 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 };
             }
             return null;
+        }
+    }
+
+    public static class MultiTenancyConfiguration extends LocalInspectionTool {
+
+        @Override
+        @Nullable
+        public com.intellij.codeInspection.ProblemDescriptor[] checkFile(@NotNull PsiFile file,
+                                                                         @NotNull InspectionManager manager,
+                                                                         boolean isOnTheFly) {
+            String name = file.getName().toLowerCase(Locale.ROOT);
+            if (!name.endsWith(".properties") && !name.endsWith(".yml") && !name.endsWith(".yaml")
+                    && !name.endsWith(".xml")) {
+                return null;
+            }
+            String text = file.getText();
+            if (!text.contains("hibernate.multiTenancy")) {
+                return null;
+            }
+            return new com.intellij.codeInspection.ProblemDescriptor[] {
+                    manager.createProblemDescriptor(file,
+                            "Hibernate 6 ignores hibernate.multiTenancy; remove the obsolete setting",
+                            LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.WARNING, isOnTheFly)
+            };
         }
     }
 
