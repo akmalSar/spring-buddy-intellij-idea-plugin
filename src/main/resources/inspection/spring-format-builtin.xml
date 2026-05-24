@@ -162,6 +162,7 @@
     <inspection_tool class="SpringHibernateSpatialType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateNativeCountCast" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateOracleFunctions" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
+    <inspection_tool class="SpringHibernateQueryTextBlock" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateCastInOnClause" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateInterceptorSignature" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
     <inspection_tool class="SpringHibernateRownumPseudoColumn" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>

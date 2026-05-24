@@ -365,7 +365,7 @@ h2 .count {
 <a href="#lombok">Lombok<span class="nav-count">25</span></a>
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
-<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">42</span></a>
+<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">43</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
@@ -379,9 +379,9 @@ h2 .count {
 
 <div class="stat-row">
 <div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>85</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>172</strong><span>WARNING</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>173</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>4</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>261</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>262</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -655,7 +655,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow misc">Hiberante Migration</div>
-<h2 id="hiberante-migration">Hiberante Migration<span class="count">42 inspections</span></h2>
+<h2 id="hiberante-migration">Hiberante Migration<span class="count">43 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateAddToDateFunction</div>
@@ -786,6 +786,11 @@ h2 .count {
 <div class="class-name">SpringHibernateQueryCacheProperties</div>
 <div class="display-name">Hibernate 6 query cache property migration<span class="badge yellow">WARNING</span></div>
 <div class="description">Reports legacy query cache configuration keys such as <pre class="code"> hibernate.cache.region_prefix</pre> and <pre class="code"> hibernate.cache.use_structured_entries</pre>. Hibernate 6 changed cache region configuration and provider integration.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateQueryTextBlock</div>
+<div class="display-name">Format Hibernate query strings as text blocks<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports long or concatenated Hibernate/JPA query strings in <pre class="code"> @Query</pre>, <pre class="code"> createQuery</pre>, or <pre class="code"> createNativeQuery</pre>. Quick-fix formats the SQL/HQL and replaces the expression with a Java text block.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateResultTransformer</div>

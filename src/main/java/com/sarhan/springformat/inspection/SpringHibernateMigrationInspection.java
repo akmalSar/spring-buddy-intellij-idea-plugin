@@ -21,29 +21,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.ElementManipulators;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiArrayType;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionList;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiImportStatement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiLiteralExpression;
 import com.intellij.psi.PsiMethod;
@@ -51,10 +50,10 @@ import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiNameValuePair;
 import com.intellij.psi.PsiReferenceList;
-import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeCastExpression;
 import com.intellij.psi.PsiVariable;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +83,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     private static final Pattern ORACLE_FUNCTION = Pattern.compile("\\b(?:nvl|add_months)\\s*\\(",
             Pattern.CASE_INSENSITIVE);
     private static final Pattern NVL_FUNCTION = Pattern.compile("\\bnvl\\s*\\(", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ADD_MONTHS_FUNCTION = Pattern.compile("\\badd_months\\s*\\(", Pattern.CASE_INSENSITIVE);
     private static final Pattern SYSDATE = Pattern.compile("\\bsysdate\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern BOOLEAN_COUNT = Pattern.compile(
             "^\\s*select\\s+case\\s+when\\s+count\\([^)]*\\)\\s*>\\s*0\\s+then\\s+true\\s+else\\s+false\\s+end\\s+from\\s+(.+)$",
@@ -260,7 +260,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (code == null) {
             return;
         }
-        PsiElement target = field.getNameIdentifier() != null ? field.getNameIdentifier() : field;
+        PsiElement target = (field.getNameIdentifier() != null) ? field.getNameIdentifier() : field;
         holder.registerProblem(target, "Hibernate 6 changes the default JDBC mapping for "
                 + canonical + "; add @JdbcTypeCode to keep the legacy schema", ProblemHighlightType.WARNING,
                 new AddJdbcTypeCodeFix(code));
@@ -296,9 +296,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Use FETCH FIRST",
                     rownumToFetchFirst(query)));
         } else if (this.kind == Kind.ORACLE_FUNCTIONS && ORACLE_FUNCTION.matcher(query).find()) {
-            LocalQuickFix[] fixes = NVL_FUNCTION.matcher(query).find()
-                    ? new LocalQuickFix[] { new ReplaceStringLiteralFix("Replace NVL with coalesce",
-                    NVL_FUNCTION.matcher(query).replaceAll("coalesce(")) } : LocalQuickFix.EMPTY_ARRAY;
+            LocalQuickFix[] fixes = oracleFunctionFixes(query);
             holder.registerProblem(target, "Hibernate 6 requires non-standard JPQL functions to use FUNCTION or a contributor",
                     ProblemHighlightType.WARNING, fixes);
         } else if (this.kind == Kind.SYSDATE_KEYWORD && SYSDATE.matcher(query).find()) {
@@ -362,8 +360,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (!isAnnotation(annotation, "org.hibernate.annotations.Type", "Type")) {
             return;
         }
-        PsiNameValuePair pair = annotation.findAttributeValue("type") != null ? findPair(annotation, "type") : null;
-        PsiAnnotationMemberValue value = pair != null ? pair.getValue() : null;
+        PsiNameValuePair pair = (annotation.findAttributeValue("type") != null) ? findPair(annotation, "type") : null;
+        PsiAnnotationMemberValue value = (pair != null) ? pair.getValue() : null;
         if (!(value instanceof PsiLiteralExpression literal) || !(literal.getValue() instanceof String type)) {
             return;
         }
@@ -379,7 +377,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 ? new ReplaceAnnotationFix("@org.hibernate.annotations.JdbcTypeCode(java.sql.Types.LONGVARCHAR)",
                 "org.hibernate.annotations.JdbcTypeCode") : null;
         holder.registerProblem(annotation, "Hibernate 6 no longer accepts string aliases in @Type(type = ...)",
-                ProblemHighlightType.WARNING, fix == null ? LocalQuickFix.EMPTY_ARRAY : new LocalQuickFix[] {fix});
+                ProblemHighlightType.WARNING, (fix != null) ? new LocalQuickFix[]{fix} : LocalQuickFix.EMPTY_ARRAY);
     }
 
     private void visitSequenceGenerator(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
@@ -563,7 +561,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (!isJpaField(field)) {
             return;
         }
-        PsiElement target = field.getNameIdentifier() != null ? field.getNameIdentifier() : field;
+        PsiElement target = (field.getNameIdentifier() != null) ? field.getNameIdentifier() : field;
         holder.registerProblem(target, "Hibernate 6 changes default array storage; pin legacy VARBINARY mapping if needed",
                 ProblemHighlightType.WARNING, new AddJdbcTypeCodeFix("java.sql.Types.VARBINARY"));
     }
@@ -609,7 +607,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (extendsList == null || !extendsList.getText().contains("BaseSessionEventListener")) {
             return;
         }
-        PsiElement target = psiClass.getNameIdentifier() != null ? psiClass.getNameIdentifier() : psiClass;
+        PsiElement target = (psiClass.getNameIdentifier() != null) ? psiClass.getNameIdentifier() : psiClass;
         holder.registerProblem(target, "Hibernate 6 replaces BaseSessionEventListener with SessionEventListener",
                 ProblemHighlightType.WARNING);
     }
@@ -669,7 +667,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return;
         }
         PsiNameValuePair pair = findPair(annotation, "name");
-        PsiAnnotationMemberValue value = pair != null ? pair.getValue() : null;
+        PsiAnnotationMemberValue value = (pair != null) ? pair.getValue() : null;
         if (!(value instanceof PsiLiteralExpression literal) || !(literal.getValue() instanceof String name)) {
             return;
         }
@@ -677,7 +675,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return;
         }
         PsiField field = PsiTreeUtil.getParentOfType(annotation, PsiField.class);
-        PsiClass embeddedClass = field != null && field.getType() instanceof com.intellij.psi.PsiClassType classType
+        PsiClass embeddedClass = (field != null && field.getType() instanceof com.intellij.psi.PsiClassType classType)
                 ? classType.resolve() : null;
         if (embeddedClass == null || !hasEmbeddedField(embeddedClass)) {
             return;
@@ -697,7 +695,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             for (int j = i + 1; j < fields.length; j++) {
                 if (isEmbeddedField(fields[j]) && type.equals(fields[j].getType().getCanonicalText())
                         && overrides != attributeOverrideCount(fields[j])) {
-                    holder.registerProblem(psiClass.getNameIdentifier() != null ? psiClass.getNameIdentifier() : psiClass,
+                    holder.registerProblem((psiClass.getNameIdentifier() != null) ? psiClass.getNameIdentifier() : psiClass,
                             "Hibernate 6 requires structurally distinct embeddable mappings to use distinct classes",
                             ProblemHighlightType.WARNING);
                     return;
@@ -716,10 +714,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return null;
         }
         String query = constantString(annotation, value);
-        return query != null ? new QueryValue(value, query) : null;
+        return (query != null) ? new QueryValue(value, query) : null;
     }
-
-    private record QueryValue(@NotNull PsiElement element, @NotNull String query) { }
 
     @Nullable
     private static String constantString(@NotNull PsiAnnotation annotation, @NotNull PsiAnnotationMemberValue value) {
@@ -809,6 +805,29 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         }
         return "select case when exists(select 1 from " + matcher.group(1).trim()
                 + ") then true else false end";
+    }
+
+    @NotNull
+    private static LocalQuickFix[] oracleFunctionFixes(@NotNull String query) {
+        boolean hasNvl = NVL_FUNCTION.matcher(query).find();
+        boolean hasAddMonths = ADD_MONTHS_FUNCTION.matcher(query).find();
+        if (hasNvl && hasAddMonths) {
+            return new LocalQuickFix[] {
+                    new ReplaceStringLiteralFix("Replace NVL with coalesce",
+                            NVL_FUNCTION.matcher(query).replaceAll("coalesce(")),
+                    new ReplaceStringLiteralFix("Wrap ADD_MONTHS in FUNCTION", wrapBareOracleFunctions(query))
+            };
+        }
+        if (hasNvl) {
+            return new LocalQuickFix[] { new ReplaceStringLiteralFix("Replace NVL with coalesce",
+                    NVL_FUNCTION.matcher(query).replaceAll("coalesce(")) };
+        }
+        if (hasAddMonths) {
+            return new LocalQuickFix[] {
+                    new ReplaceStringLiteralFix("Wrap ADD_MONTHS in FUNCTION", wrapBareOracleFunctions(query))
+            };
+        }
+        return LocalQuickFix.EMPTY_ARRAY;
     }
 
     @NotNull
@@ -921,7 +940,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             String replacement = splitArguments(args).stream()
                     .map(String::trim)
                     .map((String arg) -> isLikelyNonStringPath(arg) ? "cast(" + arg + " as string)" : arg)
-                    .reduce((left, right) -> left + ", " + right)
+                    .reduce((String left, String right) -> left + ", " + right)
                     .orElse(args);
             out.replace(open + 1 + offset, close + offset, replacement);
             offset += replacement.length() - args.length();
@@ -1101,7 +1120,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     }
 
     private static boolean isAnnotation(@NotNull PsiAnnotation annotation, @NotNull String fqn,
-                                          @NotNull String shortName) {
+                                        @NotNull String shortName) {
         String name = annotation.getQualifiedName();
         if (name == null && annotation.getNameReferenceElement() != null) {
             name = annotation.getNameReferenceElement().getText();
@@ -1130,6 +1149,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         }
         return null;
     }
+
+    private record QueryValue(@NotNull PsiElement element, @NotNull String query) { }
 
     private enum Kind {
         IMPLICIT_SELECT,
@@ -1388,6 +1409,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     private static final class ReplaceStringLiteralFix implements LocalQuickFix {
 
+        private static final int TEXT_BLOCK_THRESHOLD = 50;
         private final String name;
         private final String replacement;
 
@@ -1414,25 +1436,24 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             if (element == null) {
                 return;
             }
-            if (element.getText().startsWith("\"\"\"")) {
+            boolean useTextBlock = element.getText().startsWith("\"\"\"")
+                    || this.replacement.length() > TEXT_BLOCK_THRESHOLD;
+            String replacement = useTextBlock ? SpringInspectionUtil.formatQueryText(this.replacement) : this.replacement;
+            if (useTextBlock) {
                 PsiExpression replacementExpression = JavaPsiFacade.getElementFactory(project)
-                        .createExpressionFromText(textBlockLiteral(this.replacement), element);
-                element.replace(replacementExpression);
+                        .createExpressionFromText(SpringInspectionUtil.textBlockLiteral(replacement), element);
+                PsiElement replaced = element.replace(replacementExpression);
+                CodeStyleManager.getInstance(project).reformat(replaced);
             } else if (element instanceof PsiLiteralExpression) {
-                ElementManipulators.handleContentChange(element, this.replacement);
+                ElementManipulators.handleContentChange(element, replacement);
             } else {
-                String escaped = this.replacement.replace("\\", "\\\\").replace("\"", "\\\"");
+                String escaped = replacement.replace("\\", "\\\\").replace("\"", "\\\"");
                 PsiExpression replacementExpression = JavaPsiFacade.getElementFactory(project)
                         .createExpressionFromText("\"" + escaped + "\"", element);
                 element.replace(replacementExpression);
             }
         }
 
-        @NotNull
-        private static String textBlockLiteral(@NotNull String content) {
-            String escaped = content.replace("\\", "\\\\").replace("\"\"\"", "\\\"\"\"");
-            return "\"\"\"\n" + escaped + "\"\"\"";
-        }
     }
 
     private static final class DeleteAnnotationFix implements LocalQuickFix {
@@ -1530,7 +1551,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             boolean first = true;
             PsiAnnotationMemberValue name = oldAnnotation.findDeclaredAttributeValue("name");
             PsiAnnotationMemberValue appliesTo = oldAnnotation.findDeclaredAttributeValue("appliesTo");
-            PsiAnnotationMemberValue tableName = name != null ? name : appliesTo;
+            PsiAnnotationMemberValue tableName = (name != null) ? name : appliesTo;
             if (tableName != null) {
                 sb.append("name = ").append(tableName.getText());
                 first = false;

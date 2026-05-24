@@ -16,15 +16,22 @@
 
 package com.sarhan.springformat.inspection;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.intellij.lang.Language;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -32,6 +39,9 @@ import org.jetbrains.annotations.NotNull;
  */
 
 public final class SpringInspectionUtil {
+
+    private static final Pattern QUERY_FORMAT_PATTERN = Pattern.compile(
+            " (?i)((?:JOIN FETCH|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|ON|AND|OR|ORDER BY|GROUP BY|HAVING|UNION|SET|VALUES|FROM|WHERE|UPDATE|DELETE|INSERT INTO) )");
 
     private SpringInspectionUtil() {
     }
@@ -174,6 +184,55 @@ public final class SpringInspectionUtil {
 
     public static PsiClass resolvedClass(PsiType type) {
         return type instanceof PsiClassType classType ? classType.resolve() : null;
+    }
+
+    @NotNull
+    public static String formatQueryText(@NotNull String query) {
+        return formatQueryText(null, query);
+    }
+
+    @NotNull
+    public static String formatQueryText(Project project, @NotNull String query) {
+        if (project != null) {
+            String formatted = formatWithSqlFormatter(project, query);
+            if (formatted != null) {
+                return formatted;
+            }
+        }
+        return formatQueryTextFallback(query);
+    }
+
+    private static String formatWithSqlFormatter(@NotNull Project project, @NotNull String query) {
+        Language sql = Language.findLanguageByID("SQL");
+        if (sql == null) {
+            return null;
+        }
+        PsiFile file = PsiFileFactory.getInstance(project).createFileFromText("query.sql", sql, query.trim());
+        PsiElement reformatted = CodeStyleManager.getInstance(project).reformat(file);
+        String formatted = reformatted.getText().trim();
+        return formatted.isEmpty() ? null : formatted;
+    }
+
+    @NotNull
+    private static String formatQueryTextFallback(@NotNull String query) {
+        String normalized = query.trim().replaceAll("\\s+", " ");
+        Matcher matcher = QUERY_FORMAT_PATTERN.matcher(normalized);
+        StringBuilder formatted = new StringBuilder();
+        int lastEnd = 0;
+        while (matcher.find()) {
+            formatted.append(normalized, lastEnd, matcher.start());
+            formatted.append('\n');
+            formatted.append(matcher.group(1));
+            lastEnd = matcher.end();
+        }
+        formatted.append(normalized, lastEnd, normalized.length());
+        return formatted.toString();
+    }
+
+    @NotNull
+    public static String textBlockLiteral(@NotNull String content) {
+        String escaped = content.replace("\\", "\\\\").replace("\"\"\"", "\\\"\"\"");
+        return "\"\"\"\n" + escaped + "\n\"\"\"";
     }
 
     /**

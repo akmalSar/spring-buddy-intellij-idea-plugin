@@ -20,6 +20,8 @@ import java.util.List;
 
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.lang.java.JavaLanguage;
+import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.assertj.core.api.Assertions;
 
@@ -383,15 +385,77 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
         this.myFixture.doHighlighting();
         this.myFixture.launchAction(this.myFixture.findSingleIntention("Wrap Oracle functions in FUNCTION"));
 
-        this.myFixture.checkResult("""
+        String expected = """
                 import java.util.Date;
                 import java.util.List;
                 @interface Query { String value(); boolean nativeQuery() default false; }
                 interface Repo {
-                    @Query("SELECT CASE WHEN COUNT(bh) > 0 THEN true ELSE false END FROM BuildingHistory bh WHERE (FUNCTION('trunc', bh.validUntil) > FUNCTION('trunc', :startDate) OR bh.validUntil is null)")
+                    @Query(\"\"\"
+                            SELECT CASE WHEN COUNT(bh) > 0 THEN true ELSE false END
+                            FROM BuildingHistory bh
+                            WHERE (FUNCTION('trunc', bh.validUntil) > FUNCTION('trunc', :startDate)
+                            OR bh.validUntil is null)
+                            \"\"\")
                     boolean isBuildingValid(Date startDate, Long apartmentId, List<ContractType> contractTypes);
                 }
                 class ContractType { }
+                """;
+        this.myFixture.checkResult(expected);
+    }
+
+    public void testWrapsAddMonthsOracleFunctionInQuery() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.OracleFunctions());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Query { String value(); boolean nativeQuery() default false; }
+                interface Repo {
+                    @Query("<caret>select ADD_MONTHS(c.startDate, 1) from Contract c")
+                    Object addMonths();
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Wrap ADD_MONTHS in FUNCTION"));
+
+        this.myFixture.checkResult("""
+                @interface Query { String value(); boolean nativeQuery() default false; }
+                interface Repo {
+                    @Query(\"\"\"
+                            select FUNCTION('add_months', c.startDate, 1)
+                            from Contract c
+                            \"\"\")
+                    Object addMonths();
+                }
+                """);
+    }
+
+    public void testQuickFixUsesTabsForTextBlockIndentationWhenConfigured() {
+        CodeStyleSettingsManager.getSettings(this.getProject())
+                .getCommonSettings(JavaLanguage.INSTANCE)
+                .getIndentOptions()
+                .USE_TAB_CHARACTER = true;
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.ImplicitSelect());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Query { String value(); }
+                interface Repo {
+                \t@Query(<caret>"FROM User u JOIN u.roles r " + "WHERE r.name = :role")
+                \tObject implicit();
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Add explicit SELECT"));
+
+        this.myFixture.checkResult("""
+                @interface Query { String value(); }
+                interface Repo {
+                \t@Query(\"\"\"
+                \t\t\tSELECT u
+                \t\t\tFROM User u
+                \t\t\tJOIN u.roles r
+                \t\t\tWHERE r.name = :role
+                \t\t\t\"\"\")
+                \tObject implicit();
+                }
                 """);
     }
 
@@ -415,7 +479,11 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 @interface Component { }
                 @Component
                 interface Repo {
-                    @Query("select n from Contract n where function('date_add', cast(n.contractStartDate as LocalDate), 305, day) = FUNCTION('trunc',CURRENT_DATE)")
+                    @Query(\"\"\"
+                            select n
+                            from Contract n
+                            where function('date_add', cast(n.contractStartDate as LocalDate), 305, day) = FUNCTION('trunc',CURRENT_DATE)
+                            \"\"\")
                     Object addToDate();
                 }
                 """);
@@ -677,7 +745,12 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
         this.myFixture.checkResult("""
                 @interface Query { String value(); }
                 interface Repo {
-                    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :role")
+                    @Query(\"\"\"
+                            SELECT u
+                            FROM User u
+                            JOIN u.roles r
+                            WHERE r.name = :role
+                            \"\"\")
                     Object implicit();
                 }
                 """);
@@ -709,7 +782,13 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 @interface Query { String value(); }
                 @interface Param { String value(); }
                 interface Repo {
-                    @Query("SELECT r from SubscriberServiceReplacementAssignment ra JOIN SubscriberServiceExtended r on ra.replacementServiceId = r.id where ra.originServiceId = :originId")
+                    @Query(\"\"\"
+                            SELECT r
+                            from SubscriberServiceReplacementAssignment ra
+                            JOIN SubscriberServiceExtended r
+                            on ra.replacementServiceId = r.id
+                            where ra.originServiceId = :originId
+                            \"\"\")
                     List<SubscriberServiceExtended> getReplacements(@Param("originId") UUID originId);
                 }
                 class SubscriberServiceExtended { }
