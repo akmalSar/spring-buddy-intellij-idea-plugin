@@ -366,6 +366,7 @@ h2 .count {
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
 <a href="#hiberante-migration">Hiberante Migration<span class="nav-count">49</span></a>
+<a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">43</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
@@ -378,10 +379,10 @@ h2 .count {
 </div>
 
 <div class="stat-row">
-<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>85</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>179</strong><span>WARNING</span></div>
-<div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>4</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>268</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>98</strong><span>ERROR</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>205</strong><span>WARNING</span></div>
+<div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>8</strong><span>WEAK WARNING</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>311</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -902,6 +903,96 @@ h2 .count {
 <div class="display-name">Hibernate 6 UserType signature change<span class="badge yellow">WARNING</span></div>
 <div class="description">Reports old Hibernate 5 <pre class="code"> UserType</pre> method signatures such as legacy <pre class="code"> nullSafeGet</pre> and <pre class="code"> nullSafeSet</pre> overrides. Update custom user types to the Hibernate 6 contract.</div>
 </article>
+</div>
+</div>
+
+<div class="category-section">
+<div class="eyebrow misc">spring 2 -&gt; 3 migration</div>
+<h2 id="spring-2-3-migration">spring 2 -&gt; 3 migration<span class="count">43 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3ApacheHttpClientDependencyInspection</div><div class="display-name">Apache HttpClient 4 dependency should be migrated<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> org.apache.httpcomponents:httpclient</pre>. Spring Boot 3 uses Apache HttpClient 5 through <pre class="code"> org.apache.httpcomponents.client5:httpclient5</pre>.</div></article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBoot3ApacheHttpClientInspection</div>
+<div class="display-name">Apache HttpClient 4 should be migrated<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports Apache HttpClient 4 imports and references. Spring Boot 3 no longer auto-detects HttpClient 4 for <pre class="code"> RestTemplate</pre>; migrate to HttpClient 5.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBoot3ConstructorBindingTypeInspection</div>
+<div class="display-name">@ConstructorBinding on type is no longer needed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports type-level <pre class="code"> @ConstructorBinding</pre> on single-constructor <pre class="code"> @ConfigurationProperties</pre> types. Spring Boot 3 infers constructor binding, so the annotation should be removed unless it is placed on a specific constructor to disambiguate multiple constructors.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBoot3EnableBatchProcessingInspection</div>
+<div class="display-name">@EnableBatchProcessing disables Batch auto-configuration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports <pre class="code"> @EnableBatchProcessing</pre>. Spring Boot 3 auto-configures Batch, and adding this annotation can make auto-configuration back off unless the app intentionally owns Batch infrastructure.</div>
+</article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3ElasticsearchAutoConfigExclusionInspection</div><div class="display-name">Elasticsearch auto-configuration exclusion was renamed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> ReactiveElasticsearchRestClientAutoConfiguration</pre> exclusions. Spring Boot 3 renamed it to <pre class="code"> ReactiveElasticsearchClientAutoConfiguration</pre> under <pre class="code"> org.springframework.boot.autoconfigure.elasticsearch</pre>.</div></article>
+<article class="card" data-level="error">
+<div class="class-name">SpringBoot3HttpTraceRepositoryInspection</div>
+<div class="display-name">HTTP trace API was renamed to HTTP exchanges<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports Spring Boot 2 actuator HTTP trace types such as <pre class="code"> HttpTraceRepository</pre> and <pre class="code"> InMemoryHttpTraceRepository</pre>. Spring Boot 3 renamed these APIs to HTTP exchanges.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringBoot3JavaxFQNInspection</div>
+<div class="display-name">Fully-qualified javax.* type should be migrated to jakarta.*<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports fully-qualified Jakarta EE <pre class="code"> javax.*</pre> type references and class-name strings. Spring Boot 3 requires the corresponding <pre class="code"> jakarta.*</pre> names.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringBoot3JavaxImportInspection</div>
+<div class="display-name">javax.* import should be migrated to jakarta.*<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports Jakarta EE imports under <pre class="code"> javax.*</pre>, while ignoring Java SE packages such as <pre class="code"> javax.swing</pre>. Spring Boot 3 requires Jakarta EE 10 package names.</div>
+</article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3IncompatibleJavaVersionInspection</div><div class="display-name">Java version must be 17 or later<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports Maven or Gradle Java version settings below <pre class="code"> 17</pre>. Spring Boot 3 requires Java 17 or later.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3LegacyJavaEeDependenciesInspection</div><div class="display-name">Legacy Java EE dependencies should be migrated<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports legacy Java EE <pre class="code"> javax.*</pre> API dependencies such as <pre class="code"> javax.persistence:javax.persistence-api</pre>. Spring Boot 3 uses Jakarta EE coordinates.</div></article>
+<article class="card" data-level="weak">
+<div class="class-name">SpringBoot3JvmInfoMetricsInspection</div>
+<div class="display-name">JvmInfoMetrics manual bean is redundant<span class="badge purple">WEAK WARNING</span></div>
+<div class="description">Reports manual <pre class="code"> @Bean</pre> methods returning <pre class="code"> JvmInfoMetrics</pre>. Spring Boot 3 auto-configures this metric binder.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringBoot3TrailingSlashMatchingInspection</div>
+<div class="display-name">Trailing slash URL matching changed in Spring Boot 3<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports calls to <pre class="code"> setUseTrailingSlashMatch</pre>. Spring Framework 6 removed the old setter path; declare explicit route variants or handle trailing slashes through a filter.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringBoot3WebMvcMetricsFilterInspection</div>
+<div class="display-name">Spring Boot 2 web metrics instrumentation API was removed<span class="badge red">ERROR</span></div>
+<div class="description">Reports old actuator web metrics classes such as <pre class="code"> WebMvcMetricsFilter</pre> and <pre class="code"> WebMvcTagsProvider</pre>. Spring Boot 3 moved web instrumentation to Micrometer Observation.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringBoot3YamlJsonParserInspection</div>
+<div class="display-name">YamlJsonParser was removed in Spring Boot 3<span class="badge red">ERROR</span></div>
+<div class="description">Reports references to <pre class="code"> org.springframework.boot.json.YamlJsonParser</pre>. Migrate to an explicit supported parser such as <pre class="code"> JacksonJsonParser</pre> or <pre class="code"> BasicJsonParser</pre>.</div>
+</article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3JavaxServletDependencyInspection</div><div class="display-name">javax.servlet-api dependency should be migrated<span class="badge red">ERROR</span></div><div class="description">Reports <pre class="code"> javax.servlet:javax.servlet-api</pre> build coordinates. Spring Boot 3 uses <pre class="code"> jakarta.servlet:jakarta.servlet-api</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3MySqlDriverCoordinatesInspection</div><div class="display-name">MySQL driver coordinates changed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> mysql:mysql-connector-java</pre>. Spring Boot 3 uses <pre class="code"> com.mysql:mysql-connector-j</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3SpringFactoriesAutoConfigInspection</div><div class="display-name">Auto-configuration imports moved out of spring.factories<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> org.springframework.boot.autoconfigure.EnableAutoConfiguration</pre> entries in <pre class="code"> spring.factories</pre>. Spring Boot 3 uses <pre class="code"> AutoConfiguration.imports</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3ImageBannerInspection</div><div class="display-name">Image banner files are no longer supported<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> banner.gif</pre>, <pre class="code"> banner.jpg</pre>, and <pre class="code"> banner.png</pre> under resources. Spring Boot 3 supports text banners only.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3MaxHttpHeaderSizeInspection</div><div class="display-name">server.max-http-header-size was renamed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> server.max-http-header-size</pre>. Use <pre class="code"> server.max-http-request-header-size</pre> for request headers in Spring Boot 3.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3HttptracePropertyInspection</div><div class="display-name">httptrace actuator properties were renamed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> httptrace</pre> actuator keys and exposure values. Spring Boot 3 renamed the endpoint to <pre class="code"> httpexchanges</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3MetricsExportPropertyInspection</div><div class="display-name">Metrics export property prefix changed<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> management.metrics.export.&lt;product&gt;.*</pre>. Spring Boot 3 moved exporters to <pre class="code"> management.&lt;product&gt;.metrics.export.*</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3CassandraPropertiesInspection</div><div class="display-name">Cassandra property prefix changed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> spring.data.cassandra.*</pre>. Use <pre class="code"> spring.cassandra.*</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3RedisPropertiesInspection</div><div class="display-name">Redis property prefix changed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> spring.redis.*</pre>. Use <pre class="code"> spring.data.redis.*</pre>.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3HibernateIdGeneratorPropertyInspection</div><div class="display-name">Hibernate ID generator mapping property was removed<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> spring.jpa.hibernate.use-new-id-generator-mappings</pre>. Hibernate 6 always uses new generator mappings.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3HibernateGroupIdInspection</div><div class="display-name">Hibernate ORM groupId changed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports explicit <pre class="code"> org.hibernate:hibernate-core</pre>. Spring Boot 3 aligns Hibernate ORM under <pre class="code"> org.hibernate.orm</pre>.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3ElasticsearchRestClientInspection</div><div class="display-name">Elasticsearch high-level REST client was removed<span class="badge red">ERROR</span></div><div class="description">Reports <pre class="code"> RestHighLevelClient</pre>, old request options, ERHLC templates, and high-level REST client dependencies removed from Spring Boot 3 support.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3FlapdoodleMongoInspection</div><div class="display-name">Flapdoodle Mongo auto-configuration was removed<span class="badge yellow">WARNING</span></div><div class="description">Reports Flapdoodle embedded Mongo dependencies. Spring Boot 3 no longer auto-configures them.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3Saml2IdentityProviderPropertyInspection</div><div class="display-name">SAML2 identity-provider was renamed<span class="badge red">ERROR</span></div><div class="description">Reports SAML2 <pre class="code"> identity-provider</pre> property segments. Use <pre class="code"> asserting-party</pre>.</div></article>
+<article class="card" data-level="weak"><div class="class-name">SpringBoot3SecurityDispatchTypesInspection</div><div class="display-name">Spring Security dispatcher types default changed<span class="badge purple">WEAK WARNING</span></div><div class="description">Reports application config without explicit <pre class="code"> spring.security.filter.dispatcher-types</pre>. Spring Security 6 authorizes all dispatcher types by default.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3BatchJobNamesPropertyInspection</div><div class="display-name">spring.batch.job.names was renamed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> spring.batch.job.names</pre>. Use singular <pre class="code"> spring.batch.job.name</pre>.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3SessionStoreTypeInspection</div><div class="display-name">spring.session.store-type was removed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> spring.session.store-type</pre>. Spring Boot 3 auto-detects the session store by classpath precedence.</div></article>
+<article class="card" data-level="weak"><div class="class-name">SpringBoot3JmxEndpointExposureInspection</div><div class="display-name">JMX endpoint exposure default changed<span class="badge purple">WEAK WARNING</span></div><div class="description">Reports broad JMX endpoint exposure. Spring Boot 3 exposes only health over JMX by default.</div></article>
+<article class="card" data-level="weak"><div class="class-name">SpringBoot3ActuatorSanitizationInspection</div><div class="display-name">Actuator sanitization configuration changed<span class="badge purple">WEAK WARNING</span></div><div class="description">Reports <pre class="code"> management.endpoint.env.keys-to-sanitize</pre>. Use Spring Boot 3 <pre class="code"> show-values</pre> controls.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3PropertiesMigratorLeftInDepsInspection</div><div class="display-name">Properties migrator should be removed after migration<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> spring-boot-properties-migrator</pre> dependencies left in build files.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3GitCommitIdPluginInspection</div><div class="display-name">git-commit-id-plugin coordinates changed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports old <pre class="code"> pl.project13.maven:git-commit-id-plugin</pre>. Use <pre class="code"> io.github.git-commit-id:git-commit-id-maven-plugin</pre>.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3MavenForkAttributeInspection</div><div class="display-name">spring-boot-maven-plugin fork configuration was removed<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> &lt;fork&gt;</pre> in Spring Boot Maven plugin configuration. Spring Boot 3 removed this option.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3Ehcache3ClassifierInspection</div><div class="display-name">Ehcache 3 should use jakarta classifier<span class="badge yellow">WARNING</span></div><div class="description">Reports Ehcache 3 dependencies without the <pre class="code"> jakarta</pre> classifier.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3R2dbcBomVersionInspection</div><div class="display-name">r2dbc-bom.version no longer works<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> r2dbc-bom.version</pre>. R2DBC 1.0 no longer publishes the old BOM.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3ActiveMQRemovedInspection</div><div class="display-name">ActiveMQ Classic support was removed<span class="badge red">ERROR</span></div><div class="description">Reports ActiveMQ Classic starter or broker dependencies. Migrate to Artemis or manage ActiveMQ explicitly.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3AtomikosRemovedInspection</div><div class="display-name">Atomikos auto-configuration was removed<span class="badge yellow">WARNING</span></div><div class="description">Reports Atomikos starter dependencies. Spring Boot 3 no longer auto-configures Atomikos.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3EhCache2RemovedInspection</div><div class="display-name">EhCache 2 support was removed<span class="badge red">ERROR</span></div><div class="description">Reports <pre class="code"> net.sf.ehcache:ehcache</pre>. Migrate to Ehcache 3 with Jakarta artifacts.</div></article>
+<article class="card" data-level="error"><div class="class-name">SpringBoot3SolrRemovedInspection</div><div class="display-name">Apache Solr support was removed<span class="badge red">ERROR</span></div><div class="description">Reports Spring Data Solr or Solr starter dependencies. Spring Boot 3 removed Apache Solr support.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3RenamedPropertiesInspection</div><div class="display-name">Spring Boot 3 renamed or removed configuration property<span class="badge yellow">WARNING</span></div><div class="description">Reports general Spring Boot 3 configuration property renames and removals at edit time.</div></article>
 </div>
 </div>
 

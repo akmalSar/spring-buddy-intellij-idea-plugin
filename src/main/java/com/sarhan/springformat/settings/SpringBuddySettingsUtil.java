@@ -48,7 +48,8 @@ public final class SpringBuddySettingsUtil {
             new InspectionGroup("lombok", "3. Lombok", "Lombok"),
             new InspectionGroup("misc", "4. Misc Java/Spring quality", "Misc Java/Spring quality"),
             new InspectionGroup("mockito", "Mockito", "Mockito"),
-            new InspectionGroup("hiberante migration", "hiberante migration", "hiberante migration"),
+            new InspectionGroup("hibernate migration", "hibernate migration", "hibernate migration"),
+            new InspectionGroup("spring-boot 2 -> 3 migration", "spring-boot 2 -> 3 migration", "spring-boot 2 -> 3 migration"),
             new InspectionGroup("async-concurrency", "Async / concurrency", "Async / concurrency"));
 
     private SpringBuddySettingsUtil() {

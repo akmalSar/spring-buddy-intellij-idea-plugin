@@ -130,55 +130,55 @@
     <inspection_tool class="SpringQuerySqlInjection" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringRepositoryFindAllWithoutPageable" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJpaToOneLazyPitfall" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
-    <inspection_tool class="SpringHibernateImplicitSelect" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateBarePositionalParameters" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateBareOracleFunctions" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateBooleanCountExists" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateCallableNamedNativeQuery" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateConcatTypeCast" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateLegacyType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateUserTypeSignature" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateFetchJoinProjection" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateSequenceAllocation" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateUpdateFrom" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateSchemaTypeDefaults" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateCascadeTypes" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateIdentifierGenerator" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateSessionLifecycle" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateDialectRemoval" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateResultTransformer" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateTemporalJavaTime" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateDistinctFetch" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateFunctionRegistration" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateDialectRegisterHibernateType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateFunctionParameterType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateFunctionReturnType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateGlobalSequence" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateScrollableResultsAccess" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateEmbeddableReuse" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateTableAnnotation" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateUntypedCreateQuery" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateArrayMapping" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateCompositeUserType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateCollectionTypeString" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateLazyCollection" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateSessionEventListener" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateSpatialType" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateNativeCountCast" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateOracleFunctions" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateQueryTextBlock" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateCastInOnClause" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateInterceptorSignature" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateRownumPseudoColumn" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateScrollModeUsage" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateSysdateKeyword" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateTemporalSubtraction" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateDbDateFormatCompare" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateAddToDateFunction" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateQueryCacheProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateMultiTenancyConfiguration" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateMultiTenancyApi" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
-    <inspection_tool class="SpringHibernateEmbeddedSubPropertyOverride" enabled="true" level="WARNING" enabled_by_default="true" groups="hiberante migration"/>
+    <inspection_tool class="SpringHibernateImplicitSelect" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateBarePositionalParameters" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateBareOracleFunctions" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateBooleanCountExists" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateCallableNamedNativeQuery" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateConcatTypeCast" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateLegacyType" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateUserTypeSignature" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateFetchJoinProjection" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateSequenceAllocation" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateUpdateFrom" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateSchemaTypeDefaults" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateCascadeTypes" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateIdentifierGenerator" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateSessionLifecycle" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateDialectRemoval" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateResultTransformer" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateTemporalJavaTime" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateDistinctFetch" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateFunctionRegistration" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateDialectRegisterHibernateType" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateFunctionParameterType" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateFunctionReturnType" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateGlobalSequence" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateScrollableResultsAccess" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateEmbeddableReuse" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateTableAnnotation" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateUntypedCreateQuery" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateArrayMapping" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateCompositeUserType" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateCollectionTypeString" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateLazyCollection" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateSessionEventListener" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateSpatialType" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateNativeCountCast" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateOracleFunctions" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateQueryTextBlock" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateCastInOnClause" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateInterceptorSignature" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateRownumPseudoColumn" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateScrollModeUsage" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateSysdateKeyword" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateTemporalSubtraction" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateDbDateFormatCompare" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateAddToDateFunction" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateQueryCacheProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateMultiTenancyConfiguration" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateMultiTenancyApi" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
+    <inspection_tool class="SpringHibernateEmbeddedSubPropertyOverride" enabled="true" level="WARNING" enabled_by_default="true" groups="hibernate migration"/>
     <!-- Lombok issues moved here from plugin.xml so the bundled profile includes them -->
     <inspection_tool class="LombokConstructorToBuilder" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>
     <inspection_tool class="LombokSetterChainToBuilder" enabled="true" level="WARNING" enabled_by_default="true" groups="lombok"/>
@@ -343,6 +343,49 @@
     <inspection_tool class="SpringLazyInitializationPredictionDataFlow" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringValidOnPrimitive" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJakartaTransactionalMigration" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringBoot3JavaxImport" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3JavaxFQN" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ConstructorBindingType" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3YamlJsonParser" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3TrailingSlashMatching" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3HttpTraceRepository" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3WebMvcMetricsFilter" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3JvmInfoMetrics" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3EnableBatchProcessing" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ApacheHttpClient" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3JavaxServletDependency" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3IncompatibleJavaVersion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3LegacyJavaEeDependencies" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3MySqlDriverCoordinates" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SpringFactoriesAutoConfig" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ImageBanner" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3MaxHttpHeaderSize" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3HttptraceProperty" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3MetricsExportProperty" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3CassandraProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3RedisProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3HibernateIdGeneratorProperty" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3HibernateGroupId" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ApacheHttpClientDependency" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ElasticsearchRestClient" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ElasticsearchAutoConfigExclusion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3FlapdoodleMongo" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3Saml2IdentityProviderProperty" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SecurityDispatchTypes" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3BatchJobNamesProperty" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SessionStoreType" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3JmxEndpointExposure" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ActuatorSanitization" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3PropertiesMigratorLeftInDeps" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3GitCommitIdPlugin" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3MavenForkAttribute" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3Ehcache3Classifier" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3R2dbcBomVersion" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3ActiveMQRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3AtomikosRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3EhCache2Removed" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SolrRemoved" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3RenamedProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
 
     <inspection_tool class="SpringOrphanedApplicationEvent" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringInMemoryFiltering" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
