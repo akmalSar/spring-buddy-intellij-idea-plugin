@@ -945,6 +945,13 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                     String schema() default "";
                 }
                 """);
+        this.myFixture.addFileToProject("jakarta/persistence/Table.java", """
+                package jakarta.persistence;
+                public @interface Table {
+                    String name() default "";
+                    String schema() default "";
+                }
+                """);
         this.myFixture.configureByText("Sample.java", """
                 import org.hibernate.annotations.Table;
                 @Table(<caret>name = "V_ARCHIVABLE_PROCESSES", schema = "public")
@@ -956,11 +963,45 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
         this.myFixture.launchAction(this.myFixture.findSingleIntention("Replace with @jakarta.persistence.Table"));
 
         this.myFixture.checkResult("""
-                import org.hibernate.annotations.Table;
-                @jakarta.persistence.Table(name = "V_ARCHIVABLE_PROCESSES", schema = "public")
+                import jakarta.persistence.Table;
+                
+                @Table(name = "V_ARCHIVABLE_PROCESSES", schema = "public")
                 class Entity {
                 }
                 """);
+    }
+
+    public void testReplacesHibernateTableAnnotationWithJakartaWildcardImportPresent() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.HibernateTable());
+        this.myFixture.addFileToProject("org/hibernate/annotations/Table.java", """
+                package org.hibernate.annotations;
+                public @interface Table {
+                    String name() default "";
+                }
+                """);
+        this.myFixture.addFileToProject("jakarta/persistence/Table.java", """
+                package jakarta.persistence;
+                public @interface Table {
+                    String name() default "";
+                }
+                """);
+        this.myFixture.configureByText("Sample.java", """
+                import jakarta.persistence.*;
+                import org.hibernate.annotations.Table;
+                
+                @Table(<caret>name = "PSP_MESSAGE_HISTORY_VIEW")
+                class MessageHistoryView {
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Replace with @jakarta.persistence.Table"));
+
+        Assertions.assertThat(this.myFixture.getFile().getText())
+                .as("Hibernate Table quick fix imports")
+                .contains("import jakarta.persistence.Table;")
+                .doesNotContain("import org.hibernate.annotations.Table;")
+                .contains("@Table(name = \"PSP_MESSAGE_HISTORY_VIEW\")");
     }
 
     public void testDoesNotReportJakartaTableWildcardImport() {

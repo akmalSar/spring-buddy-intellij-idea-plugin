@@ -55,6 +55,7 @@ import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionList;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiImportStatement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiLiteralExpression;
 import com.intellij.psi.PsiMethod;
@@ -1792,7 +1793,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 PsiExpression replacementExpression = JavaPsiFacade.getElementFactory(project)
                         .createExpressionFromText(SpringInspectionUtil.textBlockLiteral(replacement), element);
                 PsiElement replaced = element.replace(replacementExpression);
-                CodeStyleManager.getInstance(project).reformat(replaced);
+                reformatSafely(project, replaced);
             } else if (element instanceof PsiLiteralExpression) {
                 ElementManipulators.handleContentChange(element, replacement);
             } else {
@@ -1803,6 +1804,21 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             }
         }
 
+    }
+
+    private static void reformatSafely(@NotNull Project project, @NotNull PsiElement element) {
+        PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
+        PsiFile containingFile = element.getContainingFile();
+        if (containingFile != null) {
+            Document document = documentManager.getDocument(containingFile);
+            if (document != null) {
+                documentManager.doPostponedOperationsAndUnblockDocument(document);
+                documentManager.commitDocument(document);
+            }
+        } else {
+            documentManager.commitAllDocuments();
+        }
+        CodeStyleManager.getInstance(project).reformat(element);
     }
 
     private static final class DeleteAnnotationFix implements LocalQuickFix {
@@ -1918,7 +1934,30 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             sb.append(")");
             PsiAnnotation newAnnotation = JavaPsiFacade.getElementFactory(project)
                     .createAnnotationFromText(sb.toString(), oldAnnotation);
-            oldAnnotation.replace(newAnnotation);
+            PsiElement replaced = oldAnnotation.replace(newAnnotation);
+            if (replaced.getContainingFile() instanceof PsiJavaFile javaFile) {
+                PsiImportStatement oldImport = javaFile.getImportList() == null ? null
+                        : javaFile.getImportList().findSingleClassImportStatement("org.hibernate.annotations.Table");
+                if (oldImport != null) {
+                    oldImport.delete();
+                }
+                PsiClass tableClass = JavaPsiFacade.getInstance(project)
+                        .findClass("jakarta.persistence.Table", replaced.getResolveScope());
+                if (tableClass != null) {
+                    addExplicitImport(project, javaFile, tableClass);
+                    JavaCodeStyleManager.getInstance(project).shortenClassReferences(replaced);
+                }
+            }
+        }
+
+        private static void addExplicitImport(@NotNull Project project, @NotNull PsiJavaFile javaFile,
+                                              @NotNull PsiClass psiClass) {
+            if (javaFile.getImportList() == null
+                    || javaFile.getImportList().findSingleClassImportStatement("jakarta.persistence.Table") != null) {
+                return;
+            }
+            PsiImportStatement importStatement = JavaPsiFacade.getElementFactory(project).createImportStatement(psiClass);
+            javaFile.getImportList().add(importStatement);
         }
     }
 
