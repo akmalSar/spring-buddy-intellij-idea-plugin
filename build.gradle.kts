@@ -17,6 +17,11 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.hibernate.core) {
+        isTransitive = false
+    }
+    implementation(libs.antlr4.runtime)
+
     testImplementation(libs.junit)
     testImplementation(libs.assertj.core)
 

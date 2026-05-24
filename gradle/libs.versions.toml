@@ -1,7 +1,11 @@
 [versions]
 junit = "4.13.2"
 assertj = "3.27.3"
+hibernate = "6.6.50.Final"
+antlr = "4.13.2"
 
 [libraries]
 junit = { module = "junit:junit", version.ref = "junit" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+hibernate-core = { module = "org.hibernate.orm:hibernate-core", version.ref = "hibernate" }
+antlr4-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr" }

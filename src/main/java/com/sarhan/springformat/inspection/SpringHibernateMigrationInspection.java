@@ -20,6 +20,16 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
+import org.hibernate.grammars.hql.HqlLexer;
+import org.hibernate.grammars.hql.HqlParser;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
@@ -34,8 +44,10 @@ import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationMemberValue;
+import com.intellij.psi.PsiArrayInitializerMemberValue;
 import com.intellij.psi.PsiArrayType;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
@@ -49,6 +61,8 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiNameValuePair;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiReferenceList;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeCastExpression;
@@ -56,8 +70,6 @@ import com.intellij.psi.PsiVariable;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Hibernate 5 to 6 migration inspections.
@@ -268,38 +280,39 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     private void visitQueryLiteral(@NotNull PsiElement target, @NotNull String query,
                                      @NotNull ProblemsHolder holder) {
+        ParsedHql parsed = ParsedHql.parse(query);
         if (this.kind == Kind.IMPLICIT_SELECT) {
             Matcher matcher = IMPLICIT_SELECT.matcher(query);
-            if (matcher.find()) {
+            if (parsed.hasImplicitSelectJoin() && matcher.find()) {
                 holder.registerProblem(target, "Hibernate 6 requires an explicit SELECT projection for joined HQL queries",
                         ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Add explicit SELECT",
                         "SELECT " + matcher.group(1) + " " + query));
             }
-        } else if (this.kind == Kind.BARE_POSITIONAL_PARAMETERS && hasBareQuestionMark(query)) {
+        } else if (this.kind == Kind.BARE_POSITIONAL_PARAMETERS && parsed.hasBareQuestionMark()) {
             holder.registerProblem(target, "Hibernate 6 requires numbered positional parameters like ?1",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Number positional parameters",
                     numberBareParameters(query)));
-        } else if (this.kind == Kind.FETCH_JOIN_PROJECTION && invalidFetchProjection(query)) {
+        } else if (this.kind == Kind.FETCH_JOIN_PROJECTION && parsed.hasInvalidFetchProjection()) {
             holder.registerProblem(target, "Hibernate 6 requires JOIN FETCH queries to select the owning entity",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Remove FETCH from scalar projection",
                     query.replaceAll("(?i)" + FETCH_JOIN_TOKEN, "JOIN")));
-        } else if (this.kind == Kind.UPDATE_FROM && UPDATE_FROM.matcher(query).find()) {
+        } else if (this.kind == Kind.UPDATE_FROM && parsed.hasUpdateFrom()) {
             holder.registerProblem(target, "Hibernate 6 forbids UPDATE FROM in HQL",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Remove FROM from UPDATE",
                     UPDATE_FROM.matcher(query).replaceFirst("UPDATE ")));
-        } else if (this.kind == Kind.DISTINCT_FETCH && SELECT_DISTINCT_FETCH.matcher(query).find()) {
+        } else if (this.kind == Kind.DISTINCT_FETCH && parsed.hasSelectDistinctFetch()) {
             holder.registerProblem(target, "Hibernate 6 de-duplicates JOIN FETCH results in memory; DISTINCT can slow SQL",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Remove redundant DISTINCT",
                     SELECT_DISTINCT_FETCH.matcher(query).replaceFirst("SELECT")));
-        } else if (this.kind == Kind.ROWNUM_PSEUDO_COLUMN && ROWNUM.matcher(query).find()) {
+        } else if (this.kind == Kind.ROWNUM_PSEUDO_COLUMN && parsed.hasIdentifier("rownum")) {
             holder.registerProblem(target, "Hibernate 6 treats ROWNUM as an entity attribute in JPQL",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Use FETCH FIRST",
                     rownumToFetchFirst(query)));
-        } else if (this.kind == Kind.ORACLE_FUNCTIONS && ORACLE_FUNCTION.matcher(query).find()) {
+        } else if (this.kind == Kind.ORACLE_FUNCTIONS && parsed.hasBareFunctionCall("nvl", "add_months")) {
             LocalQuickFix[] fixes = oracleFunctionFixes(query);
             holder.registerProblem(target, "Hibernate 6 requires non-standard JPQL functions to use FUNCTION or a contributor",
                     ProblemHighlightType.WARNING, fixes);
-        } else if (this.kind == Kind.SYSDATE_KEYWORD && SYSDATE.matcher(query).find()) {
+        } else if (this.kind == Kind.SYSDATE_KEYWORD && parsed.hasIdentifier("sysdate")) {
             holder.registerProblem(target, "Hibernate 6 expects standard current_date/current_timestamp instead of sysdate",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Replace sysdate with current_date",
                     SYSDATE.matcher(query).replaceAll("current_date")));
@@ -311,7 +324,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             holder.registerProblem(target, "Hibernate 6 cannot infer FUNCTION('trunc', ...) return type reliably",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Cast trunc operands to LocalDate",
                     truncToLocalDateCast(query)));
-        } else if (this.kind == Kind.BARE_ORACLE_FUNCTIONS && BARE_ORACLE_FUNCTION.matcher(query).find()) {
+        } else if (this.kind == Kind.BARE_ORACLE_FUNCTIONS
+                && parsed.hasBareFunctionCall("trunc", "to_char", "add_months", "add_to_date")) {
             holder.registerProblem(target, "Hibernate 6 requires vendor JPQL functions to use FUNCTION(...)",
                     ProblemHighlightType.WARNING, new ReplaceStringLiteralFix("Wrap Oracle functions in FUNCTION",
                     wrapBareOracleFunctions(query)));
@@ -396,8 +410,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (!isAnnotation(annotation, "org.hibernate.annotations.Cascade", "Cascade")) {
             return;
         }
-        String text = annotation.getText();
-        if (!text.contains("CascadeType.SAVE_UPDATE") && !text.contains("CascadeType.DELETE")) {
+        if (!hasEnumConstant(annotation.findAttributeValue("value"), "CascadeType", "SAVE_UPDATE", "DELETE")) {
             return;
         }
         holder.registerProblem(annotation, "Hibernate proprietary CascadeType.SAVE_UPDATE/DELETE should be migrated",
@@ -540,7 +553,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return;
         }
         PsiAnnotation generatedValue = findAnnotation(field.getModifierList(), "GeneratedValue");
-        if (generatedValue == null || !annotationTextContains(generatedValue, "GenerationType.SEQUENCE")) {
+        if (generatedValue == null || !hasEnumConstant(generatedValue.findAttributeValue("strategy"),
+                "GenerationType", "SEQUENCE")) {
             return;
         }
         if (findPair(generatedValue, "generator") != null || hasAnnotation(field.getModifierList(), "SequenceGenerator")) {
@@ -593,8 +607,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (!"addListener".equals(expression.getMethodExpression().getReferenceName())) {
             return;
         }
-        String text = expression.getText();
-        if (!text.contains("getEventListenerManager")) {
+        PsiExpression qualifier = expression.getMethodExpression().getQualifierExpression();
+        if (!(qualifier instanceof PsiMethodCallExpression call)
+                || !"getEventListenerManager".equals(call.getMethodExpression().getReferenceName())) {
             return;
         }
         PsiElement target = expression.getMethodExpression().getReferenceNameElement();
@@ -604,7 +619,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     private void visitSessionEventListenerClass(@NotNull PsiClass psiClass, @NotNull ProblemsHolder holder) {
         PsiReferenceList extendsList = psiClass.getExtendsList();
-        if (extendsList == null || !extendsList.getText().contains("BaseSessionEventListener")) {
+        if (extendsList == null || !hasReferenceType(extendsList, "org.hibernate.BaseSessionEventListener")) {
             return;
         }
         PsiElement target = (psiClass.getNameIdentifier() != null) ? psiClass.getNameIdentifier() : psiClass;
@@ -640,7 +655,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         if (containingClass == null || !extendsEmptyInterceptor(containingClass)) {
             return;
         }
-        if (method.getText().contains("org.hibernate.type.Type[]") || method.getText().contains("Type[]")) {
+        if (hasHibernateTypeArrayParameter(method)) {
             holder.registerProblem(method.getNameIdentifier(),
                     "Hibernate 6 changed Interceptor method signatures; update this override",
                     ProblemHighlightType.WARNING);
@@ -1069,13 +1084,65 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 || "java.time.ZonedDateTime".equals(canonical);
     }
 
-    private static boolean annotationTextContains(@NotNull PsiAnnotation annotation, @NotNull String text) {
-        return annotation.getText().contains(text);
-    }
-
     private static boolean isEmbeddedField(@NotNull PsiField field) {
         PsiModifierList modifiers = field.getModifierList();
         return hasAnnotation(modifiers, "Embedded") || hasAnnotation(modifiers, "ElementCollection");
+    }
+
+    private static boolean hasEnumConstant(@Nullable PsiAnnotationMemberValue value, @NotNull String ownerName,
+                                           @NotNull String... names) {
+        if (value instanceof PsiArrayInitializerMemberValue array) {
+            for (PsiAnnotationMemberValue initializer : array.getInitializers()) {
+                if (hasEnumConstant(initializer, ownerName, names)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (!(value instanceof PsiReferenceExpression reference)) {
+            return false;
+        }
+        if (!isEnumOwner(reference, ownerName)) {
+            return false;
+        }
+        String referenceName = reference.getReferenceName();
+        for (String name : names) {
+            if (name.equals(referenceName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isEnumOwner(@NotNull PsiReferenceExpression reference, @NotNull String ownerName) {
+        PsiExpression qualifier = reference.getQualifierExpression();
+        if (qualifier != null) {
+            return ownerName.equals(qualifier.getText());
+        }
+        if (reference.resolve() instanceof PsiField field && field.getContainingClass() != null) {
+            return ownerName.equals(field.getContainingClass().getName());
+        }
+        return false;
+    }
+
+    private static boolean hasReferenceType(@NotNull PsiReferenceList referenceList, @NotNull String fqn) {
+        for (PsiClassType type : referenceList.getReferencedTypes()) {
+            if (fqn.equals(type.getCanonicalText())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasHibernateTypeArrayParameter(@NotNull PsiMethod method) {
+        for (PsiParameter parameter : method.getParameterList().getParameters()) {
+            PsiType type = parameter.getType();
+            if (type instanceof PsiArrayType arrayType
+                    && "org.hibernate.type.Type".equals(arrayType.getComponentType().getCanonicalText())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static int attributeOverrideCount(@NotNull PsiVariable variable) {
@@ -1148,6 +1215,167 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             }
         }
         return null;
+    }
+
+    private record ParsedHql(@NotNull java.util.List<Token> tokens) {
+
+        private static final BaseErrorListener SILENT_ERROR_LISTENER = new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+                                    int charPositionInLine, String msg, RecognitionException e) {
+            }
+        };
+
+        @NotNull
+        private static ParsedHql parse(@NotNull String query) {
+            HqlLexer lexer = new HqlLexer(CharStreams.fromString(query));
+            lexer.removeErrorListeners();
+            lexer.addErrorListener(SILENT_ERROR_LISTENER);
+            CommonTokenStream stream = new CommonTokenStream(lexer);
+            HqlParser parser = new HqlParser(stream);
+            parser.removeErrorListeners();
+            parser.addErrorListener(SILENT_ERROR_LISTENER);
+            parser.statement();
+            return new ParsedHql(stream.getTokens().stream()
+                    .filter((Token token) -> token.getType() != Token.EOF && token.getChannel() == Token.DEFAULT_CHANNEL)
+                    .toList());
+        }
+
+        private boolean hasImplicitSelectJoin() {
+            return this.startsWith(HqlParser.FROM) && this.firstIndex(HqlParser.SELECT) < 0
+                    && this.hasJoin();
+        }
+
+        private boolean hasBareQuestionMark() {
+            for (int i = 0; i < this.tokens.size(); i++) {
+                Token token = this.tokens.get(i);
+                if (token.getType() == HqlParser.QUESTION_MARK
+                        && (i + 1 == this.tokens.size() || this.tokens.get(i + 1).getType() != HqlParser.INTEGER_LITERAL)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean hasInvalidFetchProjection() {
+            if (!this.hasJoinFetch()) {
+                return false;
+            }
+            int select = this.firstIndex(HqlParser.SELECT);
+            int from = this.firstIndex(HqlParser.FROM);
+            if (select < 0 || from <= select) {
+                return false;
+            }
+            String rootAlias = this.rootAlias(from);
+            if (rootAlias == null) {
+                return false;
+            }
+            for (int i = select + 1; i < from; i++) {
+                Token token = this.tokens.get(i);
+                if (token.getType() == HqlParser.IDENTIFIER && rootAlias.equals(token.getText())
+                        && !this.isPathPart(i)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean hasUpdateFrom() {
+            return this.startsWith(HqlParser.UPDATE) && this.tokens.size() > 1
+                    && this.tokens.get(1).getType() == HqlParser.FROM;
+        }
+
+        private boolean hasSelectDistinctFetch() {
+            int select = this.firstIndex(HqlParser.SELECT);
+            int distinct = this.firstIndex(HqlParser.DISTINCT);
+            return select >= 0 && distinct > select && this.hasJoinFetch();
+        }
+
+        private boolean hasIdentifier(@NotNull String value) {
+            for (Token token : this.tokens) {
+                if (token.getType() == HqlParser.IDENTIFIER && value.equalsIgnoreCase(token.getText())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean hasBareFunctionCall(@NotNull String... names) {
+            for (int i = 0; i < this.tokens.size() - 1; i++) {
+                Token token = this.tokens.get(i);
+                if (this.tokens.get(i + 1).getType() != HqlParser.LEFT_PAREN) {
+                    continue;
+                }
+                if (!matchesAny(token.getText(), names) || this.isFunctionWrapperName(i)) {
+                    continue;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private boolean isFunctionWrapperName(int index) {
+            return index >= 3
+                    && this.tokens.get(index - 3).getType() == HqlParser.FUNCTION
+                    && this.tokens.get(index - 2).getType() == HqlParser.LEFT_PAREN
+                    && this.tokens.get(index - 1).getType() == HqlParser.STRING_LITERAL;
+        }
+
+        private boolean isPathPart(int index) {
+            return (index > 0 && this.tokens.get(index - 1).getType() == HqlParser.DOT)
+                    || (index + 1 < this.tokens.size() && this.tokens.get(index + 1).getType() == HqlParser.DOT);
+        }
+
+        private boolean hasJoin() {
+            return this.firstIndex(HqlParser.JOIN) >= 0;
+        }
+
+        private boolean hasJoinFetch() {
+            for (int i = 0; i < this.tokens.size() - 1; i++) {
+                if (this.tokens.get(i).getType() == HqlParser.JOIN
+                        && this.tokens.get(i + 1).getType() == HqlParser.FETCH) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Nullable
+        private String rootAlias(int from) {
+            for (int i = from + 1; i < this.tokens.size(); i++) {
+                int type = this.tokens.get(i).getType();
+                if (type == HqlParser.JOIN || type == HqlParser.WHERE) {
+                    return null;
+                }
+                if (type == HqlParser.IDENTIFIER && i + 1 < this.tokens.size()
+                        && this.tokens.get(i + 1).getType() == HqlParser.IDENTIFIER) {
+                    return this.tokens.get(i + 1).getText();
+                }
+            }
+            return null;
+        }
+
+        private boolean startsWith(int type) {
+            return !this.tokens.isEmpty() && this.tokens.get(0).getType() == type;
+        }
+
+        private int firstIndex(int type) {
+            for (int i = 0; i < this.tokens.size(); i++) {
+                if (this.tokens.get(i).getType() == type) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private static boolean matchesAny(@NotNull String value, @NotNull String... names) {
+            for (String name : names) {
+                if (name.equalsIgnoreCase(value)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private record QueryValue(@NotNull PsiElement element, @NotNull String query) { }

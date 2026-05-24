@@ -844,6 +844,79 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 .isZero();
     }
 
+    public void testDoesNotReportPsiLookalikesAsHibernateMigrationProblems() {
+        this.myFixture.addFileToProject("org/hibernate/EmptyInterceptor.java", """
+                package org.hibernate;
+                public class EmptyInterceptor { }
+                """);
+        this.myFixture.addFileToProject("com/acme/BaseSessionEventListener.java", """
+                package com.acme;
+                public class BaseSessionEventListener { }
+                """);
+        this.myFixture.enableInspections(
+                new SpringHibernateMigrationInspection.HibernateCascade(),
+                new SpringHibernateMigrationInspection.GlobalSequence(),
+                new SpringHibernateMigrationInspection.SessionEventListener(),
+                new SpringHibernateMigrationInspection.InterceptorSignature());
+        this.myFixture.configureByText("Sample.java", """
+                import com.acme.BaseSessionEventListener;
+                @interface Cascade { NotCascadeType[] value(); }
+                @interface Entity { }
+                @interface GeneratedValue { NotGenerationType strategy(); String generator() default ""; }
+                enum NotCascadeType { SAVE_UPDATE, DELETE }
+                enum NotGenerationType { SEQUENCE }
+                class Type { }
+                @Entity
+                class EntitySample {
+                    @Cascade(NotCascadeType.SAVE_UPDATE)
+                    Object children;
+                    @GeneratedValue(strategy = NotGenerationType.SEQUENCE)
+                    Long id;
+                }
+                class Listener extends BaseSessionEventListener { }
+                class CustomInterceptor extends org.hibernate.EmptyInterceptor {
+                    public boolean onSave(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types) { return false; }
+                }
+                class Service {
+                    void run(EventListenerManager manager, Object listener) {
+                        manager.addListener(getEventListenerManager(listener));
+                    }
+                    Object getEventListenerManager(Object listener) { return listener; }
+                }
+                interface EventListenerManager {
+                    void addListener(Object listener);
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("PSI lookalike migration warnings")
+                .isZero();
+    }
+
+    public void testDoesNotReportHqlTokensInsideStringLiterals() {
+        this.myFixture.enableInspections(
+                new SpringHibernateMigrationInspection.BarePositionalParameters(),
+                new SpringHibernateMigrationInspection.RownumPseudoColumn(),
+                new SpringHibernateMigrationInspection.OracleFunctions(),
+                new SpringHibernateMigrationInspection.SysdateKeyword(),
+                new SpringHibernateMigrationInspection.BareOracleFunctions());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Query { String value(); boolean nativeQuery() default false; }
+                interface Repo {
+                    @Query("select u from User u where u.note = 'rownum ? nvl(sysdate) trunc(value)'")
+                    Object ok();
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("HQL string literal token warnings")
+                .isZero();
+    }
+
     private static long countWarnings(List<HighlightInfo> highlights) {
         return highlights.stream()
                 .filter((HighlightInfo h) -> h.getSeverity() == HighlightSeverity.WARNING)
