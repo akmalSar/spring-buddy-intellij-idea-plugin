@@ -191,6 +191,10 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             this.visitHibernateTable(annotation, holder);
         } else if (this.kind == Kind.EMBEDDED_SUB_PROPERTY_OVERRIDE) {
             this.visitEmbeddedSubPropertyOverride(annotation, holder);
+        } else if (this.kind == Kind.COLLECTION_TYPE_STRING) {
+            this.visitCollectionType(annotation, holder);
+        } else if (this.kind == Kind.CALLABLE_NAMED_NATIVE_QUERY) {
+            this.visitCallableNamedNativeQuery(annotation, holder);
         }
     }
 
@@ -366,9 +370,23 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     }
 
     private void visitLegacyType(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
-        if (isAnnotation(annotation, "org.hibernate.annotations.TypeDef", "TypeDef")) {
+        if (isAnnotation(annotation, "org.hibernate.annotations.TypeDefs", "TypeDefs")) {
             holder.registerProblem(annotation, "Hibernate 6 removes @TypeDef string-alias type registration",
                     ProblemHighlightType.WARNING, new DeleteAnnotationFix());
+            return;
+        }
+        if (isAnnotation(annotation, "org.hibernate.annotations.TypeDef", "TypeDef")) {
+            if (isNestedInAnnotation(annotation, "TypeDefs")) {
+                return;
+            }
+            holder.registerProblem(annotation, "Hibernate 6 removes @TypeDef string-alias type registration",
+                    ProblemHighlightType.WARNING, new DeleteAnnotationFix());
+            return;
+        }
+        if (isAnnotation(annotation, "org.hibernate.annotations.AnyMetaDef", "AnyMetaDef")
+                || isAnnotation(annotation, "org.hibernate.annotations.AnyMetaDefs", "AnyMetaDefs")) {
+            holder.registerProblem(annotation, "Hibernate 6 removes @AnyMetaDef; move discriminator metadata to @Any mappings",
+                    ProblemHighlightType.WARNING);
             return;
         }
         if (!isAnnotation(annotation, "org.hibernate.annotations.Type", "Type")) {
@@ -422,6 +440,33 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             holder.registerProblem(annotation, "Hibernate 6 deprecates proprietary @org.hibernate.annotations.Table",
                     ProblemHighlightType.WARNING, new ReplaceHibernateTableFix());
         }
+    }
+
+    private void visitCollectionType(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
+        if (!isAnnotation(annotation, "org.hibernate.annotations.CollectionType", "CollectionType")) {
+            return;
+        }
+        PsiNameValuePair pair = (annotation.findAttributeValue("type") != null) ? findPair(annotation, "type") : null;
+        PsiAnnotationMemberValue value = (pair != null) ? pair.getValue() : null;
+        if (!(value instanceof PsiLiteralExpression literal) || !(literal.getValue() instanceof String)) {
+            return;
+        }
+        holder.registerProblem(annotation, "Hibernate 6 removes string-based @CollectionType(type = ...); use a UserCollectionType class",
+                ProblemHighlightType.WARNING);
+    }
+
+    private void visitCallableNamedNativeQuery(@NotNull PsiAnnotation annotation, @NotNull ProblemsHolder holder) {
+        if (!isAnnotation(annotation, "javax.persistence.NamedNativeQuery", "NamedNativeQuery")
+                && !isAnnotation(annotation, "jakarta.persistence.NamedNativeQuery", "NamedNativeQuery")
+                && !isAnnotation(annotation, "org.hibernate.annotations.NamedNativeQuery", "NamedNativeQuery")) {
+            return;
+        }
+        PsiAnnotationMemberValue callable = annotation.findAttributeValue("callable");
+        if (callable == null || !"true".equals(callable.getText())) {
+            return;
+        }
+        holder.registerProblem(callable, "Hibernate 6 only temporarily translates callable named native queries; migrate to @NamedStoredProcedureQuery",
+                ProblemHighlightType.WARNING);
     }
 
     private void visitUserTypeMethod(@NotNull PsiMethod method, @NotNull ProblemsHolder holder) {
@@ -553,8 +598,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return;
         }
         PsiAnnotation generatedValue = findAnnotation(field.getModifierList(), "GeneratedValue");
-        if (generatedValue == null || !hasEnumConstant(generatedValue.findAttributeValue("strategy"),
-                "GenerationType", "SEQUENCE")) {
+        if (generatedValue == null || !hasSequenceAffectedGeneratedValueStrategy(generatedValue)) {
             return;
         }
         if (findPair(generatedValue, "generator") != null || hasAnnotation(field.getModifierList(), "SequenceGenerator")) {
@@ -1114,6 +1158,16 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         return false;
     }
 
+    private static boolean hasSequenceAffectedGeneratedValueStrategy(@NotNull PsiAnnotation annotation) {
+        PsiNameValuePair strategy = findPair(annotation, "strategy");
+        return strategy == null || hasEnumConstant(strategy.getValue(), "GenerationType", "AUTO", "SEQUENCE");
+    }
+
+    private static boolean isNestedInAnnotation(@NotNull PsiAnnotation annotation, @NotNull String shortName) {
+        PsiAnnotation parent = PsiTreeUtil.getParentOfType(annotation, PsiAnnotation.class);
+        return parent != null && parent != annotation && isAnnotation(parent, "", shortName);
+    }
+
     private static boolean isEnumOwner(@NotNull PsiReferenceExpression reference, @NotNull String ownerName) {
         PsiExpression qualifier = reference.getQualifierExpression();
         if (qualifier != null) {
@@ -1420,7 +1474,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         DB_DATE_FORMAT_COMPARE,
         CONCAT_TYPE_CAST,
         ADD_TO_DATE_FUNCTION,
-        FUNCTION_PARAMETER_TYPE
+        FUNCTION_PARAMETER_TYPE,
+        COLLECTION_TYPE_STRING,
+        CALLABLE_NAMED_NATIVE_QUERY
     }
 
     public static class ImplicitSelect extends SpringHibernateMigrationInspection {
@@ -1581,6 +1637,14 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     public static class FunctionParameterType extends SpringHibernateMigrationInspection {
         public FunctionParameterType() { super(Kind.FUNCTION_PARAMETER_TYPE); }
+    }
+
+    public static class CollectionTypeString extends SpringHibernateMigrationInspection {
+        public CollectionTypeString() { super(Kind.COLLECTION_TYPE_STRING); }
+    }
+
+    public static class CallableNamedNativeQuery extends SpringHibernateMigrationInspection {
+        public CallableNamedNativeQuery() { super(Kind.CALLABLE_NAMED_NATIVE_QUERY); }
     }
 
     public static class DialectRemoval extends LocalInspectionTool {

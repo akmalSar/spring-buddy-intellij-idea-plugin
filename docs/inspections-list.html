@@ -365,7 +365,7 @@ h2 .count {
 <a href="#lombok">Lombok<span class="nav-count">25</span></a>
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
-<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">43</span></a>
+<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">45</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
@@ -379,9 +379,9 @@ h2 .count {
 
 <div class="stat-row">
 <div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>85</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>173</strong><span>WARNING</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>175</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>4</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>262</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>264</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -655,7 +655,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow misc">Hiberante Migration</div>
-<h2 id="hiberante-migration">Hiberante Migration<span class="count">43 inspections</span></h2>
+<h2 id="hiberante-migration">Hiberante Migration<span class="count">45 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateAddToDateFunction</div>
@@ -683,6 +683,11 @@ h2 .count {
 <div class="description">Reports boolean JPQL queries written as <pre class="code"> select case when count(...) &gt; 0 then true else false end</pre>. This counts every match before returning. Quick-fix rewrites the wrapper to an <pre class="code"> exists(select 1 ...)</pre> expression.</div>
 </article>
 <article class="card" data-level="warning">
+<div class="class-name">SpringHibernateCallableNamedNativeQuery</div>
+<div class="display-name">Hibernate 6 callable named native query migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports callable <pre class="code"> @NamedNativeQuery</pre> declarations. Hibernate 6 only temporarily translates these into stored procedure metadata; migrate the mapping to <pre class="code"> @NamedStoredProcedureQuery</pre>.</div>
+</article>
+<article class="card" data-level="warning">
 <div class="class-name">SpringHibernateConcatTypeCast</div>
 <div class="display-name">Hibernate 6 CONCAT argument type check<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
 <div class="description">Reports likely non-string entity paths inside JPQL <pre class="code"> concat(...)</pre>. Hibernate 6 requires string arguments. Quick-fix wraps likely numeric or date paths with <pre class="code"> cast(... as string)</pre>.</div>
@@ -701,6 +706,11 @@ h2 .count {
 <div class="class-name">SpringHibernateCompositeUserType</div>
 <div class="display-name">Hibernate 6 CompositeUserType attribute override migration<span class="badge yellow">WARNING</span></div>
 <div class="description">Reports likely custom <pre class="code"> CompositeUserType</pre> field mappings without standard <pre class="code"> @AttributeOverride</pre> declarations. Hibernate 6 treats composite user types like embeddable components, so column overrides belong on the owning field.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringHibernateCollectionTypeString</div>
+<div class="display-name">Hibernate 6 string-based @CollectionType migration<span class="badge yellow">WARNING</span></div>
+<div class="description">Reports <pre class="code"> @CollectionType(type = "...")</pre> mappings that reference collection types by string alias. Hibernate 6 removed string-based type references; migrate to a <pre class="code"> UserCollectionType</pre> class or the Hibernate 6 collection type APIs.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateDialectRemoval</div>
@@ -750,7 +760,7 @@ h2 .count {
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateGlobalSequence</div>
 <div class="display-name">Hibernate 6 implicit global sequence drop<span class="badge yellow">WARNING</span></div>
-<div class="description">Reports <pre class="code"> @GeneratedValue(strategy = SEQUENCE)</pre> without an explicit generator or <pre class="code"> @SequenceGenerator</pre>. Hibernate 6 may look for table-specific sequences instead of the legacy global <pre class="code"> hibernate_sequence</pre>.</div>
+<div class="description">Reports <pre class="code"> @GeneratedValue</pre> and <pre class="code"> @GeneratedValue(strategy = AUTO/SEQUENCE)</pre> without an explicit generator or <pre class="code"> @SequenceGenerator</pre>. Hibernate 6 may look for table-specific sequences instead of the legacy global <pre class="code"> hibernate_sequence</pre>.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateIdentifierGenerator</div>
@@ -770,7 +780,7 @@ h2 .count {
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateLegacyType</div>
 <div class="display-name">Hibernate 6 legacy @Type/@TypeDef usage<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div>
-<div class="description">Reports removed <pre class="code"> @TypeDef</pre> registrations and string-alias <pre class="code"> @Type(type = "...")</pre> mappings. Quick-fixes remove <pre class="code"> @TypeDef</pre> or replace simple legacy text mappings with <pre class="code"> @JdbcTypeCode</pre>.</div>
+<div class="description">Reports removed <pre class="code"> @TypeDef</pre>, <pre class="code"> @TypeDefs</pre>, <pre class="code"> @AnyMetaDef</pre>, and string-alias <pre class="code"> @Type(type = "...")</pre> mappings. Quick-fixes remove type-definition annotations or replace simple legacy text mappings with <pre class="code"> @JdbcTypeCode</pre>.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateNativeCountCast</div>

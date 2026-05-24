@@ -93,6 +93,76 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 .isEqualTo(5);
     }
 
+    public void testReportsAdditionalHibernateSixAnnotationMigrationProblems() {
+        this.myFixture.enableInspections(
+                new SpringHibernateMigrationInspection.LegacyType(),
+                new SpringHibernateMigrationInspection.CollectionTypeString(),
+                new SpringHibernateMigrationInspection.CallableNamedNativeQuery(),
+                new SpringHibernateMigrationInspection.GlobalSequence());
+        this.myFixture.configureByText("Sample.java", """
+                @interface TypeDefs { TypeDef[] value(); }
+                @interface TypeDef { String name(); Class typeClass(); }
+                @interface AnyMetaDef { String name(); }
+                @interface CollectionType { String type() default ""; Class typeClass() default void.class; }
+                @interface NamedNativeQuery { String name(); String query(); boolean callable() default false; }
+                @interface GeneratedValue { GenerationType strategy() default GenerationType.AUTO; String generator() default ""; }
+                @interface Entity { }
+                enum GenerationType { AUTO, SEQUENCE, IDENTITY }
+                class LegacyJsonType { }
+                @TypeDefs(@TypeDef(name = "json", typeClass = LegacyJsonType.class))
+                @AnyMetaDef(name = "legacyAny")
+                @Entity
+                class EntitySample {
+                    @CollectionType(type = "legacyList")
+                    java.util.List<String> values;
+                    @GeneratedValue
+                    Long id;
+                }
+                @NamedNativeQuery(name = "callProc", query = "{ call sync_data() }", callable = true)
+                class Queries { }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("additional Hibernate 6 annotation migration warnings")
+                .isEqualTo(5);
+    }
+
+    public void testDoesNotReportModernHibernateSixAnnotationMigrationUsage() {
+        this.myFixture.enableInspections(
+                new SpringHibernateMigrationInspection.CollectionTypeString(),
+                new SpringHibernateMigrationInspection.CallableNamedNativeQuery(),
+                new SpringHibernateMigrationInspection.GlobalSequence());
+        this.myFixture.configureByText("Sample.java", """
+                @interface CollectionType { Class type(); }
+                @interface NamedNativeQuery { String name(); String query(); boolean callable() default false; }
+                @interface GeneratedValue { GenerationType strategy() default GenerationType.AUTO; String generator() default ""; }
+                @interface SequenceGenerator { String name(); }
+                @interface Entity { }
+                enum GenerationType { AUTO, SEQUENCE, IDENTITY }
+                class ModernListType { }
+                @Entity
+                class EntitySample {
+                    @CollectionType(type = ModernListType.class)
+                    java.util.List<String> values;
+                    @SequenceGenerator(name = "entity_seq")
+                    @GeneratedValue(strategy = GenerationType.AUTO, generator = "entity_seq")
+                    Long id;
+                    @GeneratedValue(strategy = GenerationType.IDENTITY)
+                    Long identityId;
+                }
+                @NamedNativeQuery(name = "findUsers", query = "select * from users", callable = false)
+                class Queries { }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("modern Hibernate 6 annotation migration warnings")
+                .isZero();
+    }
+
     public void testReportsContractAndSessionMigrationProblems() {
         this.myFixture.addFileToProject("org/hibernate/usertype/UserType.java", """
                 package org.hibernate.usertype;
@@ -726,6 +796,26 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
 
         Assertions.assertThat(countWarnings(highlights))
                 .as("legacy text type warning after quick fix")
+                .isZero();
+    }
+
+    public void testLegacyTypeDefsFixClearsWarning() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.LegacyType());
+        this.myFixture.configureByText("Sample.java", """
+                @interface TypeDefs { TypeDef[] value(); }
+                @interface TypeDef { String name(); Class typeClass(); }
+                class JsonType { }
+                @<caret>TypeDefs(@TypeDef(name = "json", typeClass = JsonType.class))
+                class Entity {
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Remove legacy @TypeDef"));
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countWarnings(highlights))
+                .as("legacy TypeDefs warning after quick fix")
                 .isZero();
     }
 
