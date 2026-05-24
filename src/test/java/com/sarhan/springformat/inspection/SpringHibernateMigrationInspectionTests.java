@@ -559,6 +559,55 @@ public class SpringHibernateMigrationInspectionTests extends BasePlatformTestCas
                 """);
     }
 
+    public void testRownumQuickFixRemovesEmptyWhereClause() {
+        this.myFixture.enableInspections(new SpringHibernateMigrationInspection.RownumPseudoColumn());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Query { String value(); boolean nativeQuery() default false; }
+                interface Repo {
+                    @Query("<caret>select u from User u where rownum = 1")
+                    Object first();
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Use FETCH FIRST"));
+
+        Assertions.assertThat(this.myFixture.getFile().getText())
+                .as("ROWNUM quick fix query text")
+                .contains("from User u FETCH FIRST 1 ROWS ONLY")
+                .doesNotContain("where FETCH FIRST");
+    }
+
+    public void testQueryQuickFixesKeepQuotedStringLiteralsUnchanged() {
+        this.myFixture.enableInspections(
+                new SpringHibernateMigrationInspection.BarePositionalParameters(),
+                new SpringHibernateMigrationInspection.BareOracleFunctions());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Query { String value(); boolean nativeQuery() default false; }
+                interface Repo {
+                    @Query("<caret>select u from User u where u.note = 'literal ? trunc(value)' and trunc(u.createdAt) > ?")
+                    Object mixed();
+                }
+                """);
+
+        this.myFixture.doHighlighting();
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Number positional parameters"));
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Wrap Oracle functions in FUNCTION"));
+
+        this.myFixture.checkResult("""
+                @interface Query { String value(); boolean nativeQuery() default false; }
+                interface Repo {
+                    @Query(\"\"\"
+                            select u
+                            from User u
+                            where u.note = 'literal ? trunc(value)'
+                            and FUNCTION('trunc', u.createdAt) > ?1
+                            \"\"\")
+                    Object mixed();
+                }
+                """);
+    }
+
     public void testDoesNotReportModernHibernateUsage() {
         this.myFixture.enableInspections(
                 new SpringHibernateMigrationInspection.ImplicitSelect(),

@@ -828,7 +828,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         for (int i = 0; i < query.length(); i++) {
             char ch = query.charAt(i);
             out.append(ch);
-            if (ch == '?' && (i + 1 == query.length() || !Character.isDigit(query.charAt(i + 1)))) {
+            if (ch == '?' && !isInsideQuotedString(query, i)
+                    && (i + 1 == query.length() || !Character.isDigit(query.charAt(i + 1)))) {
                 out.append(index++);
             }
         }
@@ -849,6 +850,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     @NotNull
     private static String rownumToFetchFirst(@NotNull String query) {
         String fixed = ROWNUM_PREDICATE.matcher(query).replaceAll(" ");
+        fixed = fixed.replaceAll("(?i)\\bwhere\\s*(?=order\\s+by|group\\s+by|having\\b|$)", "");
         fixed = fixed.replaceAll("\\s+", " ").trim();
         if (!fixed.matches("(?is).*\\bfetch\\s+first\\b.*")) {
             fixed = fixed + " FETCH FIRST 1 ROWS ONLY";
@@ -907,7 +909,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         int offset = 0;
         while (matcher.find()) {
             int nameStart = matcher.start();
-            if (isWrappedByFunction(query, nameStart)) {
+            if (isInsideQuotedString(query, nameStart) || isWrappedByFunction(query, nameStart)) {
                 continue;
             }
             int open = matcher.end() - 1;
@@ -933,6 +935,10 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         int depth = 0;
         for (int i = open; i < text.length(); i++) {
             char ch = text.charAt(i);
+            if (ch == '\'') {
+                i = skipQuotedString(text, i);
+                continue;
+            }
             if (ch == '(') {
                 depth++;
             } else if (ch == ')') {
@@ -971,6 +977,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     private static boolean concatNeedsCast(@NotNull String query) {
         Matcher matcher = CONCAT_FUNCTION.matcher(query);
         while (matcher.find()) {
+            if (isInsideQuotedString(query, matcher.start())) {
+                continue;
+            }
             int close = matchingParen(query, matcher.end() - 1);
             if (close < 0) {
                 continue;
@@ -990,6 +999,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         Matcher matcher = CONCAT_FUNCTION.matcher(query);
         int offset = 0;
         while (matcher.find()) {
+            if (isInsideQuotedString(query, matcher.start())) {
+                continue;
+            }
             int open = matcher.end() - 1;
             int close = matchingParen(query, open);
             if (close < 0) {
@@ -1014,6 +1026,10 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         int start = 0;
         for (int i = 0; i < args.length(); i++) {
             char ch = args.charAt(i);
+            if (ch == '\'') {
+                i = skipQuotedString(args, i);
+                continue;
+            }
             if (ch == '(') {
                 depth++;
             } else if (ch == ')') {
@@ -1043,6 +1059,9 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         Matcher matcher = ADD_TO_DATE.matcher(query);
         StringBuffer out = new StringBuffer();
         while (matcher.find()) {
+            if (isInsideQuotedString(query, matcher.start())) {
+                continue;
+            }
             matcher.appendReplacement(out, Matcher.quoteReplacement("function('date_add', cast("
                     + matcher.group(1).trim() + " as LocalDate), " + matcher.group(2) + ", day)"));
         }
@@ -1052,8 +1071,46 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     @NotNull
     private static String castFunctionParameters(@NotNull String query) {
-        return query.replaceAll("(?i)FUNCTION\\(\\s*'trunc'\\s*,\\s*((?::\\w+|\\?\\d+))\\s*\\)",
-                "cast($1 as LocalDate)");
+        Matcher matcher = Pattern.compile("(?i)FUNCTION\\(\\s*'trunc'\\s*,\\s*((?::\\w+|\\?\\d+))\\s*\\)")
+                .matcher(query);
+        StringBuffer out = new StringBuffer();
+        while (matcher.find()) {
+            if (isInsideQuotedString(query, matcher.start())) {
+                continue;
+            }
+            matcher.appendReplacement(out, Matcher.quoteReplacement("cast(" + matcher.group(1) + " as LocalDate)"));
+        }
+        matcher.appendTail(out);
+        return out.toString();
+    }
+
+    private static boolean isInsideQuotedString(@NotNull String text, int offset) {
+        boolean inside = false;
+        for (int i = 0; i < offset; i++) {
+            if (text.charAt(i) != '\'') {
+                continue;
+            }
+            if (i + 1 < text.length() && text.charAt(i + 1) == '\'') {
+                i++;
+            } else {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    private static int skipQuotedString(@NotNull String text, int quote) {
+        for (int i = quote + 1; i < text.length(); i++) {
+            if (text.charAt(i) != '\'') {
+                continue;
+            }
+            if (i + 1 < text.length() && text.charAt(i + 1) == '\'') {
+                i++;
+            } else {
+                return i;
+            }
+        }
+        return text.length() - 1;
     }
 
     private static boolean implementsType(@NotNull PsiClass psiClass, @NotNull String fqn) {
