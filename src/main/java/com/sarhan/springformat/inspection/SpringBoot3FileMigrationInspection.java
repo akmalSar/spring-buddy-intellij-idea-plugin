@@ -122,7 +122,8 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
             case METRICS_EXPORT_PROPERTY -> hasOldMetricsExportProperty(text);
             case CASSANDRA_PROPERTIES -> text.contains("spring.data.cassandra.");
             case REDIS_PROPERTIES -> text.contains("spring.redis.");
-            case HIBERNATE_ID_GENERATOR_PROPERTY -> text.contains("spring.jpa.hibernate.use-new-id-generator-mappings");
+            case HIBERNATE_ID_GENERATOR_PROPERTY -> text.contains("spring.jpa.hibernate.use-new-id-generator-mappings")
+                    || text.contains("hibernate.id.new_generator_mappings");
             case HIBERNATE_GROUP_ID -> hasAll(text, "<groupId>org.hibernate</groupId>", "<artifactId>hibernate-core</artifactId>")
                     || text.contains("org.hibernate:hibernate-core");
             case APACHE_HTTP_CLIENT -> text.contains("org.apache.httpcomponents:httpclient")
@@ -236,6 +237,7 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                 || text.contains("management.endpoint.httptrace.") || text.contains("httptrace")
                 || text.contains(".identity-provider.")
                 || text.contains("spring.jpa.hibernate.use-new-id-generator-mappings")
+                || text.contains("hibernate.id.new_generator_mappings")
                 || text.contains("management.endpoint.env.keys-to-sanitize");
     }
 
@@ -335,8 +337,10 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                         "spring.cassandra.");
                 case REDIS_PROPERTIES -> replace("Rename spring.redis prefix", "spring.redis.", "spring.data.redis.");
                 case HIBERNATE_ID_GENERATOR_PROPERTY -> new DeleteMatchingLinesFix(
-                        "Delete spring.jpa.hibernate.use-new-id-generator-mappings",
-                        "spring.jpa.hibernate.use-new-id-generator-mappings");
+                        "Delete removed Hibernate ID generator mapping property",
+                        text.contains("spring.jpa.hibernate.use-new-id-generator-mappings")
+                                ? "spring.jpa.hibernate.use-new-id-generator-mappings"
+                                : "hibernate.id.new_generator_mappings");
                 case HIBERNATE_GROUP_ID -> new ReplaceFileTextFix("Replace Hibernate groupId",
                         List.of(replacement("org.hibernate:hibernate-core", "org.hibernate.orm:hibernate-core"),
                                 replacement("<groupId>org.hibernate</groupId>",
@@ -443,8 +447,12 @@ public class SpringBoot3FileMigrationInspection extends LocalInspectionTool {
                 return new DeleteMatchingLinesFix("Delete spring.session.store-type", "spring.session.store-type");
             }
             if (text.contains("spring.jpa.hibernate.use-new-id-generator-mappings")) {
-                return new DeleteMatchingLinesFix("Delete spring.jpa.hibernate.use-new-id-generator-mappings",
+                return new DeleteMatchingLinesFix("Delete removed Hibernate ID generator mapping property",
                         "spring.jpa.hibernate.use-new-id-generator-mappings");
+            }
+            if (text.contains("hibernate.id.new_generator_mappings")) {
+                return new DeleteMatchingLinesFix("Delete removed Hibernate ID generator mapping property",
+                        "hibernate.id.new_generator_mappings");
             }
             return null;
         }

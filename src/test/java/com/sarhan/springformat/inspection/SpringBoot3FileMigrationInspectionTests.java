@@ -290,6 +290,20 @@ public class SpringBoot3FileMigrationInspectionTests extends BasePlatformTestCas
                 .contains("spring.application.name=sample");
     }
 
+    public void testRawHibernateIdGeneratorProperty_quickFixDeletesPropertyLine() {
+        this.myFixture.configureByText("application.properties", """
+                hibernate.id.new_generator_mappings=false
+                hibernate.format_sql=true
+                """);
+
+        applySingleFix(new SpringBoot3FileMigrationInspection.HibernateIdGeneratorProperty());
+
+        Assertions.assertThat(this.myFixture.getFile().getText())
+                .as("raw Hibernate ID generator property quick-fix")
+                .doesNotContain("hibernate.id.new_generator_mappings")
+                .contains("hibernate.format_sql=true");
+    }
+
     public void testSpringdocV2_quickFixUsesBootThreeStarter() {
         this.myFixture.configureByText("pom.xml", """
                 <project>

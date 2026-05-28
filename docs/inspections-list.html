@@ -366,7 +366,7 @@ h2 .count {
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
 <a href="#hiberante-migration">Hiberante Migration<span class="nav-count">49</span></a>
-<a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">58</span></a>
+<a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">60</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
@@ -380,9 +380,9 @@ h2 .count {
 
 <div class="stat-row">
 <div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>98</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>220</strong><span>WARNING</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>222</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>8</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>326</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>328</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -908,7 +908,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow misc">spring 2 -&gt; 3 migration</div>
-<h2 id="spring-2-3-migration">spring 2 -&gt; 3 migration<span class="count">58 inspections</span></h2>
+<h2 id="spring-2-3-migration">spring 2 -&gt; 3 migration<span class="count">60 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3ApacheHttpClientDependencyInspection</div><div class="display-name">Apache HttpClient 4 dependency should be migrated<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> org.apache.httpcomponents:httpclient</pre>. Spring Boot 3 uses Apache HttpClient 5 through <pre class="code"> org.apache.httpcomponents.client5:httpclient5</pre>.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3DropwizardJakartaMetricsInspection</div><div class="display-name">Dropwizard servlet metrics should use Jakarta artifacts<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports Dropwizard servlet metrics artifacts such as <pre class="code"> metrics-servlet</pre>. Spring Boot 3 uses Jakarta Servlet, so switch to <pre class="code"> metrics-jakarta-*</pre> artifacts.</div></article>
@@ -953,6 +953,7 @@ h2 .count {
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3RestTemplateRequestFactoryBuilderInspection</div><div class="display-name">RestTemplateBuilder requestFactory(Function) changed<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> RestTemplateBuilder.requestFactory(Function)</pre>. Spring Boot 3.4 replaced this style with <pre class="code"> requestFactoryBuilder</pre>; migrate the callback manually.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3SapCfJakartaLoggingInspection</div><div class="display-name">SAP CF logging support should use Jakarta artifact<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> cf-java-logging-support-servlet</pre>. Spring Boot 3 uses Jakarta Servlet, so switch to <pre class="code"> cf-java-logging-support-servlet-jakarta</pre>.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3SecurityConfigurationInspection</div><div class="display-name">@Enable*Security requires @Configuration<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports Spring Security <pre class="code"> @Enable*Security</pre> classes without <pre class="code"> @Configuration</pre>. Spring Security 6 no longer implies configuration from these annotations.</div></article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3SecurityMatchersInspection</div><div class="display-name">Spring Security matcher DSL changed<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports removed Spring Security 5 authorization methods such as <pre class="code"> authorizeRequests()</pre>, <pre class="code"> antMatchers()</pre>, <pre class="code"> mvcMatchers()</pre>, and <pre class="code"> regexMatchers()</pre>. Spring Security 6 uses <pre class="code"> authorizeHttpRequests()</pre> and <pre class="code"> requestMatchers()</pre>.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3SolrAutoConfigurationExcludeInspection</div><div class="display-name">SolrAutoConfiguration exclusion was removed<span class="badge yellow">WARNING</span></div><div class="description">Reports <pre class="code"> SolrAutoConfiguration</pre> in auto-configuration exclusions. Spring Boot 3 removed Solr auto-configuration, so remove this exclusion.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3SpringdocV2Inspection</div><div class="display-name">Springdoc dependencies should use Boot 3 starters<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports Springdoc 1.x artifacts such as <pre class="code"> springdoc-openapi-ui</pre>. Spring Boot 3 requires Springdoc 2 starter artifacts.</div></article>
 <article class="card" data-level="warning"><div class="class-name">SpringBoot3ThymeleafSpring6Inspection</div><div class="display-name">Thymeleaf dependencies should use Spring 6 artifacts<span class="badge yellow">WARNING</span><span class="badge fix">FIX</span></div><div class="description">Reports <pre class="code"> thymeleaf-spring5</pre> and <pre class="code"> thymeleaf-extras-springsecurity5</pre>. Spring Boot 3 uses Spring Framework 6 and Spring Security 6 variants.</div></article>
@@ -972,6 +973,7 @@ h2 .count {
 <div class="display-name">Spring Boot 2 web metrics instrumentation API was removed<span class="badge red">ERROR</span></div>
 <div class="description">Reports old actuator web metrics classes such as <pre class="code"> WebMvcMetricsFilter</pre> and <pre class="code"> WebMvcTagsProvider</pre>. Spring Boot 3 moved web instrumentation to Micrometer Observation.</div>
 </article>
+<article class="card" data-level="warning"><div class="class-name">SpringBoot3WebSecurityConfigurerAdapterInspection</div><div class="display-name">WebSecurityConfigurerAdapter was removed<span class="badge yellow">WARNING</span></div><div class="description">Reports classes extending <pre class="code"> WebSecurityConfigurerAdapter</pre>. Spring Security 6 removed this base class; define a <pre class="code"> SecurityFilterChain</pre> bean and configure <pre class="code"> HttpSecurity</pre> directly.</div></article>
 <article class="card" data-level="error">
 <div class="class-name">SpringBoot3YamlJsonParserInspection</div>
 <div class="display-name">YamlJsonParser was removed in Spring Boot 3<span class="badge red">ERROR</span></div>

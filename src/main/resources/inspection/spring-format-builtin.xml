@@ -354,6 +354,8 @@
     <inspection_tool class="SpringBoot3EnableBatchProcessing" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3ApacheHttpClient" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3SecurityConfiguration" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3WebSecurityConfigurerAdapter" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot3SecurityMatchers" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3NestedConfigurationPropertiesValid" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3PreciseBeanType" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3SolrAutoConfigurationExclude" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>

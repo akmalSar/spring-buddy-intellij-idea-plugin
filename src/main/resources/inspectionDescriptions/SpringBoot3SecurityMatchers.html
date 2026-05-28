@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports removed Spring Security 5 authorization DSL methods such as
+<code>authorizeRequests()</code>, <code>antMatchers()</code>, <code>mvcMatchers()</code>,
+and <code>regexMatchers()</code>.
+<p>
+    Spring Security 6 uses <code>authorizeHttpRequests()</code> and
+    <code>requestMatchers()</code>. Update the matcher chain and verify authorization
+    semantics after migration.
+</p>
+</body>
+</html>

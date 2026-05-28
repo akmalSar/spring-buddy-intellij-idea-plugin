@@ -45,6 +45,7 @@ import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiNameValuePair;
 import com.intellij.psi.PsiNewExpression;
 import com.intellij.psi.PsiReferenceExpression;
+import com.intellij.psi.PsiReferenceList;
 import com.intellij.psi.PsiReturnStatement;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.PsiType;
@@ -172,6 +173,11 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
         if (this.kind == Kind.APACHE_HTTP_CLIENT && qualifiedName.startsWith("org.apache.http.")) {
             holder.registerProblem(statement, "Apache HttpClient 4 is no longer auto-detected by Spring Boot 3");
         }
+        if (this.kind == Kind.WEB_SECURITY_CONFIGURER_ADAPTER
+                && "org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter"
+                        .equals(qualifiedName)) {
+            holder.registerProblem(statement, "WebSecurityConfigurerAdapter was removed in Spring Security 6");
+        }
     }
 
     private void visitReference(PsiReferenceExpression expression, ProblemsHolder holder) {
@@ -252,6 +258,10 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
                         "@Enable*Security no longer implies @Configuration in Spring Security 6",
                         new AddAnnotationToClassFix("Add @Configuration", "Configuration"));
             }
+        }
+        if (this.kind == Kind.WEB_SECURITY_CONFIGURER_ADAPTER && extendsWebSecurityConfigurerAdapter(psiClass)) {
+            holder.registerProblem(psiClass.getNameIdentifier() == null ? psiClass : psiClass.getNameIdentifier(),
+                    "WebSecurityConfigurerAdapter was removed in Spring Security 6");
         }
     }
 
@@ -335,6 +345,12 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
             holder.registerProblem(expression.getMethodExpression(),
                     "RestTemplateBuilder.requestFactory(Function) was replaced by requestFactoryBuilder in Spring Boot 3.4");
         }
+        if (this.kind == Kind.SECURITY_MATCHERS && isRemovedSecurityDslMethod(methodName)
+                && isSpringSecurityDslCall(expression)) {
+            holder.registerProblem(expression.getMethodExpression(),
+                    "Spring Security 6 replaced this authorization DSL method",
+                    new RenameSecurityDslMethodFix(methodName, securityDslReplacement(methodName)));
+        }
     }
 
     private static boolean isJakartaJavaxName(String name) {
@@ -367,6 +383,68 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
         return "WebMvcMetricsFilter".equals(name) || "WebMvcTagsProvider".equals(name)
                 || "WebMvcTagsContributor".equals(name) || "MetricsRestTemplateCustomizer".equals(name)
                 || "RestTemplateExchangeTagsProvider".equals(name) || "DefaultWebMvcTagsProvider".equals(name);
+    }
+
+    private static boolean isRemovedSecurityDslMethod(String methodName) {
+        return "authorizeRequests".equals(methodName) || "antMatchers".equals(methodName)
+                || "mvcMatchers".equals(methodName) || "regexMatchers".equals(methodName);
+    }
+
+    private static String securityDslReplacement(String methodName) {
+        if ("authorizeRequests".equals(methodName)) {
+            return "authorizeHttpRequests";
+        }
+        return "requestMatchers";
+    }
+
+    private static boolean isSpringSecurityDslCall(PsiMethodCallExpression expression) {
+        PsiMethod target = expression.resolveMethod();
+        if (target != null && isSecurityDslClass(target.getContainingClass())) {
+            return true;
+        }
+        PsiExpression qualifier = expression.getMethodExpression().getQualifierExpression();
+        PsiType qualifierType = qualifier == null ? null : qualifier.getType();
+        if (qualifierType == null) {
+            return false;
+        }
+        String text = qualifierType.getCanonicalText();
+        return "HttpSecurity".equals(text)
+                || "org.springframework.security.config.annotation.web.builders.HttpSecurity".equals(text)
+                || "org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer.ExpressionInterceptUrlRegistry"
+                        .equals(text);
+    }
+
+    private static boolean isSecurityDslClass(PsiClass psiClass) {
+        if (psiClass == null) {
+            return false;
+        }
+        String qualifiedName = psiClass.getQualifiedName();
+        if ("org.springframework.security.config.annotation.web.builders.HttpSecurity".equals(qualifiedName)) {
+            return true;
+        }
+        String name = psiClass.getName();
+        return "HttpSecurity".equals(name) || "ExpressionInterceptUrlRegistry".equals(name);
+    }
+
+    private static boolean extendsWebSecurityConfigurerAdapter(PsiClass psiClass) {
+        PsiReferenceList extendsList = psiClass.getExtendsList();
+        if (extendsList == null) {
+            return false;
+        }
+        for (PsiJavaCodeReferenceElement reference : extendsList.getReferenceElements()) {
+            String qualifiedName = reference.getQualifiedName();
+            if (isWebSecurityConfigurerAdapterName(reference.getText())
+                    || isWebSecurityConfigurerAdapterName(qualifiedName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isWebSecurityConfigurerAdapterName(String name) {
+        return "WebSecurityConfigurerAdapter".equals(name)
+                || "org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter"
+                        .equals(name);
     }
 
     private static boolean isMappingAnnotation(PsiAnnotation annotation) {
@@ -473,7 +551,9 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
         PRECISE_BEAN_TYPE,
         SOLR_AUTO_CONFIGURATION_EXCLUDE,
         REACTOR_CONTEXT_PROPAGATION,
-        REST_TEMPLATE_REQUEST_FACTORY_BUILDER
+        REST_TEMPLATE_REQUEST_FACTORY_BUILDER,
+        WEB_SECURITY_CONFIGURER_ADAPTER,
+        SECURITY_MATCHERS
     }
 
     private static final class ReplaceTextFix implements LocalQuickFix {
@@ -524,6 +604,38 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
                 return;
             }
             element.replace(newElement);
+        }
+    }
+
+    private static final class RenameSecurityDslMethodFix implements LocalQuickFix {
+
+        private final String oldName;
+        private final String newName;
+
+        private RenameSecurityDslMethodFix(String oldName, String newName) {
+            this.oldName = oldName;
+            this.newName = newName;
+        }
+
+        @Override
+        @NotNull
+        public String getName() {
+            return "Replace with Spring Security 6 DSL method";
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return this.getName();
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiElement element = descriptor.getPsiElement();
+            if (element instanceof PsiReferenceExpression reference
+                    && this.oldName.equals(reference.getReferenceName())) {
+                reference.handleElementRename(this.newName);
+            }
         }
     }
 
@@ -761,6 +873,18 @@ public class SpringBoot3MigrationInspection extends AbstractBaseJavaLocalInspect
     public static class RestTemplateRequestFactoryBuilder extends SpringBoot3MigrationInspection {
         public RestTemplateRequestFactoryBuilder() {
             super(Kind.REST_TEMPLATE_REQUEST_FACTORY_BUILDER);
+        }
+    }
+
+    public static class WebSecurityConfigurerAdapter extends SpringBoot3MigrationInspection {
+        public WebSecurityConfigurerAdapter() {
+            super(Kind.WEB_SECURITY_CONFIGURER_ADAPTER);
+        }
+    }
+
+    public static class SecurityMatchers extends SpringBoot3MigrationInspection {
+        public SecurityMatchers() {
+            super(Kind.SECURITY_MATCHERS);
         }
     }
 }

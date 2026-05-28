@@ -414,6 +414,99 @@ public class SpringBoot3MigrationInspectionTests extends BasePlatformTestCase {
                 .isEqualTo(1);
     }
 
+    public void testWebSecurityConfigurerAdapter_reportsRemovedBaseClass() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.WebSecurityConfigurerAdapter());
+        this.myFixture.configureByText("Sample.java", """
+                class WebSecurityConfigurerAdapter { }
+                class Sample extends WebSecurityConfigurerAdapter {
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "WebSecurityConfigurerAdapter was removed"))
+                .as("removed WebSecurityConfigurerAdapter")
+                .isEqualTo(1);
+    }
+
+    public void testWebSecurityConfigurerAdapter_ignoresOtherBaseClass() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.WebSecurityConfigurerAdapter());
+        this.myFixture.configureByText("Sample.java", """
+                class SecurityConfigurerAdapter { }
+                class Sample extends SecurityConfigurerAdapter {
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "WebSecurityConfigurerAdapter was removed"))
+                .as("unrelated adapter")
+                .isZero();
+    }
+
+    public void testSecurityMatchers_reportsRemovedDslMethods() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.SecurityMatchers());
+        this.myFixture.configureByText("Sample.java", """
+                class HttpSecurity {
+                    HttpSecurity authorizeRequests() { return this; }
+                    HttpSecurity antMatchers(String pattern) { return this; }
+                    HttpSecurity anyRequest() { return this; }
+                }
+                class Sample {
+                    void configure(HttpSecurity http) {
+                        http.authorizeRequests().antMatchers("/admin/**").anyRequest();
+                    }
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "Spring Security 6 replaced"))
+                .as("removed Spring Security matcher DSL")
+                .isEqualTo(2);
+    }
+
+    public void testSecurityMatchers_quickFixRenamesMethod() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.SecurityMatchers());
+        this.myFixture.configureByText("Sample.java", """
+                class HttpSecurity {
+                    HttpSecurity authorizeRequests() { return this; }
+                }
+                class Sample {
+                    void configure(HttpSecurity http) {
+                        http.<caret>authorizeRequests();
+                    }
+                }
+                """);
+        this.myFixture.doHighlighting();
+
+        this.myFixture.launchAction(this.myFixture.findSingleIntention("Replace with Spring Security 6 DSL method"));
+
+        Assertions.assertThat(this.myFixture.getFile().getText())
+                .as("renamed security DSL method")
+                .contains("http.authorizeHttpRequests()");
+    }
+
+    public void testSecurityMatchers_ignoresUnrelatedMethodNames() {
+        this.myFixture.enableInspections(new SpringBoot3MigrationInspection.SecurityMatchers());
+        this.myFixture.configureByText("Sample.java", """
+                class RouteBuilder {
+                    RouteBuilder antMatchers(String pattern) { return this; }
+                }
+                class Sample {
+                    void configure(RouteBuilder routes) {
+                        routes.antMatchers("/admin/**");
+                    }
+                }
+                """);
+
+        List<HighlightInfo> highlights = this.myFixture.doHighlighting();
+
+        Assertions.assertThat(countDescriptions(highlights, "Spring Security 6 replaced"))
+                .as("unrelated matcher method")
+                .isZero();
+    }
+
     private static long countErrors(List<HighlightInfo> highlights) {
         return highlights.stream()
                 .filter((HighlightInfo h) -> h.getSeverity() == HighlightSeverity.ERROR)
