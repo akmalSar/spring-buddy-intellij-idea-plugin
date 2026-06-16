@@ -115,7 +115,19 @@ public class SpringControllerBoundaryInspectionTest extends BasePlatformTestCase
         this.myFixture.configureByText("Sample.java", """
                 @RestController
                 class SampleController {
-                    <warning descr="Controller should not inject repositories directly; use a service boundary">UserRepository repository</warning>;
+                    UserRepository <warning descr="Controller should not inject repositories directly; use a service boundary">repository</warning>;
+                }
+                interface UserRepository { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testReportsConstructorRepositoryInjectionOnParameterNameOnly() {
+        this.myFixture.enableInspections(new SpringControllerBoundaryInspection.RepositoryInjection());
+        this.myFixture.configureByText("Sample.java", """
+                @RestController
+                class SampleController {
+                    SampleController(UserRepository <warning descr="Controller should not inject repositories directly; use a service boundary">repository</warning>) { }
                 }
                 interface UserRepository { }
                 """);

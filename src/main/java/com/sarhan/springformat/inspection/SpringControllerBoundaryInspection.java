@@ -36,6 +36,7 @@ import com.intellij.psi.PsiNewExpression;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiReturnStatement;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiTypeElement;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -120,6 +121,24 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
     private static boolean canRegisterProblemOn(PsiElement element) {
         return element != null && element.isPhysical() && element.getContainingFile() != null
                 && !element.getTextRange().isEmpty();
+    }
+
+    private static PsiElement problemAnchor(PsiElement... candidates) {
+        for (PsiElement candidate : candidates) {
+            if (canRegisterProblemOn(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private static PsiElement fieldAnchor(PsiField field) {
+        return problemAnchor(field.getNameIdentifier(), field.getTypeElement(), field);
+    }
+
+    private static PsiElement parameterAnchor(PsiParameter parameter) {
+        PsiTypeElement typeElement = parameter.getTypeElement();
+        return problemAnchor(parameter.getNameIdentifier(), typeElement, parameter);
     }
 
     private static boolean returnsLikelyEntity(PsiMethod method) {
@@ -302,19 +321,23 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
         protected void inspectClass(PsiClass psiClass, ProblemsHolder holder) {
             for (PsiField field : psiClass.getFields()) {
                 if (isRepositoryType(field.getType())) {
-                    holder.registerProblem(field,
-                            "Controller should not inject repositories directly; use a service boundary",
-                            ProblemHighlightType.WARNING);
+                    PsiElement anchor = fieldAnchor(field);
+                    if (anchor != null) {
+                        holder.registerProblem(anchor,
+                                "Controller should not inject repositories directly; use a service boundary",
+                                ProblemHighlightType.WARNING);
+                    }
                 }
             }
             for (PsiMethod constructor : psiClass.getConstructors()) {
                 for (PsiParameter parameter : constructor.getParameterList().getParameters()) {
                     if (isRepositoryType(parameter.getType())) {
-                        PsiElement anchor = canRegisterProblemOn(parameter) ? parameter
-                                : canRegisterProblemOn(constructor) ? constructor : psiClass;
-                        holder.registerProblem(anchor,
-                                "Controller should not inject repositories directly; use a service boundary",
-                                ProblemHighlightType.WARNING);
+                        PsiElement anchor = parameterAnchor(parameter);
+                        if (anchor != null) {
+                            holder.registerProblem(anchor,
+                                    "Controller should not inject repositories directly; use a service boundary",
+                                    ProblemHighlightType.WARNING);
+                        }
                     }
                 }
             }
