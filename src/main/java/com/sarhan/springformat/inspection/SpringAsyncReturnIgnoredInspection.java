@@ -32,8 +32,10 @@ import com.intellij.psi.PsiExpressionStatement;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
+import com.intellij.psi.PsiNameHelper;
 import com.intellij.psi.PsiStatement;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiTypes;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +69,7 @@ public class SpringAsyncReturnIgnoredInspection extends AbstractBaseJavaLocalIns
                     return;
                 }
                 PsiType ret = resolved.getReturnType();
-                if (ret == null || PsiType.VOID.equals(ret)) {
+                if (ret == null || PsiTypes.voidType().equals(ret)) {
                     return;
                 }
                 if (isFutureType(ret)) {
@@ -167,7 +169,7 @@ public class SpringAsyncReturnIgnoredInspection extends AbstractBaseJavaLocalIns
             } else {
                 String methodName = resolved.getName();
                 String varName = (methodName != null) ? methodName + "Result" : "future";
-                if (!JavaPsiFacade.getInstance(project).getNameHelper().isIdentifier(varName)) {
+                if (!PsiNameHelper.getInstance(project).isIdentifier(varName)) {
                     varName = "future";
                 }
                 String typeText = ret.getCanonicalText();

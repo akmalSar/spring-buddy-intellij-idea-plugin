@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -158,7 +159,8 @@ public class SpringImportOrderInspection extends AbstractBaseJavaLocalInspection
                 previousGroup = entry.group();
             }
             source.append("}\n");
-            PsiFile file = PsiFileFactory.getInstance(project).createFileFromText("Dummy.java", source.toString());
+            PsiFile file = PsiFileFactory.getInstance(project)
+                    .createFileFromText("Dummy.java", JavaLanguage.INSTANCE, source.toString());
             return file instanceof PsiJavaFile javaFile ? javaFile.getImportList() : null;
         }
     }

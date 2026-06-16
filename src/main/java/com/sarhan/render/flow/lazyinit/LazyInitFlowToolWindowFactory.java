@@ -52,7 +52,7 @@ public final class LazyInitFlowToolWindowFactory implements ToolWindowFactory {
 
     public static void showFlow(@NotNull Project project,
                                   @NotNull PsiMethodCallExpression lazyCall) {
-        FlowGraph flow = ReadAction.compute(() ->
+        FlowGraph flow = ReadAction.computeBlocking(() ->
                 new LazyInitFlowBuilder(project).buildFromSink(lazyCall));
         String tabTitle = lazyCall.getMethodExpression().getReferenceName();
         FlowToolWindowSupport.showFlow(project, TOOL_WINDOW_ID,

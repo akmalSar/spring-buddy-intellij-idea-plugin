@@ -19,6 +19,7 @@ package com.sarhan.dataFlow;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -354,7 +355,8 @@ public class SpringTransactionalDirtyCheckingDataFlowInspection extends Abstract
         }
 
         private static void replaceAnnotation(Project project, PsiAnnotation annotation, String text) {
-            PsiFile file = PsiFileFactory.getInstance(project).createFileFromText("A.java", text + " class A {}");
+            PsiFile file = PsiFileFactory.getInstance(project)
+                    .createFileFromText("A.java", JavaLanguage.INSTANCE, text + " class A {}");
             PsiAnnotation replacement = PsiTreeUtil.findChildOfType(file, PsiAnnotation.class);
             if (replacement != null) {
                 annotation.replace(replacement);

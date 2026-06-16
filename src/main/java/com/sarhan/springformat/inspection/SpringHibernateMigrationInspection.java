@@ -1835,7 +1835,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                 return new com.intellij.codeInspection.ProblemDescriptor[] {
                         manager.createProblemDescriptor(file,
                                 "Hibernate 6 changed query cache region configuration properties",
-                                LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.WARNING, isOnTheFly)
+                                isOnTheFly, LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.WARNING)
                 };
             }
             return null;
@@ -1861,7 +1861,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             return new com.intellij.codeInspection.ProblemDescriptor[] {
                     manager.createProblemDescriptor(file,
                             "Hibernate 6 ignores hibernate.multiTenancy; remove the obsolete setting",
-                            LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.WARNING, isOnTheFly)
+                            isOnTheFly, LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.WARNING)
             };
         }
     }

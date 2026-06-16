@@ -26,8 +26,8 @@ import java.util.Set;
 
 import com.intellij.codeHighlighting.HighlightDisplayLevel;
 import com.intellij.lang.annotation.HighlightSeverity;
+import com.intellij.openapi.util.JDOMUtil;
 import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -108,7 +108,7 @@ public final class SpringBuddySettingsUtil {
             if (stream == null) {
                 return List.of();
             }
-            return new SAXBuilder().build(stream).getRootElement().getChildren("inspection_tool");
+            return JDOMUtil.load(stream).getChildren("inspection_tool");
         } catch (Exception ignored) {
             return List.of();
         }

@@ -105,7 +105,7 @@ public class SpringMutableExceptionInspection extends AbstractBaseJavaLocalInspe
             if (modifierList == null) {
                 return;
             }
-            modifierList.add(com.intellij.psi.JavaPsiFacade.getElementFactory(project).createKeyword(PsiKeyword.FINAL));
+            modifierList.add(com.intellij.psi.JavaPsiFacade.getElementFactory(project).createKeyword(PsiModifier.FINAL));
         }
     }
 }

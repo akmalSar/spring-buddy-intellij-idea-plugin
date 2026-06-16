@@ -382,7 +382,7 @@ public class LombokAllArgsConstructorRedundancyInspection extends AbstractBaseJa
         Project project = parentConstructor.getProject();
         GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
 
-        for (PsiClass candidate : ClassInheritorsSearch.search(parentClass, scope, false)) {
+        for (PsiClass candidate : ClassInheritorsSearch.search(parentClass, scope, false).findAll()) {
             if (candidate.isInterface() || candidate.isAnnotationType()) {
                 continue;
             }
@@ -438,7 +438,7 @@ public class LombokAllArgsConstructorRedundancyInspection extends AbstractBaseJa
 
         Project project = aClass.getProject();
         GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
-        for (PsiClass sub : ClassInheritorsSearch.search(aClass, scope, false)) {
+        for (PsiClass sub : ClassInheritorsSearch.search(aClass, scope, false).findAll()) {
             if (hasBuilderAnnotation(sub)) {
                 return true;
             }

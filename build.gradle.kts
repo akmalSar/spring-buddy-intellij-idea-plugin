@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.sarhan.springformat"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -42,7 +42,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = "Spring Buddy"
-        version = "1.0.1"
+        version = "1.0.2"
         description = """
             <h2>Make invisible Spring runtime behavior visible.</h2>
               <p>

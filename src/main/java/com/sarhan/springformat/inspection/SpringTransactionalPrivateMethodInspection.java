@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -1148,7 +1149,8 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
     }
 
     private static void replaceAnnotation(Project project, PsiAnnotation annotation, String text) {
-        PsiFile file = PsiFileFactory.getInstance(project).createFileFromText("A.java", "@" + text.substring(1) + " class A {}");
+        PsiFile file = PsiFileFactory.getInstance(project)
+                .createFileFromText("A.java", JavaLanguage.INSTANCE, "@" + text.substring(1) + " class A {}");
         PsiAnnotation replacement = com.intellij.psi.util.PsiTreeUtil.findChildOfType(file, PsiAnnotation.class);
         if (replacement != null) {
             annotation.replace(replacement);
@@ -1546,7 +1548,8 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
                     .replace("spring.jpa.open-in-view=true", "spring.jpa.open-in-view=false")
                     .replace("spring.jpa.open-in-view: true", "spring.jpa.open-in-view: false")
                     .replace("open-in-view: true", "open-in-view: false");
-            PsiFile replacement = PsiFileFactory.getInstance(project).createFileFromText(file.getName(), text);
+            PsiFile replacement = PsiFileFactory.getInstance(project)
+                    .createFileFromText(file.getName(), JavaLanguage.INSTANCE, text);
             file.replace(replacement);
         }
     }

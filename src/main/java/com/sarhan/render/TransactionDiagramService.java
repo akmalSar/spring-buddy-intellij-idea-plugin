@@ -170,11 +170,11 @@ public final class TransactionDiagramService implements Disposable {
      */
     @Nullable
     public TransactionGraph getCached(@NotNull PsiMethod method) {
-        return ReadAction.compute(() -> this.cache.get(computeCacheKey(method)));
+        return ReadAction.computeBlocking(() -> this.cache.get(computeCacheKey(method)));
     }
 
     public void invalidate(@NotNull PsiMethod method) {
-        ReadAction.run(() -> this.cache.remove(computeCacheKey(method)));
+        ReadAction.runBlocking(() -> this.cache.remove(computeCacheKey(method)));
     }
 
     /**

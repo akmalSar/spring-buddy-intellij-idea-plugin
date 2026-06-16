@@ -47,7 +47,7 @@ public final class UnexpectedRollbackFlowToolWindowFactory implements ToolWindow
     }
 
     public static void showFlow(@NotNull Project project, @NotNull PsiElement element) {
-        FlowGraph flow = ReadAction.compute(() -> new UnexpectedRollbackFlowBuilder(project).buildFromProblem(element));
+        FlowGraph flow = ReadAction.computeBlocking(() -> new UnexpectedRollbackFlowBuilder(project).buildFromProblem(element));
         FlowToolWindowSupport.showFlow(project, TOOL_WINDOW_ID, "unexpected rollback", flow);
     }
 }

@@ -177,7 +177,7 @@ public abstract class LombokBuilderHierarchyInspection extends AbstractBaseJavaL
                 return;
             }
             GlobalSearchScope scope = GlobalSearchScope.projectScope(aClass.getProject());
-            for (PsiClass sub : ClassInheritorsSearch.search(aClass, scope, false)) {
+            for (PsiClass sub : ClassInheritorsSearch.search(aClass, scope, false).findAll()) {
                 if (!sub.isInterface() && !sub.isAnnotationType()) {
                     holder.registerProblem(builderAnn,
                             MyMessageBundle.message("inspection.builder.001.problem.descriptor"),

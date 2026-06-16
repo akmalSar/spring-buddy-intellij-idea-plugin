@@ -52,9 +52,9 @@ public final class NPlusOneFlowToolWindowFactory implements ToolWindowFactory {
     }
 
     public static void showFlow(@NotNull Project project, @NotNull PsiElement sinkElement) {
-        FlowGraph flow = ReadAction.compute(() ->
+        FlowGraph flow = ReadAction.computeBlocking(() ->
                 new NPlusOneFlowBuilder(project).buildFromSink(sinkElement));
-        String tabTitle = ReadAction.compute(() -> tabTitle(sinkElement));
+        String tabTitle = ReadAction.computeBlocking(() -> tabTitle(sinkElement));
         FlowToolWindowSupport.showFlow(project, TOOL_WINDOW_ID, tabTitle, flow);
     }
 

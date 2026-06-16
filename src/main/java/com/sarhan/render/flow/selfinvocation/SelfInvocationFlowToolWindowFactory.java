@@ -51,7 +51,7 @@ public final class SelfInvocationFlowToolWindowFactory implements ToolWindowFact
     }
 
     public static void showFlow(@NotNull Project project, @NotNull PsiMethod caller) {
-        FlowGraph flow = ReadAction.compute(() ->
+        FlowGraph flow = ReadAction.computeBlocking(() ->
                 new SelfInvocationFlowBuilder(project).buildFromCaller(caller));
         FlowToolWindowSupport.showFlow(project, TOOL_WINDOW_ID,
                 caller.getName(), flow);

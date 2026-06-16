@@ -52,7 +52,7 @@ public final class SqlInjectionFlowToolWindowFactory implements ToolWindowFactor
 
     public static void showFlow(@NotNull Project project,
                                   @NotNull PsiMethodCallExpression sinkCall) {
-        FlowGraph flow = ReadAction.compute(() ->
+        FlowGraph flow = ReadAction.computeBlocking(() ->
                 new SqlInjectionFlowBuilder(project).buildFromSink(sinkCall));
         String tabTitle = sinkCall.getMethodExpression().getReferenceName();
         FlowToolWindowSupport.showFlow(project, TOOL_WINDOW_ID,

@@ -16,6 +16,7 @@
 
 package com.sarhan.springformat.inspection;
 
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
@@ -383,7 +384,7 @@ public class SpringValidationPitfallInspection extends AbstractBaseJavaLocalInsp
             return;
         }
         PsiJavaFile tempFile = (PsiJavaFile) com.intellij.psi.PsiFileFactory.getInstance(project)
-                .createFileFromText("Import.java", "import " + fqn + "; class Import {}\n");
+                .createFileFromText("Import.java", JavaLanguage.INSTANCE, "import " + fqn + "; class Import {}\n");
         if (tempFile.getImportList() != null && tempFile.getImportList().getImportStatements().length > 0) {
             importList.add(tempFile.getImportList().getImportStatements()[0]);
         }
@@ -479,7 +480,8 @@ public class SpringValidationPitfallInspection extends AbstractBaseJavaLocalInsp
                 importList.add(JavaPsiFacade.getElementFactory(project).createImportStatement(imported));
             } else {
                 PsiJavaFile tempFile = (PsiJavaFile) com.intellij.psi.PsiFileFactory.getInstance(project)
-                        .createFileFromText("Import.java", "import " + fqn + "; class Import {}\n");
+                        .createFileFromText("Import.java", JavaLanguage.INSTANCE,
+                                "import " + fqn + "; class Import {}\n");
                 if (tempFile.getImportList() != null && tempFile.getImportList().getImportStatements().length > 0) {
                     importList.add(tempFile.getImportList().getImportStatements()[0]);
                 }

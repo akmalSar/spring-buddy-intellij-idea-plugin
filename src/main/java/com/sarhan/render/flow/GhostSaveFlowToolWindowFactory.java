@@ -78,7 +78,7 @@ public final class GhostSaveFlowToolWindowFactory implements ToolWindowFactory {
             return;
         }
 
-        GhostSaveFlow flow = ReadAction.compute(() ->
+        GhostSaveFlow flow = ReadAction.computeBlocking(() ->
                 new GhostSaveFlowBuilder(project).buildFromSink(mutationCall));
 
         boolean dark = GraphTheme.isDark();
@@ -89,7 +89,7 @@ public final class GhostSaveFlowToolWindowFactory implements ToolWindowFactory {
         if (JBCefApp.isSupported()) {
             JBCefBrowser browser = new JBCefBrowser();
             browser.getComponent().setPreferredSize(new Dimension(440, 600));
-            JBCefJSQuery navQuery = JBCefJSQuery.create(browser);
+            JBCefJSQuery navQuery = JBCefJSQuery.create((com.intellij.ui.jcef.JBCefBrowserBase) browser);
             navQuery.addHandler((String request) -> {
                 openFileAtLine(project, request);
                 return new JBCefJSQuery.Response("ok");
@@ -127,7 +127,7 @@ public final class GhostSaveFlowToolWindowFactory implements ToolWindowFactory {
             return;
         }
         ApplicationManager.getApplication().invokeLater(() ->
-                ReadAction.run(() -> {
+                ReadAction.runBlocking(() -> {
                     for (VirtualFile vf : FilenameIndex.getVirtualFilesByName(
                             fileName, GlobalSearchScope.projectScope(project))) {
                         new OpenFileDescriptor(project, vf, Math.max(0, line), 0)

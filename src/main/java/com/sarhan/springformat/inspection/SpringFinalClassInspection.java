@@ -154,7 +154,7 @@ public class SpringFinalClassInspection extends AbstractBaseJavaLocalInspectionT
             if (modifierList == null) {
                 return;
             }
-            modifierList.add(JavaPsiFacade.getElementFactory(project).createKeyword(PsiKeyword.FINAL));
+            modifierList.add(JavaPsiFacade.getElementFactory(project).createKeyword(PsiModifier.FINAL));
         }
     }
 }

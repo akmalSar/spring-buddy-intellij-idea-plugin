@@ -51,9 +51,9 @@ public final class BagProblemFlowToolWindowFactory implements ToolWindowFactory 
     }
 
     public static void showFlow(@NotNull Project project, @NotNull PsiField bagField) {
-        FlowGraph flow = ReadAction.compute(() ->
+        FlowGraph flow = ReadAction.computeBlocking(() ->
                 new BagProblemFlowBuilder(project).buildFromField(bagField));
-        String containingClass = ReadAction.compute(() -> (bagField.getContainingClass() != null
+        String containingClass = ReadAction.computeBlocking(() -> (bagField.getContainingClass() != null
                 && bagField.getContainingClass().getName() != null)
                 ? bagField.getContainingClass().getName()
                 : bagField.getName());

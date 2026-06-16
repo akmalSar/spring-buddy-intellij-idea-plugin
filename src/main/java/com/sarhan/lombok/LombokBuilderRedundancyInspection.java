@@ -79,7 +79,7 @@ public class LombokBuilderRedundancyInspection extends AbstractBaseJavaLocalInsp
 
         Project project = aClass.getProject();
         GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
-        for (PsiClass sub : com.intellij.psi.search.searches.ClassInheritorsSearch.search(aClass, scope, false)) {
+        for (PsiClass sub : com.intellij.psi.search.searches.ClassInheritorsSearch.search(aClass, scope, false).findAll()) {
             if (hasBuilderAnnotation(sub)) {
                 return true;
             }

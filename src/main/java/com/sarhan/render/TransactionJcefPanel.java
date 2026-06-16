@@ -103,9 +103,9 @@ public final class TransactionJcefPanel {
             this.cardLayout.show(panel, "status");
             this.root    = panel;
             this.root.setPreferredSize(new Dimension(720, 480));
-            this.navigateQuery = JBCefJSQuery.create(this.browser);
+            this.navigateQuery = JBCefJSQuery.create((com.intellij.ui.jcef.JBCefBrowserBase) this.browser);
             this.navigateQuery.addHandler(this::onNavigateRequest);
-            this.refreshQuery = JBCefJSQuery.create(this.browser);
+            this.refreshQuery = JBCefJSQuery.create((com.intellij.ui.jcef.JBCefBrowserBase) this.browser);
             this.refreshQuery.addHandler(this::onRefreshRequest);
         } else {
             this.browser       = null;
@@ -218,7 +218,7 @@ public final class TransactionJcefPanel {
     @NotNull
     private JBCefJSQuery.Response onNavigateRequest(@NotNull String request) {
         ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            PsiMethod target = ReadAction.compute(
+            PsiMethod target = ReadAction.computeBlocking(
                     () -> findMethodById(request));
             if (target != null) {
                 ApplicationManager.getApplication().invokeLater(() -> {

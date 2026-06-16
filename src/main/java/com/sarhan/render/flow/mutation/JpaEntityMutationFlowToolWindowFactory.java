@@ -50,7 +50,7 @@ public final class JpaEntityMutationFlowToolWindowFactory implements ToolWindowF
     public static void showFlow(@NotNull Project project,
                                 @NotNull PsiElement element,
                                 @NotNull MutationFlowMode mode) {
-        FlowGraph flow = ReadAction.compute(() -> new JpaEntityMutationFlowBuilder(project).build(element, mode));
+        FlowGraph flow = ReadAction.computeBlocking(() -> new JpaEntityMutationFlowBuilder(project).build(element, mode));
         FlowToolWindowSupport.showFlow(project, TOOL_WINDOW_ID, tabTitle(element, mode), flow);
     }
 
