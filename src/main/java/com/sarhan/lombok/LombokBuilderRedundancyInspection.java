@@ -38,7 +38,6 @@ import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
-import com.intellij.util.indexing.FileBasedIndex;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -186,9 +185,8 @@ public class LombokBuilderRedundancyInspection extends AbstractBaseJavaLocalInsp
 
     /**
      * Scans project files for textual evidence of {@code ClassName.builder()} usage.
-     * Uses {@link FileBasedIndex} ({@code IdIndex}) to narrow the search to files
-     * that contain the class name, then checks file text for common builder call
-     * patterns.
+     * Scans project source files in scope, then checks file text for common
+     * builder call patterns.
      */
     private static boolean hasTextualBuilderUsage(PsiClass aClass, GlobalSearchScope scope) {
         String className = aClass.getName();
@@ -197,26 +195,7 @@ public class LombokBuilderRedundancyInspection extends AbstractBaseJavaLocalInsp
             return true; // Cannot determine → assume used to be safe.
         }
 
-        Project project = aClass.getProject();
-
-        // Find all project files that contain the class name as an indexed word.
-        Collection<VirtualFile> candidateFiles = null;
-        try {
-            candidateFiles = FileBasedIndex.getInstance()
-                    .getContainingFiles(
-                            com.intellij.psi.impl.cache.impl.id.IdIndex.NAME,
-                            new com.intellij.psi.impl.cache.impl.id.IdIndexEntry(className, true),
-                            scope
-                    );
-        } catch (Exception ex) {
-            // If indexing fails (e.g. during dumb mode), fall back to direct scan.
-        }
-
-        // Fallback: when the index is empty (fresh test fixtures, new files,
-        // or incomplete indexing) scan all Java/Kotlin files in scope directly.
-        if ((candidateFiles == null) || candidateFiles.isEmpty()) {
-            candidateFiles = collectAllJavaKtFilesInScope(project, scope);
-        }
+        Collection<VirtualFile> candidateFiles = collectAllJavaKtFilesInScope(aClass.getProject(), scope);
 
         // Prepare search patterns.
         String directCall = className + ".builder";
@@ -263,8 +242,7 @@ public class LombokBuilderRedundancyInspection extends AbstractBaseJavaLocalInsp
 
     /**
      * Collects all {@code .java} and {@code .kt} files that belong to the project
-     * content and lie inside the given search scope. Used as a fallback when the
-     * {@link FileBasedIndex} has not yet indexed newly created or modified files.
+     * content and lie inside the given search scope.
      */
     private static Collection<VirtualFile> collectAllJavaKtFilesInScope(
             Project project, GlobalSearchScope scope) {

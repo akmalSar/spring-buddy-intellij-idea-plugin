@@ -17,6 +17,7 @@
 package com.sarhan.inspection.builtin;
 
 
+import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.GlobalInspectionContext;
 import com.intellij.codeInspection.GlobalInspectionTool;
 import com.intellij.codeInspection.GlobalSimpleInspectionTool;
@@ -41,10 +42,7 @@ import com.intellij.spring.data.jpa.inspections.SpringDataModifyingAnnotationMis
 import com.intellij.spring.data.jpa.inspections.SpringDataPageableParameterMissingInspection;
 import com.intellij.spring.data.jpa.inspections.SpringDataRepositoryMethodParametersInspection;
 import com.intellij.spring.data.jpa.inspections.SpringDataRepositoryMethodReturnTypeInspection;
-import com.intellij.spring.model.highlighting.jam.AsyncMethodInspection;
 import com.intellij.spring.mvc.pathVariables.MVCPathVariableInspection;
-import com.intellij.spring.mvc.pathVariables.SpringMvcPathVariableDeclarationInspection;
-import com.intellij.spring.profiles.SpringProfileExpressionInspection;
 import com.siyeh.ig.bugs.InfiniteRecursionInspection;
 import com.siyeh.ig.classlayout.ClassWithOnlyPrivateConstructorsInspection;
 import com.siyeh.ig.classlayout.NonFinalUtilityClassInspection;
@@ -90,21 +88,35 @@ public final class BuiltInInspectionWrappers {
     private abstract static class Delegating extends LocalInspectionTool {
 
         private final LocalInspectionTool delegate;
+        private final String shortName;
+        private final String displayName;
 
         protected Delegating(LocalInspectionTool delegate) {
+            this(delegate, null, null);
+        }
+
+        protected Delegating(LocalInspectionTool delegate, String shortName, String displayName) {
             this.delegate = delegate;
+            this.shortName = shortName;
+            this.displayName = displayName;
         }
 
 
         @Override
         @NotNull
         public String getDisplayName() {
+            if (this.displayName != null) {
+                return this.displayName;
+            }
             return this.delegate.getDisplayName();
         }
 
         @Override
         @NotNull
         public String getShortName() {
+            if (this.shortName != null) {
+                return this.shortName;
+            }
             return "BuiltIn" + this.delegate.getShortName();
         }
 
@@ -125,6 +137,21 @@ public final class BuiltInInspectionWrappers {
                                               @NotNull LocalInspectionToolSession session) {
             return this.delegate.buildVisitor(holder, isOnTheFly, session);
         }
+    }
+
+    private static LocalInspectionTool loadOptionalLocalInspection(String className) {
+        try {
+            Class<?> inspectionClass = BuiltInInspectionWrappers.class.getClassLoader().loadClass(className);
+            Object inspection = inspectionClass.getDeclaredConstructor().newInstance();
+            if (inspection instanceof LocalInspectionTool localInspection) {
+                return localInspection;
+            }
+        }
+        catch (ReflectiveOperationException | LinkageError ex) {
+            // Optional bundled inspection not present in every IntelliJ target IDE.
+        }
+        return new AbstractBaseJavaLocalInspectionTool() {
+        };
     }
 
     // -------------------------------------------------------------------------
@@ -290,13 +317,15 @@ public final class BuiltInInspectionWrappers {
 
     public static final class AsyncMethod extends Delegating {
         public AsyncMethod() {
-            super(new AsyncMethodInspection());
+            super(loadOptionalLocalInspection("com.intellij.spring.model.highlighting.jam.AsyncMethodInspection"),
+                    "BuiltInAsyncMethod", "Async method");
         }
     }
 
     public static final class SpringProfileExpression extends Delegating {
         public SpringProfileExpression() {
-            super(new SpringProfileExpressionInspection());
+            super(loadOptionalLocalInspection("com.intellij.spring.profiles.SpringProfileExpressionInspection"),
+                    "BuiltInSpringProfileExpression", "Spring profile expression");
         }
     }
 
@@ -344,7 +373,9 @@ public final class BuiltInInspectionWrappers {
 
     public static final class SpringMvcPathVariableDeclaration extends Delegating {
         public SpringMvcPathVariableDeclaration() {
-            super(new SpringMvcPathVariableDeclarationInspection());
+            super(loadOptionalLocalInspection(
+                    "com.intellij.spring.mvc.pathVariables.SpringMvcPathVariableDeclarationInspection"),
+                    "BuiltInSpringMvcPathVariableDeclaration", "Spring MVC path variable declaration");
         }
     }
 
