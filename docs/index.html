@@ -280,6 +280,73 @@
             transform: translateY(-1px);
         }
 
+        .repo-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 24px;
+            background: rgba(7, 17, 31, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .top-bar .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #dfffea;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .top-bar .brand .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--blue));
+            box-shadow: 0 0 12px rgba(120, 214, 75, 0.6);
+        }
+
+        .repo-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(20, 36, 53, 0.9);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .repo-link:hover {
+            transform: translateY(-1px);
+            border-color: var(--green);
+        }
+
+        .repo-link svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
         .flow {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -440,6 +507,18 @@
     </style>
 </head>
 <body>
+<header class="top-bar">
+    <nav class="repo-links">
+        <a class="repo-link" href="https://github.com/akmalSar/spring-buddy-intellij-idea-plugin" target="_blank" rel="noopener" aria-label="Source code on GitHub">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            Source on GitHub
+        </a>
+        <a class="repo-link" href="https://plugins.jetbrains.com/plugin/32307-spring-buddy" target="_blank" rel="noopener" aria-label="Spring Buddy on the JetBrains Marketplace">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.3l7.5 3.75L12 11.8 4.5 8.05 12 4.3zM4 9.4l7 3.5v7.2l-7-3.5V9.4zm9 10.7v-7.2l7-3.5v7.2l-7 3.5z"/></svg>
+            Install from JetBrains Marketplace
+        </a>
+    </nav>
+</header>
 <main class="deck">
     <section class="slide">
         <span class="eyebrow">Spring Buddy</span>
