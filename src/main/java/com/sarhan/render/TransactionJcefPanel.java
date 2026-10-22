@@ -22,11 +22,13 @@ import javax.swing.*;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.pom.Navigatable;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.jcef.JBCefApp;
@@ -222,9 +224,12 @@ public final class TransactionJcefPanel {
                     () -> findMethodById(request));
             if (target != null) {
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    if (target instanceof Navigatable navigatable
-                            && navigatable.canNavigate()) {
-                        navigatable.navigate(true);
+                    PsiFile containingFile = target.getContainingFile();
+                    VirtualFile virtualFile = (containingFile != null)
+                            ? containingFile.getVirtualFile() : null;
+                    if (virtualFile != null) {
+                        new OpenFileDescriptor(this.project, virtualFile, target.getTextOffset())
+                                .navigate(true);
                     }
                 });
             }

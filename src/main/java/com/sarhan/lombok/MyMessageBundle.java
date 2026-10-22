@@ -29,7 +29,7 @@ public final class MyMessageBundle extends DynamicBundle {
     private static final MyMessageBundle MESSAGE_BUNDLE = new MyMessageBundle();
 
     private MyMessageBundle() {
-        super(BUNDLE);
+        super(MyMessageBundle.class, BUNDLE);
     }
 
     public static String message(@PropertyKey(resourceBundle = BUNDLE) String key,

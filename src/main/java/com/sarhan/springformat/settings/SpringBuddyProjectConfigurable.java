@@ -20,6 +20,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.JPanel;
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
@@ -30,6 +31,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -65,7 +67,16 @@ public class SpringBuddyProjectConfigurable implements Configurable {
     public @Nullable JComponent createComponent() {
         if (this.panel == null) {
             this.targetComboBox = new ComboBox<>(SpringBootTargetMode.values());
-            this.targetComboBox.setRenderer(SimpleListCellRenderer.create("", this.labels::get));
+            this.targetComboBox.setRenderer(new SimpleListCellRenderer<>() {
+                @Override
+                public void customize(@NotNull JList<? extends SpringBootTargetMode> list,
+                                      @Nullable SpringBootTargetMode value,
+                                      int index,
+                                      boolean selected,
+                                      boolean hasFocus) {
+                    setText((value != null) ? SpringBuddyProjectConfigurable.this.labels.get(value) : "");
+                }
+            });
             this.detectedLabel = new JBLabel();
             FormBuilder builder = FormBuilder.createFormBuilder();
             builder.addLabeledComponent("Target Spring Boot version:", this.targetComboBox, 1, false);
@@ -86,7 +97,7 @@ public class SpringBuddyProjectConfigurable implements Configurable {
     public void apply() {
         SpringBuddyProjectSettingsState settings = SpringBuddyProjectSettingsState.getInstance(this.project);
         settings.setTargetMode(selectedMode());
-        DaemonCodeAnalyzer.getInstance(this.project).restart();
+        DaemonCodeAnalyzer.getInstance(this.project).settingsChanged();
     }
 
     @Override

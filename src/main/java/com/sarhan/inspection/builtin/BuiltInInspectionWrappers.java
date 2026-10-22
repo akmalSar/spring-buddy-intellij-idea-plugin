@@ -36,11 +36,8 @@ import com.intellij.codeInspection.unusedImport.UnusedImportInspection;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiFile;
 import com.intellij.spring.boot.model.SpringBootApplicationSetupInspection;
-import com.intellij.spring.data.jdbc.inspection.SpringDataJdbcEmptySequenceNameInspection;
-import com.intellij.spring.data.jpa.inspections.SpringDataMethodInconsistencyInspection;
 import com.intellij.spring.data.jpa.inspections.SpringDataModifyingAnnotationMissingInspection;
 import com.intellij.spring.data.jpa.inspections.SpringDataPageableParameterMissingInspection;
-import com.intellij.spring.data.jpa.inspections.SpringDataRepositoryMethodParametersInspection;
 import com.intellij.spring.data.jpa.inspections.SpringDataRepositoryMethodReturnTypeInspection;
 import com.intellij.spring.mvc.pathVariables.MVCPathVariableInspection;
 import com.siyeh.ig.bugs.InfiniteRecursionInspection;
@@ -139,16 +136,25 @@ public final class BuiltInInspectionWrappers {
         }
     }
 
-    private static LocalInspectionTool loadOptionalLocalInspection(String className) {
-        try {
-            Class<?> inspectionClass = BuiltInInspectionWrappers.class.getClassLoader().loadClass(className);
-            Object inspection = inspectionClass.getDeclaredConstructor().newInstance();
-            if (inspection instanceof LocalInspectionTool localInspection) {
-                return localInspection;
+    /**
+     * Loads an optional bundled inspection by class name. Falls back to the legacy
+     * class name when the class has been relocated in newer IntelliJ versions.
+     *
+     * @param classNames candidate fully-qualified class names, newest package layout first
+     * @return the loaded inspection instance, or an inert inspection when no candidate exists
+     */
+    private static LocalInspectionTool loadOptionalLocalInspection(String... classNames) {
+        for (String className : classNames) {
+            try {
+                Class<?> inspectionClass = BuiltInInspectionWrappers.class.getClassLoader().loadClass(className);
+                Object inspection = inspectionClass.getDeclaredConstructor().newInstance();
+                if (inspection instanceof LocalInspectionTool localInspection) {
+                    return localInspection;
+                }
             }
-        }
-        catch (ReflectiveOperationException | LinkageError ex) {
-            // Optional bundled inspection not present in every IntelliJ target IDE.
+            catch (ReflectiveOperationException | LinkageError ex) {
+                // Optional bundled inspection not present in every IntelliJ target IDE.
+            }
         }
         return new AbstractBaseJavaLocalInspectionTool() {
         };
@@ -349,13 +355,19 @@ public final class BuiltInInspectionWrappers {
 
     public static final class SpringDataRepositoryMethodParameters extends Delegating {
         public SpringDataRepositoryMethodParameters() {
-            super(new SpringDataRepositoryMethodParametersInspection());
+            super(loadOptionalLocalInspection(
+                    "com.intellij.spring.data.jpa.analysis.inspections.SpringDataRepositoryMethodParametersInspection",
+                    "com.intellij.spring.data.jpa.inspections.SpringDataRepositoryMethodParametersInspection"),
+                    "BuiltInSpringDataRepositoryMethodParameters", "Spring Data repository method parameter issues");
         }
     }
 
     public static final class SpringDataMethodInconsistency extends Delegating {
         public SpringDataMethodInconsistency() {
-            super(new SpringDataMethodInconsistencyInspection());
+            super(loadOptionalLocalInspection(
+                    "com.intellij.spring.data.jpa.analysis.inspections.SpringDataMethodInconsistencyInspection",
+                    "com.intellij.spring.data.jpa.inspections.SpringDataMethodInconsistencyInspection"),
+                    "BuiltInSpringDataMethodInconsistency", "Spring Data method inconsistency");
         }
     }
 
@@ -367,7 +379,10 @@ public final class BuiltInInspectionWrappers {
 
     public static final class SpringDataJdbcEmptySequenceName extends Delegating {
         public SpringDataJdbcEmptySequenceName() {
-            super(new SpringDataJdbcEmptySequenceNameInspection());
+            super(loadOptionalLocalInspection(
+                    "com.intellij.spring.data.analysis.jdbc.inspection.SpringDataJdbcEmptySequenceNameInspection",
+                    "com.intellij.spring.data.jdbc.inspection.SpringDataJdbcEmptySequenceNameInspection"),
+                    "BuiltInSpringDataJdbcEmptySequenceName", "Spring Data JDBC empty sequence name");
         }
     }
 
