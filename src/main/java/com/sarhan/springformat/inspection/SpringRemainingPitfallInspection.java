@@ -42,6 +42,8 @@ import com.intellij.psi.PsiThrowStatement;
 import com.intellij.psi.PsiTryStatement;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeElement;
+import com.sarhan.springformat.settings.SpringBootTarget;
+import com.sarhan.springformat.settings.SpringBootVersionResolver;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -142,7 +144,7 @@ public class SpringRemainingPitfallInspection extends AbstractBaseJavaLocalInspe
     private static boolean hasSliceCandidateSignals(PsiClass psiClass) {
         for (PsiField field : psiClass.getFields()) {
             PsiModifierList modifiers = field.getModifierList();
-            if (hasAnnotation(modifiers, "MockBean") || hasAnnotation(modifiers, "Autowired")) {
+            if (hasMockInjection(modifiers) || hasAnnotation(modifiers, "Autowired")) {
                 PsiType type = field.getType();
                 String canonical = type.getCanonicalText();
                 if (canonical.contains("MockMvc") || canonical.contains("WebTestClient")) {
@@ -154,11 +156,18 @@ public class SpringRemainingPitfallInspection extends AbstractBaseJavaLocalInspe
                     return true;
                 }
             }
-            if (hasAnnotation(modifiers, "MockBean")) {
+            if (hasMockInjection(modifiers)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean hasMockInjection(PsiModifierList modifiers) {
+        return hasAnnotation(modifiers, "MockBean")
+                || hasAnnotation(modifiers, "SpyBean")
+                || hasAnnotation(modifiers, "MockitoBean")
+                || hasAnnotation(modifiers, "MockitoSpyBean");
     }
 
     private static boolean isEntityManagerType(String canonical) {
@@ -170,11 +179,26 @@ public class SpringRemainingPitfallInspection extends AbstractBaseJavaLocalInspe
         if (!isTestClass(psiClass)) {
             return;
         }
+        // On a Boot 4 target the removed @MockBean/@SpyBean are reported by the
+        // Spring Boot 4 migration inspection; avoid double reports here.
+        boolean boot4 = SpringBootVersionResolver.isAtLeast(psiClass, SpringBootTarget.BOOT_4);
         for (PsiField field : psiClass.getFields()) {
             PsiAnnotation mockBean = findAnnotation(field.getModifierList(), "MockBean");
-            if (mockBean != null) {
+            if (mockBean == null) {
+                mockBean = findAnnotation(field.getModifierList(), "SpyBean");
+            }
+            if (mockBean != null && !boot4) {
                 holder.registerProblem(mockBean,
                         "@MockBean changes the Spring test context cache key; centralize common mocks to avoid extra context loads",
+                        ProblemHighlightType.WARNING);
+            }
+            PsiAnnotation mockitoBean = findAnnotation(field.getModifierList(), "MockitoBean");
+            if (mockitoBean == null) {
+                mockitoBean = findAnnotation(field.getModifierList(), "MockitoSpyBean");
+            }
+            if (mockitoBean != null) {
+                holder.registerProblem(mockitoBean,
+                        "@MockitoBean changes the Spring test context cache key; centralize common mocks to avoid extra context loads",
                         ProblemHighlightType.WARNING);
             }
         }

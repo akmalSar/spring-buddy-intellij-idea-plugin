@@ -23,6 +23,12 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
  */
 public class SpringRemainingPitfallInspectionTest extends BasePlatformTestCase {
 
+    @Override
+    protected void tearDown() throws Exception {
+        SpringBoot4TestSupport.reset(getProject());
+        super.tearDown();
+    }
+
     public void testReportsServiceMultipleRepositoriesWithoutTransaction() {
         this.myFixture.enableInspections(new SpringRemainingPitfallInspection.ServiceMultipleRepositoriesWithoutTransaction());
         this.myFixture.configureByText("Sample.java", """
@@ -81,11 +87,39 @@ public class SpringRemainingPitfallInspectionTest extends BasePlatformTestCase {
     }
 
     public void testReportsMockBeanContextCacheFragmentation() {
+        SpringBoot4TestSupport.setBoot3(getProject());
         this.myFixture.enableInspections(new SpringRemainingPitfallInspection.MockBeanContextCache());
         this.myFixture.configureByText("SampleTest.java", """
                 @SpringBootTest
                 class SampleTest {
                     <warning descr="@MockBean changes the Spring test context cache key; centralize common mocks to avoid extra context loads">@MockBean</warning>
+                    EmailService emailService;
+                }
+                class EmailService { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testReportsMockBeanInAutoDetectModeWithoutBoot4() {
+        this.myFixture.enableInspections(new SpringRemainingPitfallInspection.MockBeanContextCache());
+        this.myFixture.configureByText("SampleTest.java", """
+                @SpringBootTest
+                class SampleTest {
+                    <warning descr="@MockBean changes the Spring test context cache key; centralize common mocks to avoid extra context loads">@MockBean</warning>
+                    EmailService emailService;
+                }
+                class EmailService { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testDoesNotReportMockBeanOnBoot4Target() {
+        SpringBoot4TestSupport.setBoot4(getProject());
+        this.myFixture.enableInspections(new SpringRemainingPitfallInspection.MockBeanContextCache());
+        this.myFixture.configureByText("SampleTest.java", """
+                @SpringBootTest
+                class SampleTest {
+                    @MockBean
                     EmailService emailService;
                 }
                 class EmailService { }
