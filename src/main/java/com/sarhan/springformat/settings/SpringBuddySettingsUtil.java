@@ -38,6 +38,12 @@ public final class SpringBuddySettingsUtil {
 
     public static final String DEFAULT_LEVEL = "WARNING";
 
+    /**
+     * Inspections gated on a Spring Boot 4 target; toggled per project via
+     * {@link SpringBootVersionResolver}.
+     */
+    public static final String MIGRATION_GROUP_ID = "spring-boot 3 -> 4 migration";
+
     private static final String PROFILE_RESOURCE = "/inspection/spring-format-builtin.xml";
 
     public static final List<String> LEVELS = List.of("ERROR", "WARNING", "WEAK WARNING", "INFO", "INFORMATION");
@@ -50,6 +56,7 @@ public final class SpringBuddySettingsUtil {
             new InspectionGroup("mockito", "Mockito", "Mockito"),
             new InspectionGroup("hibernate migration", "hibernate migration", "hibernate migration"),
             new InspectionGroup("spring-boot 2 -> 3 migration", "spring-boot 2 -> 3 migration", "spring-boot 2 -> 3 migration"),
+            new InspectionGroup(MIGRATION_GROUP_ID, MIGRATION_GROUP_ID, MIGRATION_GROUP_ID),
             new InspectionGroup("async-concurrency", "Async / concurrency", "Async / concurrency"));
 
     private SpringBuddySettingsUtil() {

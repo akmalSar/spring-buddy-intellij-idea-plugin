@@ -1,0 +1,13 @@
+<html>
+<body>
+Reports references to <code>org.springframework.boot.web.embedded.undertow.*</code> such as
+<code>UndertowServletWebServerFactory</code>.
+<p>
+    Spring Boot 4 dropped Undertow as a supported embedded server (React Web docs list only Reactor
+    Netty, Tomcat and Jetty). Applications using Undertow must switch to another container.
+</p>
+<p>
+    No automatic fix: choose Tomcat or Jetty and remove Undertow-specific customizers and properties.
+</p>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>@Bean</code> methods returning a Jackson <code>ObjectMapper</code>.
+<p>
+    Spring Boot 4 auto-configures a Jackson 3 <code>JsonMapper</code>; an <code>ObjectMapper</code> bean no longer
+    backs off that auto-configuration, so your customisation is silently ignored for HTTP and other Boot integrations.
+    Define a <code>JsonMapper</code> (or <code>XmlMapper</code>) bean, or use a <code>JsonMapperBuilderCustomizer</code>.
+</p>
+</body>
+</html>

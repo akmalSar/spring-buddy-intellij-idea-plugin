@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports <code>@RunWith(SpringRunner.class)</code> and <code>SpringJUnit4ClassRunner</code>, deprecated
+in Spring Framework 7 (Spring Boot 4) in favour of JUnit Jupiter.
+<p>
+    Spring Framework 7 deprecates the JUnit 4 TestContext support. Existing JUnit 4 based Spring tests
+    keep working for now, but should be migrated to <code>@SpringBootTest</code> with JUnit Jupiter.
+</p>
+<p>
+    Migrate the test class to JUnit Jupiter (<code>org.junit.jupiter.api.Test</code>); the JUnit
+    Vintage engine can bridge the transition.
+</p>
+</body>
+</html>

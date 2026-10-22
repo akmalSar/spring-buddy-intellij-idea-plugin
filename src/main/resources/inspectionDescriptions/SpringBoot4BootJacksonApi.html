@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports Spring Boot Jackson integration types that were renamed or relocated in Spring Boot 4:
+<code>@JsonComponent</code>/<code>@JsonMixin</code> &rarr; <code>@JacksonComponent</code>/<code>@JacksonMixin</code>,
+<code>JsonComponentModule</code>/<code>JsonMixinModule</code> &rarr; <code>JacksonComponentModule</code>/<code>JacksonMixinModule</code>,
+<code>Jackson2ObjectMapperBuilderCustomizer</code> &rarr; <code>JsonMapperBuilderCustomizer</code> and
+<code>JsonObjectSerializer</code>/<code>JsonObjectDeserializer</code> &rarr;
+<code>ObjectValueSerializer</code>/<code>ObjectValueDeserializer</code>.
+<p>
+    Spring Boot 4 splits Jackson support into the <code>spring-boot-jackson</code> module and aligns
+    its API with Jackson 3 naming.
+</p>
+<p>
+    Quick fix replaces the annotation or type with the new name and updates the import.
+</p>
+</body>
+</html>

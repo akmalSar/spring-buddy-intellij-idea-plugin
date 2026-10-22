@@ -403,6 +403,35 @@
     <inspection_tool class="SpringBoot3ObservationMetricNames" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3LogbackSpringConfig" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
     <inspection_tool class="SpringBoot3RenamedProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 2 -> 3 migration"/>
+    <inspection_tool class="SpringBoot4MockBean" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4JacksonPackage" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4JacksonRenamedType" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4BootJacksonApi" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4SecurityAndChain" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4SecurityNonLambdaDsl" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4AntPathRequestMatcher" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4ListenableFuture" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4SpringLangNullability" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4RelocatedBootType" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4Undertow" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4PathMatchSuffix" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4HibernateRemovedAnnotation" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4Junit4Runner" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4UndertowStarter" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4RenamedStarter" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4JacksonCoordinates" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4RenamedProperties" enabled="true" level="WARNING" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4BuildToolVersion" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4TestStarterModules" enabled="true" level="WEAK WARNING" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4SpringBootTestAutoConfigure" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4MockitoAnnotations" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4ObjectMapperBean" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4HttpMessageConverterBean" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4ActuatorSpringLangNullable" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4PropertyMapperAlwaysApplying" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4HibernateProcessor" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4UnmanagedDependency" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
+    <inspection_tool class="SpringBoot4RemovedBuildFeature" enabled="true" level="ERROR" enabled_by_default="true" groups="spring-boot 3 -> 4 migration"/>
 
     <inspection_tool class="SpringOrphanedApplicationEvent" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringInMemoryFiltering" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>

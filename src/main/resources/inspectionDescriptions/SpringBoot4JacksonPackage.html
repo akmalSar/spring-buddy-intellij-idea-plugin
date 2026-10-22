@@ -1,0 +1,19 @@
+<html>
+<body>
+Reports imports and references of <code>com.fasterxml.jackson.core.*</code> and
+<code>com.fasterxml.jackson.databind.*</code> and <code>com.fasterxml.jackson.dataformat.*</code>, which moved to
+<code>tools.jackson.*</code> in Jackson 3 (default in Spring Boot 4), as well as Jackson 2 modules under
+<code>com.fasterxml.jackson.datatype.*</code>/<code>com.fasterxml.jackson.module.*</code>.
+<p>
+    Jackson 3 renamed its root package from <code>com.fasterxml.jackson</code> to <code>tools.jackson</code>
+    for core and databind. The annotations package <code>com.fasterxml.jackson.annotation</code>
+    (<code>@JsonIgnore</code>, <code>@JsonProperty</code>, &hellip;) is unchanged.
+</p>
+<p>
+    Switch imports to <code>tools.jackson.*</code> (quick fix offered when the type name is unchanged).
+    Module packages have no quick fix: java.time, Jdk8 and parameter-names support are built into
+    Jackson 3 databind, so those module registrations can usually be removed.
+    Jackson 2 support exists in the <code>spring-boot-jackson2</code> module only as a migration aid and is deprecated.
+</p>
+</body>
+</html>

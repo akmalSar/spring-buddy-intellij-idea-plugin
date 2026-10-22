@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports usages of <code>AntPathRequestMatcher</code> and <code>MvcRequestMatcher</code>, removed in
+Spring Security 7 (Spring Boot 4).
+<p>
+    Spring Security 7 removes these matchers in favour of <code>PathPatternRequestMatcher</code>,
+    which parses patterns up front and handles trailing slashes consistently.
+</p>
+<p>
+    Replace matchers with <code>PathPatternRequestMatcher.withDefaults().matcher(...)</code> or
+    <code>PathPatternRequestMatcher.withDefaultPathPatternParser()</code>; builder semantics differ, so
+    the migration is manual.
+</p>
+</body>
+</html>

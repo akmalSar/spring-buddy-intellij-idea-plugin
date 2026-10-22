@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports build features removed in Spring Boot 4: embedded launch scripts
+(<code>launchScript()</code>, <code>&lt;executable&gt;true&lt;/executable&gt;</code>), Spring Session Hazelcast and MongoDB,
+Spring Pulsar Reactive and Spock.
+<p>
+    These integrations are no longer provided or managed by Spring Boot 4, so the build fails or the application
+    misses the auto-configuration. Use <code>java -jar</code> with a service manager instead of launch scripts and
+    take the dependency (and its version) from the respective project directly.
+</p>
+</body>
+</html>

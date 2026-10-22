@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>spring-retry</code> dependencies without a version and the
+<code>spring-authorization-server.version</code> property.
+<p>
+    Spring Boot 4 no longer manages Spring Retry, so a version-less dependency fails to resolve; add an explicit
+    version (or migrate to Spring Framework 7 core retry). Spring Authorization Server is now part of Spring Security,
+    so override <code>spring-security.version</code> instead.
+</p>
+</body>
+</html>

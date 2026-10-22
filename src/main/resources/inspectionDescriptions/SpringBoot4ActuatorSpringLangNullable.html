@@ -1,0 +1,11 @@
+<html>
+<body>
+Reports <code>org.springframework.lang.Nullable</code> on parameters of actuator
+<code>@ReadOperation</code>, <code>@WriteOperation</code> and <code>@DeleteOperation</code> methods.
+<p>
+    Spring Boot 4 only treats JSpecify <code>@Nullable</code> (or <code>@OptionalParameter</code>) as optional;
+    with the old annotation the parameter becomes mandatory and requests without it fail.
+    Quick fix replaces it with <code>org.jspecify.annotations.Nullable</code>.
+</p>
+</body>
+</html>

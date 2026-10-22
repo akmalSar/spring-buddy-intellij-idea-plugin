@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports calls to <code>and()</code> on Spring Security configurers, removed from the
+<code>HttpSecurity</code> DSL in Spring Security 7 (Spring Boot 4).
+<p>
+    Spring Security 7 removed <code>and()</code> in favour of the lambda DSL. Chained configurers such as
+    <code>http.authorizeRequests().and().formLogin()</code> no longer compile.
+</p>
+<p>
+    Restructure the chain into nested lambda DSL calls, for example
+    <code>http.authorizeHttpRequests(customizer)</code> followed by
+    <code>http.formLogin(customizer)</code>.
+</p>
+</body>
+</html>

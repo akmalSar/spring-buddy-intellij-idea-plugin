@@ -1,0 +1,21 @@
+<html>
+<body>
+Reports Spring Boot starters that were renamed in Boot 4:
+<code>spring-boot-starter-web</code> &rarr; <code>spring-boot-starter-webmvc</code>,
+<code>spring-boot-starter-web-services</code> &rarr; <code>spring-boot-starter-webservices</code>,
+<code>spring-boot-starter-aop</code> &rarr; <code>spring-boot-starter-aspectj</code>,
+<code>spring-boot-starter-oauth2-client</code> &rarr;
+<code>spring-boot-starter-security-oauth2-client</code>,
+<code>spring-boot-starter-oauth2-authorization-server</code> &rarr;
+<code>spring-boot-starter-security-oauth2-authorization-server</code> and
+<code>spring-boot-starter-oauth2-resource-server</code> &rarr;
+<code>spring-boot-starter-security-oauth2-resource-server</code>.
+<p>
+    Spring Boot 4 renames several starters to make the technology they bring explicit.
+</p>
+<p>
+    Quick fix replaces the exact artifact id in Maven and Gradle build files; starters sharing a prefix
+    such as <code>spring-boot-starter-webflux</code> are left untouched.
+</p>
+</body>
+</html>

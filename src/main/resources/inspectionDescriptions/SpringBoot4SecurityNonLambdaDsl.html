@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports zero-argument <code>HttpSecurity</code> configurer methods such as <code>csrf()</code>,
+<code>formLogin()</code> or <code>authorizeHttpRequests()</code>, removed in Spring Security 7
+(Spring Boot 4).
+<p>
+    Spring Security 7 only keeps the lambda DSL variants that take a <code>Customizer</code> argument,
+    e.g. <code>http.csrf((customizer) -&gt; ...)</code>. The deprecated zero-arg overloads were removed.
+</p>
+<p>
+    For the unambiguous shape <code>http.x().disable()</code> a quick fix offers
+    <code>http.x((customizer) -&gt; customizer.disable())</code>. All other cases require manual conversion.
+</p>
+</body>
+</html>

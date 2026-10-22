@@ -1,0 +1,22 @@
+<html>
+<body>
+Reports configuration properties that were renamed or removed in Spring Boot 4:
+<code>spring.jackson.read.*</code> &rarr; <code>spring.jackson.json.read.*</code>,
+<code>spring.jackson.write.*</code> &rarr; <code>spring.jackson.json.write.*</code>,
+the partially replaced <code>spring.jackson.parser.*</code>/<code>spring.jackson.generator.*</code>,
+<code>spring.dao.exceptiontranslation.enabled</code> &rarr;
+<code>spring.persistence.exceptiontranslation.enabled</code>,
+<code>management.tracing.enabled</code> &rarr; <code>management.tracing.export.enabled</code> and
+the removed <code>spring.flyway.clean-on-validation-error</code>.
+<p>
+    Spring Boot 4 reorganises configuration namespaces while renaming removed properties; unknown keys
+    are silently ignored, so a stale property can disable a feature without any error.
+</p>
+<p>
+    Quick fix renames the property (or deletes the removed Flyway property line).
+    <code>spring.jackson.parser.*</code> and <code>spring.jackson.generator.*</code> have no fix: only features
+    with a Jackson 3 <code>JsonReadFeature</code>/<code>JsonWriteFeature</code> equivalent move to
+    <code>spring.jackson.json.read/write</code>; the rest need a <code>JsonMapperBuilderCustomizer</code>.
+</p>
+</body>
+</html>

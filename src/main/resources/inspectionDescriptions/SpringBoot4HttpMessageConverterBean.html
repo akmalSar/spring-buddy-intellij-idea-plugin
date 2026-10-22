@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports <code>@Bean</code> methods returning an <code>HttpMessageConverter</code>.
+<p>
+    Spring Boot 4 no longer adds <code>HttpMessageConverter</code> beans to the converter list, so the converter is
+    silently unused. Register it with a <code>ServerHttpMessageConvertersCustomizer</code> or
+    <code>ClientHttpMessageConvertersCustomizer</code> bean instead.
+</p>
+</body>
+</html>

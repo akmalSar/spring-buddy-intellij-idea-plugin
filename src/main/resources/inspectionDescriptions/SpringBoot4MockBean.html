@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports <code>@MockBean</code> and <code>@SpyBean</code> usages, which were removed in Spring Boot 4.
+<p>
+    Spring Framework 6.2 introduced <code>@MockitoBean</code>/<code>@MockitoSpyBean</code> as the supported way to
+    override beans in tests. Spring Boot 4 removes the old <code>org.springframework.boot.test.mock.mockito</code>
+    annotations entirely, so test code still using them no longer compiles or runs.
+</p>
+<p>
+    Replace usages with <code>@MockitoBean</code> / <code>@MockitoSpyBean</code> (quick fix available).
+    The fix keeps <code>name</code>, <code>reset</code> and <code>answer</code> (as <code>answers</code>);
+    class-level <code>@MockBean(SomeClass.class)</code> becomes <code>@MockitoBean(types = SomeClass.class)</code>.
+</p>
+</body>
+</html>

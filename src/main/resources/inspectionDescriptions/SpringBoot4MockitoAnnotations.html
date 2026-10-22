@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports <code>@Mock</code>, <code>@Spy</code>, <code>@Captor</code> and <code>@InjectMocks</code> fields in Spring
+tests (<code>@SpringBootTest</code>, <code>@SpringJUnitConfig</code>, <code>@ContextConfiguration</code> or
+<code>@ExtendWith(SpringExtension.class)</code>) without <code>MockitoExtension</code> or <code>MockitoAnnotations.openMocks</code>.
+<p>
+    Spring Boot 4 removed <code>MockitoTestExecutionListener</code>, which used to initialise these fields.
+    They now stay <code>null</code> and the test fails with a <code>NullPointerException</code>.
+    Quick fix adds <code>@ExtendWith(MockitoExtension.class)</code>; prefer <code>@MockitoBean</code> for beans in the context.
+</p>
+</body>
+</html>

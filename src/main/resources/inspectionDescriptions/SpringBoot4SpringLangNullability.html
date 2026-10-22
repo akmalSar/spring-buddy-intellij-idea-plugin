@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports <code>org.springframework.lang.Nullable</code> / <code>NonNull</code> /
+<code>NonNullApi</code> / <code>NonNullFields</code>, deprecated in Spring Framework 7
+(Spring Boot 4) in favour of JSpecify.
+<p>
+    Spring Framework 7 now ships JSpecify annotations, which provide a specification, better Kotlin
+    integration and tooling support. The Spring annotations remain deprecated during the migration.
+</p>
+<p>
+    Replace <code>org.springframework.lang.Nullable</code> with
+    <code>org.jspecify.annotations.Nullable</code> (quick fix available). For package-level
+    <code>NonNullApi</code>/<code>NonNullFields</code> switch the package to
+    <code>@NullMarked</code> manually &mdash; it changes the semantics of the whole package.
+</p>
+</body>
+</html>

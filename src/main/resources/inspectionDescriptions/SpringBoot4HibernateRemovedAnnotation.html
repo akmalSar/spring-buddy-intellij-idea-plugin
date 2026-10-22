@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports Hibernate annotations that were removed in Hibernate 7 (Spring Boot 4):
+<code>@Where</code>, <code>@WhereJoinTable</code>, <code>@Loader</code>, <code>@Polymorphism</code>,
+<code>@SelectBeforeUpdate</code> and <code>@Proxy</code>.
+<p>
+    Hibernate 7 removes these deprecated annotations. Code still using them fails at startup or during
+    metadata processing after the upgrade.
+</p>
+<p>
+    <code>@Where(clause = "...")</code> has a quick fix to <code>@SQLRestriction("...")</code>;
+    <code>@WhereJoinTable</code> becomes <code>@SQLJoinTableRestriction</code>. The remaining
+    annotations must be reworked manually (e.g. dynamic filters).
+</p>
+</body>
+</html>

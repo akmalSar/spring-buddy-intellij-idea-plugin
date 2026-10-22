@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports calls to <code>PathMatchConfigurer.setUseSuffixPatternMatch</code>,
+<code>setUseRegisteredSuffixPatternMatch</code> and <code>setUseTrailingSlashMatch</code>, which were
+removed in Spring Framework 7 (Spring Boot 4).
+<p>
+    Spring Framework 7 removed the deprecated suffix-pattern and trailing-slash matching APIs. Requests
+    such as <code>/users/foo.json</code> and <code>/users/</code> no longer match <code>/users/{id}</code>.
+</p>
+<p>
+    Quick fix deletes the removed call statement. Otherwise rely on the default parsed-pattern matching
+    of <code>PathPatternParser</code>.
+</p>
+</body>
+</html>

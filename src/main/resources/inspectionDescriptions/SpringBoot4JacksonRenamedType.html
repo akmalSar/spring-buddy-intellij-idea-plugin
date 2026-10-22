@@ -1,0 +1,17 @@
+<html>
+<body>
+Reports Jackson types that were renamed between Jackson 2 and Jackson 3, such as
+<code>JsonProcessingException</code> &rarr; <code>JacksonException</code>,
+<code>JsonSerializer</code> &rarr; <code>ValueSerializer</code>,
+<code>JsonDeserializer</code> &rarr; <code>ValueDeserializer</code>,
+<code>SerializerProvider</code> &rarr; <code>SerializationContext</code> and
+<code>JsonMappingException</code> &rarr; <code>DatabindException</code>.
+<p>
+    Spring Boot 4 upgrades to Jackson 3, so code extending or catching the old types must switch
+    to the new names.
+</p>
+<p>
+    Quick fix replaces the type reference and import when the mapping is verified.
+</p>
+</body>
+</html>

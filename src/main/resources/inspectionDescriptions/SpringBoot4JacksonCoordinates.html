@@ -1,0 +1,15 @@
+<html>
+<body>
+Reports explicit <code>com.fasterxml.jackson.core:jackson-databind</code> and
+<code>jackson-core</code> dependencies in build files.
+<p>
+    Spring Boot 4 manages Jackson 3 under the <code>tools.jackson.core</code> group id. Jackson 2 core
+    artifacts are only available through the deprecated <code>spring-boot-jackson2</code> module.
+    The <code>jackson-annotations</code> artifact keeps its coordinates and is not reported.
+</p>
+<p>
+    Quick fix replaces the group id for databind/core artifacts; remove explicit Jackson dependencies
+    where possible and rely on Boot's dependency management.
+</p>
+</body>
+</html>

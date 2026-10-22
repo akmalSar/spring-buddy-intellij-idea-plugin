@@ -1,0 +1,10 @@
+<html>
+<body>
+Reports calls to <code>PropertyMapper.alwaysApplyingWhenNonNull()</code>.
+<p>
+    The method was removed in Spring Boot 4 because <code>PropertyMapper</code> now skips <code>null</code> sources by
+    default, so the call no longer compiles. Remove it; use <code>always()</code> only where <code>null</code> values
+    must be mapped. No quick fix: <code>always()</code> has different semantics.
+</p>
+</body>
+</html>

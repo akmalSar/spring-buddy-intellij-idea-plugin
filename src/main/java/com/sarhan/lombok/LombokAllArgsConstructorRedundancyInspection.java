@@ -67,8 +67,7 @@ public class LombokAllArgsConstructorRedundancyInspection extends AbstractBaseJa
             "javax.persistence.MappedSuperclass",
             "jakarta.persistence.MappedSuperclass",
             "javax.persistence.Embeddable",
-            "jakarta.persistence.Embeddable",
-            "com.fasterxml.jackson.databind.annotation.JsonDeserialize"
+            "jakarta.persistence.Embeddable"
     );
 
     private static boolean hasBuilderAnnotation(PsiClass aClass) {

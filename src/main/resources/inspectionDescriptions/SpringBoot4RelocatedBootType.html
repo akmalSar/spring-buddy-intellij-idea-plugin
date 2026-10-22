@@ -1,0 +1,23 @@
+<html>
+<body>
+Reports Spring Boot types that were relocated by the Boot 4 modularisation, for example
+<code>org.springframework.boot.autoconfigure.domain.EntityScan</code> &rarr;
+<code>org.springframework.boot.persistence.autoconfigure.EntityScan</code>,
+<code>@WebMvcTest</code> &rarr; <code>org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest</code>,
+<code>@DataJpaTest</code> &rarr; <code>org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest</code> and
+<code>TestRestTemplate</code> &rarr; <code>org.springframework.boot.resttestclient.TestRestTemplate</code>,
+<code>@PropertyMapping</code> &rarr; <code>org.springframework.boot.test.context.PropertyMapping</code>,
+<code>BootstrapRegistry</code> and related classes &rarr; <code>org.springframework.boot.bootstrap</code> and
+the deprecated <code>org.springframework.boot.env.EnvironmentPostProcessor</code> &rarr;
+<code>org.springframework.boot.EnvironmentPostProcessor</code> (reported as a warning).
+<p>
+    Spring Boot 4 splits the monolithic auto-configuration into per-technology modules, moving most
+    types to dedicated packages such as <code>org.springframework.boot.webmvc.autoconfigure</code>.
+</p>
+<p>
+    Quick fix updates the import or fully-qualified reference to the new package when the simple name is
+    unchanged. For <code>@AutoConfigureMockMvc</code> the HtmlUnit flags <code>webClientEnabled</code>/<code>webDriverEnabled</code>
+    are moved into <code>htmlUnit = @HtmlUnit(webClient = ..., webDriver = ...)</code>.
+</p>
+</body>
+</html>

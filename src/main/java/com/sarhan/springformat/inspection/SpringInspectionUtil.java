@@ -16,6 +16,7 @@
 
 package com.sarhan.springformat.inspection;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +40,15 @@ import org.jetbrains.annotations.NotNull;
  */
 
 public final class SpringInspectionUtil {
+
+    /**
+     * Jackson 2 and Jackson 3 (Spring Boot 4) qualified names for {@code @JsonDeserialize}:
+     * the databind package moved to {@code tools.jackson} in Jackson 3 while the
+     * annotations package stays under {@code com.fasterxml.jackson.annotation}.
+     */
+    public static final List<String> JSON_DESERIALIZE_FQNS = List.of(
+            "com.fasterxml.jackson.databind.annotation.JsonDeserialize",
+            "tools.jackson.databind.annotation.JsonDeserialize");
 
     private static final Pattern QUERY_FORMAT_PATTERN = Pattern.compile(
             " (?i)((?:JOIN FETCH|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|ON|AND|OR|ORDER BY|GROUP BY|HAVING|UNION|SET|VALUES|FROM|WHERE|UPDATE|DELETE|INSERT INTO) )");

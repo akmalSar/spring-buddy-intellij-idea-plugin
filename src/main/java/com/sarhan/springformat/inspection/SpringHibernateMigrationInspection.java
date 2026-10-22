@@ -71,6 +71,8 @@ import com.intellij.psi.PsiVariable;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.sarhan.springformat.settings.SpringBootTarget;
+import com.sarhan.springformat.settings.SpringBootVersionResolver;
 
 /**
  * Hibernate 5 to 6 migration inspections.
@@ -552,6 +554,12 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         }
         String replacement = "save".equals(name) ? "persist" : "merge";
         PsiElement target = expression.getMethodExpression().getReferenceNameElement();
+        if (SpringBootVersionResolver.isAtLeast(expression, SpringBootTarget.BOOT_4)) {
+            holder.registerProblem(target,
+                    "Session." + name + "() was removed in Hibernate 7 (Spring Boot 4); use " + replacement + "()",
+                    ProblemHighlightType.GENERIC_ERROR, new RenameMethodFix(replacement));
+            return;
+        }
         holder.registerProblem(target, "Hibernate Session." + name + "() is deprecated; use " + replacement + "()",
                 ProblemHighlightType.WARNING, new RenameMethodFix(replacement));
     }

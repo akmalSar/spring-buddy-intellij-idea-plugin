@@ -309,9 +309,15 @@ public final class LombokAnnotationUtil {
     }
 
     public static boolean hasJsonDeserialize(@Nullable PsiClass aClass) {
-        return findAnnotation(aClass,
-                "com.fasterxml.jackson.databind.annotation.JsonDeserialize",
-                "JsonDeserialize") != null;
+        if (aClass == null) {
+            return false;
+        }
+        for (String fqn : SpringInspectionUtil.JSON_DESERIALIZE_FQNS) {
+            if (findAnnotation(aClass, fqn, "JsonDeserialize") != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ── Field helpers ────────────────────────────────────────────────────

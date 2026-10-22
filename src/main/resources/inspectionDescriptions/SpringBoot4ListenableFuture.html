@@ -1,0 +1,16 @@
+<html>
+<body>
+Reports usages of Spring's <code>ListenableFuture</code> API
+(<code>ListenableFuture</code>, <code>SettableListenableFuture</code>, <code>ListenableFutureCallback</code>,
+<code>AsyncResult</code>), removed in Spring Framework 7 (Spring Boot 4).
+<p>
+    Spring Framework 7 dropped the deprecated ListenableFuture family. APIs now use
+    <code>CompletableFuture</code>.
+</p>
+<p>
+    Replace <code>ListenableFuture</code> with <code>CompletableFuture</code> (supported since Spring 6),
+    for example <code>CompletableFuture.completedFuture(value)</code> and
+    <code>thenApply/thenAccept</code> chains.
+</p>
+</body>
+</html>

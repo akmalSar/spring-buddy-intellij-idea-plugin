@@ -45,6 +45,7 @@ public final class SpringBuddySettingsState implements PersistentStateComponent<
 
     @Override
     public @Nullable State getState() {
+        this.state.knownGroups = new ArrayList<>(SpringBuddySettingsUtil.defaultGroupIds());
         return this.state;
     }
 
@@ -57,6 +58,30 @@ public final class SpringBuddySettingsState implements PersistentStateComponent<
         if (this.state.inspectionLevel == null || this.state.inspectionLevel.isBlank()) {
             this.state.inspectionLevel = SpringBuddySettingsUtil.DEFAULT_LEVEL;
         }
+        migrateGroupIds();
+    }
+
+    /**
+     * Groups added by newer plugin versions must stay enabled for existing users:
+     * a persisted {@code enabledGroups} list that predates a group id would otherwise
+     * silently disable the new group. {@code knownGroups} records which group ids the
+     * plugin version that wrote the state already knew; any default group missing from
+     * that list is newly introduced and gets adopted once. Legacy state written before
+     * {@code knownGroups} existed knew every default group except the migration group.
+     */
+    private void migrateGroupIds() {
+        List<String> defaultIds = new ArrayList<>(SpringBuddySettingsUtil.defaultGroupIds());
+        List<String> knownGroups = this.state.knownGroups;
+        if (knownGroups == null || knownGroups.isEmpty()) {
+            knownGroups = new ArrayList<>(defaultIds);
+            knownGroups.remove(SpringBuddySettingsUtil.MIGRATION_GROUP_ID);
+        }
+        for (String groupId : defaultIds) {
+            if (!knownGroups.contains(groupId) && !this.state.enabledGroups.contains(groupId)) {
+                this.state.enabledGroups.add(groupId);
+            }
+        }
+        this.state.knownGroups = defaultIds;
     }
 
     public Set<String> getEnabledGroups() {
@@ -86,6 +111,12 @@ public final class SpringBuddySettingsState implements PersistentStateComponent<
     public static final class State {
 
         public List<String> enabledGroups = new ArrayList<>(SpringBuddySettingsUtil.defaultGroupIds());
+
+        /**
+         * Group ids the plugin version that last wrote this state already knew;
+         * defaults missing from this list are newly introduced groups.
+         */
+        public List<String> knownGroups = new ArrayList<>();
 
         public String inspectionLevel = SpringBuddySettingsUtil.DEFAULT_LEVEL;
 

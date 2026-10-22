@@ -1,0 +1,14 @@
+<html>
+<body>
+Reports build files that combine <code>spring-boot-starter-test</code> with a technology starter but
+lack the matching modular test starter (for example <code>spring-boot-starter-webmvc-test</code> or
+<code>spring-boot-starter-data-jpa-test</code>).
+<p>
+    Spring Boot 4 splits test support into per-technology test starters. Slice tests that relied on the
+    monolithic starter's transitive dependencies need the dedicated module after the upgrade.
+</p>
+<p>
+    Add the matching <code>spring-boot-starter-&lt;technology&gt;-test</code> dependency.
+</p>
+</body>
+</html>
