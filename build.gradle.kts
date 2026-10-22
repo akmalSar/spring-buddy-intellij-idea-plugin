@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.sarhan.springformat"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
@@ -42,7 +42,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = "Spring Buddy"
-        version = "1.0.2"
+        version = "1.0.3"
         description = """
             <h2>Make invisible Spring runtime behavior visible.</h2>
               <p>
@@ -68,6 +68,14 @@ intellijPlatform {
                 View our <a href="https://akmalsar.github.io/spring-buddy-intellij-idea-plugin/">Visual Feature Tour</a>
                 to see how transaction proxies and persistence risks are surfaced in the IDE.
               </p>
+        """.trimIndent()
+        changeNotes = """
+            <h3>1.0.3</h3>
+            <ul>
+              <li><b>Spring Boot 4 migration support:</b> 29 new inspections cover the Boot 3 to Boot 4 upgrade — Jackson 2 to Jackson 3 package and coordinate moves, Spring Security lambda DSL and chained request matchers, Undertow starter removal, renamed and relocated Boot starters and classes, removed build features, JUnit 4 test runners, and updated test-starter modules.</li>
+              <li><b>New Spring Boot Target setting:</b> per-project Auto-detect, Boot 3, or Boot 4 target gates the migration inspections, with auto-detect reading the Boot version from the module classpath.</li>
+              <li><b>Fixed:</b> <code>@MockBean</code>/<code>@SpyBean</code> context-cache warnings are reported again in auto-detect mode on Boot 3 projects.</li>
+            </ul>
         """.trimIndent()
     }
 }
