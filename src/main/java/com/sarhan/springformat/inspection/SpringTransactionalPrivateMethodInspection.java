@@ -16,9 +16,13 @@
 
 package com.sarhan.springformat.inspection;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.intellij.codeInsight.ExceptionUtil;
 import com.intellij.lang.java.JavaLanguage;
@@ -66,7 +70,17 @@ import com.intellij.psi.PsiTryStatement;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeElement;
 import com.intellij.psi.PsiWhileStatement;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.OverridingMethodsSearch;
+import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.PsiModificationTracker;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -86,6 +100,8 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
     private final Kind kind;
 
     private static final int MAX_CALL_SEARCH_DEPTH = 3;
+
+    private static final Pattern OPEN_IN_VIEW = Pattern.compile("open-in-view\\s*[:=]\\s*(true|false)\\b");
 
     public SpringTransactionalPrivateMethodInspection() {
         this(Kind.PRIVATE_METHOD);
@@ -162,7 +178,8 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
                                 ProblemHighlightType.ERROR, new DisableReadOnlyFix(), new RemoveMethodTransactionalAnnotationFix());
                     }
                     if (SpringTransactionalPrivateMethodInspection.this.thisKind(Kind.READ_ONLY_ENTITY_FETCH)
-                            && isEffectiveReadOnly(method) && returnsLikelyEntity(method)) {
+                            && isEffectiveReadOnly(method) && returnsLikelyEntity(method)
+                            && !isOpenSessionInViewDisabled(method.getProject())) {
                         holder.registerProblem((method.getNameIdentifier() != null) ? method.getNameIdentifier() : method,
                                 "Read-only transaction appears to fetch entities; prefer DTO projections",
                                 ProblemHighlightType.ERROR, new RemoveMethodTransactionalAnnotationFix());
@@ -260,14 +277,16 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
                             ProblemHighlightType.ERROR, new AddRethrowToCatchBlocksFix(), new AddRollbackOnlyToCatchBlocksFix());
                 }
                 if (SpringTransactionalPrivateMethodInspection.this.thisKind(Kind.READ_ONLY_ENTITY_FETCH)
-                        && isEffectiveReadOnly(method) && returnsLikelyEntity(method)) {
+                        && isEffectiveReadOnly(method) && returnsLikelyEntity(method)
+                        && !isOpenSessionInViewDisabled(method.getProject())) {
                     holder.registerProblem((nameIdentifier != null) ? nameIdentifier : method,
                             "Read-only transaction appears to fetch entities; prefer DTO projections",
                             ProblemHighlightType.ERROR, new RemoveMethodTransactionalAnnotationFix());
                 }
                 if (SpringTransactionalPrivateMethodInspection.this.thisKind(Kind.WEAK_ISOLATION)
                         && hasMultipleReads(method) && !hasExplicitStrongIsolation(transactional)
-                        && !isEffectiveReadOnly(method) && !takesPessimisticLock(method)) {
+                        && !isEffectiveReadOnly(method) && !takesPessimisticLock(method)
+                        && !isOnlyCalledUnderLock(method)) {
                     holder.registerProblem((nameIdentifier != null) ? nameIdentifier : method,
                             "Multiple reads with default/weak isolation can allow non-repeatable reads",
                             ProblemHighlightType.ERROR, new AddRepeatableReadIsolationFix(), new AddSerializableIsolationFix());
@@ -447,8 +466,48 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
         if (!(name.endsWith(".properties") || name.endsWith(".yml") || name.endsWith(".yaml"))) {
             return false;
         }
-        String text = file.getText().toLowerCase(Locale.ROOT);
-        return text.contains("spring.jpa.open-in-view=true") || text.contains("open-in-view: true");
+        return Boolean.TRUE.equals(openInViewValue(file.getText()));
+    }
+
+    private static Boolean openInViewValue(String configText) {
+        Matcher matcher = OPEN_IN_VIEW.matcher(configText.toLowerCase(Locale.ROOT));
+        Boolean value = null;
+        while (matcher.find()) {
+            if ("true".equals(matcher.group(1))) {
+                return true;
+            }
+            value = false;
+        }
+        return value;
+    }
+
+    /**
+     * With Hibernate and open-in-view off, Spring's HibernateJpaDialect opens every read-only transaction on a
+     * transaction-local session and calls setDefaultReadOnly(true), so loaded entities keep no dirty-check snapshot.
+     */
+    private static boolean isOpenSessionInViewDisabled(Project project) {
+        return CachedValuesManager.getManager(project).getCachedValue(project, () -> CachedValueProvider.Result.create(
+                computeOpenSessionInViewDisabled(project), PsiModificationTracker.MODIFICATION_COUNT));
+    }
+
+    private static boolean computeOpenSessionInViewDisabled(Project project) {
+        if (JavaPsiFacade.getInstance(project).findClass("org.hibernate.Session", GlobalSearchScope.allScope(project)) == null) {
+            return false;
+        }
+        GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+        PsiManager psiManager = PsiManager.getInstance(project);
+        boolean disabled = false;
+        for (String extension : List.of("properties", "yml", "yaml")) {
+            for (VirtualFile file : FilenameIndex.getAllFilesByExt(project, extension, scope)) {
+                PsiFile psiFile = file.getName().startsWith("application") ? psiManager.findFile(file) : null;
+                Boolean value = (psiFile != null) ? openInViewValue(psiFile.getText()) : null;
+                if (Boolean.TRUE.equals(value)) {
+                    return false;
+                }
+                disabled |= Boolean.FALSE.equals(value);
+            }
+        }
+        return disabled;
     }
 
     private static boolean hasTransactionalAnnotation(PsiClass psiClass) {
@@ -651,6 +710,29 @@ public class SpringTransactionalPrivateMethodInspection extends AbstractBaseJava
 
     private static boolean takesPessimisticLock(PsiMethod method) {
         return takesPessimisticLock(method, new HashSet<>(), 0);
+    }
+
+    /** True when the method has callers and every non-test caller takes a pessimistic lock in the joined transaction. */
+    private static boolean isOnlyCalledUnderLock(PsiMethod method) {
+        List<PsiMethod> targets = new ArrayList<>(List.of(method.findSuperMethods()));
+        targets.add(method);
+        boolean called = false;
+        for (PsiMethod target : targets) {
+            for (PsiReference reference : ReferencesSearch.search(target).findAll()) {
+                if (!(reference.getElement() instanceof PsiReferenceExpression)) {
+                    continue;
+                }
+                PsiMethod caller = PsiTreeUtil.getParentOfType(reference.getElement(), PsiMethod.class);
+                if (caller == null || isTestMethod(caller)) {
+                    continue;
+                }
+                if (!takesPessimisticLock(caller)) {
+                    return false;
+                }
+                called = true;
+            }
+        }
+        return called;
     }
 
     private static boolean takesPessimisticLock(PsiMethod method, Set<PsiMethod> visited, int depth) {

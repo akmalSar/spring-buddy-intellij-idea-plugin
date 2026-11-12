@@ -883,6 +883,89 @@ public class SpringTransactionalPrivateMethodInspectionTest extends BasePlatform
         this.myFixture.checkHighlighting(false, false, true, true);
     }
 
+    public void testDoesNotReportReadOnlyEntityFetchWhenHibernateAndOpenInViewDisabled() {
+        this.myFixture.enableInspections(new SpringTransactionalPrivateMethodInspection.ReadOnlyEntityFetch());
+        this.myFixture.addFileToProject("org/hibernate/Session.java", "package org.hibernate; public interface Session { }");
+        this.myFixture.addFileToProject("application.yml", "spring:\n  jpa:\n    open-in-view: false\n");
+        this.myFixture.configureByText("Sample.java", """
+                class Sample {
+                    @Transactional(readOnly = true)
+                    User findUser() { return repository.findById(); }
+                    Repository repository;
+                    interface Repository { User findById(); }
+                    @Entity
+                    static class User { }
+                }
+                """);
+        assertNoProblem("Read-only transaction appears to fetch entities");
+    }
+
+    public void testReportsReadOnlyEntityFetchWhenOpenInViewNotDisabled() {
+        this.myFixture.enableInspections(new SpringTransactionalPrivateMethodInspection.ReadOnlyEntityFetch());
+        this.myFixture.addFileToProject("org/hibernate/Session.java", "package org.hibernate; public interface Session { }");
+        this.myFixture.addFileToProject("application.properties", "spring.jpa.show-sql=true\n");
+        this.myFixture.configureByText("Sample.java", """
+                class Sample {
+                    @Transactional(readOnly = true)
+                    User <warning descr="Read-only transaction appears to fetch entities; prefer DTO projections">findUser</warning>() { return repository.findById(); }
+                    Repository repository;
+                    interface Repository { User findById(); }
+                    @Entity
+                    static class User { }
+                }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testDoesNotReportWeakIsolationWhenEveryCallerHoldsLock() {
+        this.myFixture.enableInspections(new SpringTransactionalPrivateMethodInspection.WeakIsolation());
+        this.myFixture.configureByText("Sample.java", """
+                @interface Transactional { boolean readOnly() default false; }
+                @interface Lock { }
+                interface Callbacks { void onRefunded(long id); }
+                class CartCallbacks implements Callbacks {
+                    UserRepository repository;
+                    @Transactional
+                    public void onRefunded(long id) {
+                        this.repository.findById(1L);
+                        this.repository.findById(2L);
+                    }
+                }
+                class PaymentService {
+                    PaymentRepository payments;
+                    Callbacks callbacks;
+                    @Transactional
+                    void refund(long id) {
+                        this.payments.findByIdForUpdate(id);
+                        this.callbacks.onRefunded(id);
+                    }
+                }
+                class Sample {
+                    UserRepository repository;
+                    Helper helper;
+                    @Transactional
+                    void unlocked() { this.helper.load(); }
+                    @Transactional
+                    void locked() { this.repository.findByIdForUpdate(1L); this.helper.load(); }
+                }
+                class Helper {
+                    UserRepository repository;
+                    @Transactional
+                    void load() {
+                        this.repository.findById(1L);
+                        this.repository.findById(2L);
+                    }
+                }
+                interface PaymentRepository { @Lock Object findByIdForUpdate(long id); }
+                interface UserRepository {
+                    Object findById(long id);
+                    @Lock Object findByIdForUpdate(long id);
+                }
+                """);
+        Assertions.assertThat(this.highlighted("Multiple reads with default/weak isolation can allow non-repeatable reads"))
+                .containsExactly("load");
+    }
+
     public void testReportsOpenSessionInView() {
         this.myFixture.enableInspections(new SpringTransactionalPrivateMethodInspection.OpenSessionInView());
         this.myFixture.configureByText("application.properties", """

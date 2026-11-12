@@ -4,5 +4,8 @@
 <p>Reports read-only transactional methods that appear to return managed entity types. Hibernate may still create
     snapshots for dirty checking, wasting memory and CPU. Prefer DTO projections or read models for read-only use
     cases.</p>
+<p>Not reported when Hibernate is on the classpath and <code>spring.jpa.open-in-view</code> is set to
+    <code>false</code>. In that case Spring's <code>HibernateJpaDialect</code> runs each read-only transaction on a
+    transaction-local session and calls <code>setDefaultReadOnly(true)</code>, so loaded entities keep no snapshot.</p>
 </body>
 </html>

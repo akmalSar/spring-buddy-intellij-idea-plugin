@@ -8,6 +8,7 @@
     annotated with <code>@Lock</code> or a <code>@Query</code> containing <code>FOR UPDATE</code>,
     <code>FOR NO KEY UPDATE</code> or a PostgreSQL advisory lock (<code>pg_advisory_xact_lock</code>). The lock is
     also found through called methods, including helpers in other beans that run such SQL with
-    <code>JdbcTemplate</code>, up to three calls deep.</p>
+    <code>JdbcTemplate</code>, up to three calls deep. A method is also excluded when every non-test caller,
+    including callers through an interface it implements, takes such a lock in the transaction it joins.</p>
 </body>
 </html>

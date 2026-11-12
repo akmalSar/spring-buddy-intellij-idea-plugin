@@ -1,11 +1,27 @@
 # Gradle
 .gradle/
 build/
+.kotlin/
 
 # IntelliJ Platform Gradle Plugin
 .intellijPlatform/
+
+# Unpacked plugin distribution
+/spring-buddy-plugin/
 
 # IDE
 .idea/
 *.iml
 out/
+
+# OS
+.DS_Store
+
+# Local AI agent tooling
+/.agents/
+/.clinerules/
+/.codex-plugins/
+/.cursor/
+/.junie/
+/.opencode/
+/.windsurf/

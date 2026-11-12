@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.sarhan.springformat"
-version = "1.0.11"
+version = "1.0.12"
 
 repositories {
     mavenCentral()
@@ -44,7 +44,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = "Spring Buddy"
-        version = "1.0.11"
+        version = "1.0.12"
         description = """
             <h2>Make invisible Spring runtime behavior visible.</h2>
               <p>
@@ -72,6 +72,11 @@ intellijPlatform {
               </p>
         """.trimIndent()
         changeNotes = """
+            <h3>1.0.12</h3>
+            <ul>
+              <li><b>Fewer false positives for read-only transactions that fetch entities:</b> the warning is no longer shown when Hibernate is on the classpath and <code>spring.jpa.open-in-view</code> is set to <code>false</code>. In that setup Spring's <code>HibernateJpaDialect</code> runs each read-only transaction on a transaction-local session and calls <code>setDefaultReadOnly(true)</code>, so loaded entities keep no dirty-checking snapshot. The warning is still shown when any <code>application</code> config sets <code>open-in-view</code> to <code>true</code> or leaves it unset.</li>
+              <li><b>Fewer false positives for weak transaction isolation:</b> a method is no longer reported when every non-test caller takes a pessimistic lock in the transaction it joins, including callers that go through an interface the method implements. A typical case is a payment callback that runs under the payment row lock taken by its caller (<code>findByIdForUpdate</code>). A method without callers is still reported.</li>
+            </ul>
             <h3>1.0.11</h3>
             <ul>
               <li><b>Fewer false positives for final classes:</b> classes with protected constructors are no longer suggested to be made <code>final</code>, since those constructors allow subclassing. The inspection now requires all declared constructors to be private; private classes with an implicit constructor remain eligible.</li>
