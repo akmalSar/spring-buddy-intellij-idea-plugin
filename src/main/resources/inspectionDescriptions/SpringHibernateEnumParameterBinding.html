@@ -1,0 +1,41 @@
+<html>
+<body>
+Reports <code>setParameter</code> bindings that pass a <code>String</code> or number to a named
+parameter that the query compares against an enum-typed path (for example an
+<code>@Enumerated(EnumType.STRING)</code> field). This is a runtime-breaking error: Hibernate 6
+fails the query when it executes.
+
+<p>
+Hibernate 6 validates the parameter binding type when a query executes. Binding a
+<code>String</code> to an enum path fails at runtime with
+<code>Argument [W] of type [java.lang.String] did not match parameter type [TransferState]</code>.
+Hibernate 5 silently converted the value, so migrated applications typically only discover
+this in production.
+</p>
+
+<pre>
+// broken: transferStatus is an enum field, the bound value is a String
+em.createQuery("SELECT a FROM " + clazz + " a WHERE a.transferStatus != :transferStatus")
+  .setParameter("transferStatus", "W")              // fails at runtime
+</pre>
+
+<pre>
+// fixed: bind the enum constant
+em.createQuery("SELECT a FROM " + clazz + " a WHERE a.transferStatus != :transferStatus")
+  .setParameter("transferStatus", TransferState.W)
+</pre>
+
+<p>
+The inspection walks the fluent <code>createQuery(...).setParameter(...)</code> call chain and
+resolves every compared path against the entity model. The root entity is taken from the
+result class argument, or from the entity name after <code>FROM</code>. When the entity name
+is built dynamically, the compared field is resolved by name across all JPA entities of the
+project and reported only when every matching field has the same enum type. When the bound
+value is a String literal that names an enum constant, a quick fix replaces it with that
+constant. Native queries are not checked.
+</p>
+
+<!-- tooltip end -->
+<p><small>Since Spring Buddy 1.x</small></p>
+</body>
+</html>

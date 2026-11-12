@@ -365,7 +365,7 @@ h2 .count {
 <a href="#lombok">Lombok<span class="nav-count">25</span></a>
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
 <a href="#mockito">Mockito<span class="nav-count">3</span></a>
-<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">50</span></a>
+<a href="#hiberante-migration">Hiberante Migration<span class="nav-count">51</span></a>
 <a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">60</span></a>
 <a href="#spring-boot-4-migration">spring 3 -&gt; 4 migration<span class="nav-count">34</span></a>
 <a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
@@ -380,10 +380,10 @@ h2 .count {
 </div>
 
 <div class="stat-row">
-<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>125</strong><span>ERROR</span></div>
+<div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>126</strong><span>ERROR</span></div>
 <div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>229</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>9</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>363</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>364</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
 
@@ -657,7 +657,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow misc">Hiberante Migration</div>
-<h2 id="hiberante-migration">Hiberante Migration<span class="count">50 inspections</span></h2>
+<h2 id="hiberante-migration">Hiberante Migration<span class="count">51 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateAddToDateFunction</div>
@@ -748,6 +748,11 @@ h2 .count {
 <div class="class-name">SpringHibernateEmbeddedSubPropertyOverride</div>
 <div class="display-name">Hibernate 6 embedded sub-property override path<span class="badge yellow">WARNING</span></div>
 <div class="description">Reports ambiguous <pre class="code"> @AttributeOverride</pre> names on nested embedded components. Hibernate 6 validates embedded sub-property paths strictly; use an explicit dot path that mirrors the embedded object hierarchy.</div>
+</article>
+<article class="card" data-level="error">
+<div class="class-name">SpringHibernateEnumParameterBinding</div>
+<div class="display-name">Hibernate 6 enum-typed query parameter binding<span class="badge red">ERROR</span><span class="badge fix">FIX</span></div>
+<div class="description">Reports <pre class="code"> setParameter</pre> bindings that pass a String or number to a named parameter the query compares against an enum-typed path (e.g. <pre class="code"> @Enumerated(EnumType.STRING)</pre>). Hibernate 6 fails the query at runtime with <pre class="code"> Argument [W] of type [java.lang.String] did not match parameter type [TransferState]</pre>; older Hibernate silently converted it. Also resolves dynamic entity names (<pre class="code"> "from " + clazz + " a"</pre>) by field name. Quick-fix replaces a matching String literal with the enum constant.</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringHibernateFetchJoinProjection</div>

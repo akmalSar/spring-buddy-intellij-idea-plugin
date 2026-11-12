@@ -43,6 +43,8 @@ import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.ElementManipulators;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.JavaPsiFacade;
@@ -56,6 +58,7 @@ import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiEnumConstant;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionList;
 import com.intellij.psi.PsiField;
@@ -68,6 +71,7 @@ import com.intellij.psi.PsiMethodCallExpression;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiNameValuePair;
 import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiPolyadicExpression;
 import com.intellij.psi.PsiReferenceExpression;
 import com.intellij.psi.PsiReferenceList;
 import com.intellij.psi.PsiType;
@@ -75,7 +79,10 @@ import com.intellij.psi.PsiTypeCastExpression;
 import com.intellij.psi.PsiVariable;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.TypeConversionUtil;
 import com.sarhan.springformat.settings.SpringBootTarget;
 import com.sarhan.springformat.settings.SpringBootVersionResolver;
 
@@ -132,6 +139,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
     private static final Pattern COMPARISON_BINDING = Pattern.compile(
             "([\\w.]+)\\s*(?:=|!=|<>|<=|>=|<|>)\\s*:(\\w+)");
     private static final String SET_PARAMETER_METHOD = "setParameter";
+    private static final String DYNAMIC_QUERY_PART = "__dynamic__";
 
     private final Kind kind;
 
@@ -247,6 +255,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
             this.visitRegisterHibernateType(expression, holder);
         } else if (this.kind == Kind.ASSOCIATION_PARAMETER_BINDING) {
             this.visitAssociationParameterBinding(expression, holder);
+        } else if (this.kind == Kind.ENUM_PARAMETER_BINDING) {
+            this.visitEnumParameterBinding(expression, holder);
         }
     }
 
@@ -319,6 +329,176 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
                         + " = :" + binding.name() + "'", ProblemHighlightType.ERROR);
             }
         }
+    }
+
+    /**
+     * Detects a {@code setParameter} call that binds a String or number to a named
+     * parameter that the query compares against an enum-typed path (for example an
+     * {@code @Enumerated(EnumType.STRING)} field). Hibernate 6 validates the binding
+     * type and fails at runtime with {@code Argument [W] of type [java.lang.String] did
+     * not match parameter type [TransferState]}, while older Hibernate versions
+     * silently converted the value.
+     * <p>
+     * The root entity is resolved from the result class argument, else from the
+     * {@code FROM} entity name. When the entity name is dynamic (for example
+     * {@code "from " + clazz + " a"}), the compared field is resolved by name across
+     * all JPA entities of the project and reported only when every candidate field has
+     * the same enum type.
+     */
+    private void visitEnumParameterBinding(@NotNull PsiMethodCallExpression expression,
+            @NotNull ProblemsHolder holder) {
+        if (isQualifierOfFollowingCall(expression)) {
+            return;
+        }
+        BindingChain chain = collectBindingChain(expression);
+        if (chain == null) {
+            return;
+        }
+        PsiExpression[] queryArguments = chain.queryCall().getArgumentList().getExpressions();
+        if (queryArguments.length == 0) {
+            return;
+        }
+        String query = queryText(queryArguments[0]);
+        if (query == null) {
+            return;
+        }
+        Project project = expression.getProject();
+        GlobalSearchScope scope = expression.getResolveScope();
+        PsiClass rootClass = rootEntityClass(queryArguments);
+        if (rootClass == null) {
+            rootClass = entityClassFromQuery(project, scope, query);
+        }
+        Map<String, List<String>> aliases = collectAliases(query);
+        for (NamedBinding binding : chain.bindings()) {
+            PsiType argumentType = binding.argument().getType();
+            if (!isStringOrNumber(argumentType)) {
+                continue;
+            }
+            for (String path : comparisonPathsForParameter(query, binding.name())) {
+                EnumPathResolution resolution = (rootClass != null)
+                        ? enumPathResolution(resolveFieldPath(path, aliases, rootClass))
+                        : enumPathByFieldName(project, scope, path, aliases);
+                if (resolution == null) {
+                    continue;
+                }
+                PsiClass enumClass = resolution.enumClass();
+                String constant = matchingEnumConstant(binding.argument(), enumClass);
+                String example = enumClass.getName() + "." + ((constant != null) ? constant : "VALUE");
+                String message = "Hibernate 6 rejects binding a " + argumentType.getPresentableText()
+                        + " to the enum path '" + path + "' (" + resolution.owner() + " is "
+                        + enumClass.getName() + "): bind the enum constant instead, e.g. '" + example + "'";
+                if (constant != null && enumClass.getQualifiedName() != null) {
+                    holder.registerProblem(binding.argument(), message, ProblemHighlightType.ERROR,
+                            new ReplaceWithEnumConstantFix(enumClass.getQualifiedName() + "." + constant));
+                }
+                else {
+                    holder.registerProblem(binding.argument(), message, ProblemHighlightType.ERROR);
+                }
+            }
+        }
+    }
+
+    @Nullable
+    private static String queryText(@NotNull PsiExpression queryArgument) {
+        if (queryArgument instanceof PsiLiteralExpression literal) {
+            return (literal.getValue() instanceof String value) ? value : null;
+        }
+        if (!(queryArgument instanceof PsiPolyadicExpression polyadic)) {
+            return null;
+        }
+        StringBuilder text = new StringBuilder();
+        boolean hasConstantPart = false;
+        for (PsiExpression operand : polyadic.getOperands()) {
+            Object value = JavaPsiFacade.getInstance(operand.getProject())
+                .getConstantEvaluationHelper()
+                .computeConstantExpression(operand);
+            if (value instanceof String part) {
+                text.append(part);
+                hasConstantPart = true;
+            }
+            else {
+                text.append(DYNAMIC_QUERY_PART);
+            }
+        }
+        return hasConstantPart ? text.toString() : null;
+    }
+
+    @Nullable
+    private static PsiClass entityClassFromQuery(@NotNull Project project, @NotNull GlobalSearchScope scope,
+            @NotNull String query) {
+        Matcher rootMatcher = ROOT_ALIAS.matcher(query);
+        if (!rootMatcher.find() || rootMatcher.group(1).contains(DYNAMIC_QUERY_PART)) {
+            return null;
+        }
+        String entityName = rootMatcher.group(1);
+        String shortName = entityName.substring(entityName.lastIndexOf('.') + 1);
+        PsiClass found = null;
+        for (PsiClass candidate : PsiShortNamesCache.getInstance(project).getClassesByName(shortName, scope)) {
+            if (!SpringInspectionUtil.isJpaEntity(candidate)) {
+                continue;
+            }
+            if (found != null) {
+                return null;
+            }
+            found = candidate;
+        }
+        return found;
+    }
+
+    @Nullable
+    private static EnumPathResolution enumPathResolution(@Nullable PathResolution resolution) {
+        if (resolution == null) {
+            return null;
+        }
+        PsiClass fieldClass = SpringInspectionUtil.resolvedClass(resolution.field().getType());
+        if (fieldClass == null || !fieldClass.isEnum()) {
+            return null;
+        }
+        return new EnumPathResolution(fieldClass,
+                resolution.ownerClass().getName() + "." + resolution.field().getName());
+    }
+
+    @Nullable
+    private static EnumPathResolution enumPathByFieldName(@NotNull Project project, @NotNull GlobalSearchScope scope,
+            @NotNull String path, @NotNull Map<String, List<String>> aliases) {
+        String[] parts = path.split("\\.");
+        if (parts.length != 2) {
+            return null;
+        }
+        List<String> aliasPath = aliases.get(parts[0].toLowerCase(Locale.ROOT));
+        if (aliasPath == null || !aliasPath.isEmpty()) {
+            return null;
+        }
+        PsiClass enumClass = null;
+        for (PsiField field : PsiShortNamesCache.getInstance(project).getFieldsByName(parts[1], scope)) {
+            PsiClass owner = field.getContainingClass();
+            if (owner == null || !SpringInspectionUtil.isJpaEntity(owner)) {
+                continue;
+            }
+            PsiClass fieldClass = SpringInspectionUtil.resolvedClass(field.getType());
+            if (fieldClass == null || !fieldClass.isEnum()) {
+                return null;
+            }
+            if (enumClass != null && !enumClass.isEquivalentTo(fieldClass)) {
+                return null;
+            }
+            enumClass = fieldClass;
+        }
+        return (enumClass != null) ? new EnumPathResolution(enumClass, "every entity field '" + parts[1] + "'")
+                : null;
+    }
+
+    private static boolean isStringOrNumber(@Nullable PsiType type) {
+        return type != null && (type.equalsToText(CommonClassNames.JAVA_LANG_STRING)
+                || TypeConversionUtil.isNumericType(type));
+    }
+
+    @Nullable
+    private static String matchingEnumConstant(@NotNull PsiExpression argument, @NotNull PsiClass enumClass) {
+        if (!(argument instanceof PsiLiteralExpression literal) || !(literal.getValue() instanceof String value)) {
+            return null;
+        }
+        return (enumClass.findFieldByName(value, false) instanceof PsiEnumConstant) ? value : null;
     }
 
     private static boolean isQualifierOfFollowingCall(@NotNull PsiMethodCallExpression expression) {
@@ -1809,6 +1989,8 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     private record PathResolution(@NotNull PsiField field, @NotNull PsiClass ownerClass) { }
 
+    private record EnumPathResolution(@NotNull PsiClass enumClass, @NotNull String owner) { }
+
     private enum Kind {
         IMPLICIT_SELECT,
         BARE_POSITIONAL_PARAMETERS,
@@ -1855,6 +2037,7 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         LAZY_COLLECTION,
         DIALECT_REGISTER_HIBERNATE_TYPE,
         ASSOCIATION_PARAMETER_BINDING,
+        ENUM_PARAMETER_BINDING,
         MULTI_TENANCY_API
     }
 
@@ -2036,6 +2219,10 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
 
     public static class AssociationParameterBinding extends SpringHibernateMigrationInspection {
         public AssociationParameterBinding() { super(Kind.ASSOCIATION_PARAMETER_BINDING); }
+    }
+
+    public static class EnumParameterBinding extends SpringHibernateMigrationInspection {
+        public EnumParameterBinding() { super(Kind.ENUM_PARAMETER_BINDING); }
     }
 
     public static class MultiTenancyApi extends SpringHibernateMigrationInspection {
@@ -2479,6 +2666,37 @@ public class SpringHibernateMigrationInspection extends AbstractBaseJavaLocalIns
         public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
             PsiElement element = descriptor.getPsiElement();
             element.replace(JavaPsiFacade.getElementFactory(project).createExpressionFromText(this.replacement, element));
+        }
+    }
+
+    private static final class ReplaceWithEnumConstantFix implements LocalQuickFix {
+
+        private final String constantReference;
+
+        private ReplaceWithEnumConstantFix(@NotNull String constantReference) {
+            this.constantReference = constantReference;
+        }
+
+        @Override
+        @NotNull
+        public String getName() {
+            String className = StringUtil.getPackageName(this.constantReference);
+            return "Bind enum constant '" + StringUtil.getShortName(className) + "."
+                    + StringUtil.getShortName(this.constantReference) + "'";
+        }
+
+        @Override
+        @NotNull
+        public String getFamilyName() {
+            return "Bind enum constant";
+        }
+
+        @Override
+        public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+            PsiElement element = descriptor.getPsiElement();
+            PsiElement replaced = element.replace(JavaPsiFacade.getElementFactory(project)
+                .createExpressionFromText(this.constantReference, element));
+            JavaCodeStyleManager.getInstance(project).shortenClassReferences(replaced);
         }
     }
 

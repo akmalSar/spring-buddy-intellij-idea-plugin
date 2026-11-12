@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spring Buddy — Animated</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07111f;
+  --panel: #101c2a;
+  --panel-2: #142435;
+  --line: #284057;
+  --text: #f2fff6;
+  --muted: #b7c7d4;
+  --green: #78d64b;
+  --green-2: #1f8f3a;
+  --blue: #35c5ff;
+  --blue-2: #2d68ff;
+  --yellow: #ffd166;
+  --red: #ff6b6b;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Progress bar ── */
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  z-index: 100;
+  box-shadow: 0 0 12px rgba(120,214,75,.5);
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(16,28,42,0.92);
+  border: 1px solid rgba(141,235,255,0.15);
+  border-radius: 999px;
+  padding: 10px 20px;
+  z-index: 100;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.4);
+}
+
+.nav-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: grid; place-items: center;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+.nav-btn:active { transform: scale(0.93); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+#slide-counter {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 52px;
+  text-align: center;
+  letter-spacing: .06em;
+}
+
+.dot-row { display: flex; gap: 6px; align-items: center; }
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: background .25s, transform .25s;
+}
+.dot.active { background: var(--green); transform: scale(1.5); }
+
+/* ── Slide viewport ── */
+#viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 52px 64px 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0s;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Background glows per slide */
+.slide::after {
+  content: "";
+  position: absolute;
+  right: -80px; top: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120,214,75,0.14), transparent 70%);
+  pointer-events: none;
+}
+.slide.blocker::after { background: radial-gradient(circle, rgba(255,107,107,0.14), transparent 70%); }
+
+/* ── Animation atoms ── */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(28px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes scaleIn {
+  from { opacity:0; transform: scale(0.88); }
+  to   { opacity:1; transform: scale(1); }
+}
+@keyframes slideRight {
+  from { opacity:0; transform: translateX(-24px); }
+  to   { opacity:1; transform: translateX(0); }
+}
+@keyframes countUp {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+@keyframes barGrow {
+  from { width: 0; }
+}
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(120,214,75,0); }
+  50%     { box-shadow: 0 0 24px 4px rgba(120,214,75,0.22); }
+}
+@keyframes arrowPulse {
+  0%,100% { opacity:.5; transform:translateY(-50%) translateX(0); }
+  50%     { opacity:1; transform:translateY(-50%) translateX(3px); }
+}
+
+.slide.active .anim-fadeup {
+  animation: fadeUp .55s cubic-bezier(.22,1,.36,1) both;
+}
+.slide.active .anim-fadein {
+  animation: fadeIn .5s ease both;
+}
+.slide.active .anim-scalein {
+  animation: scaleIn .5s cubic-bezier(.22,1,.36,1) both;
+}
+.slide.active .anim-slideright {
+  animation: slideRight .5s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* Stagger delays */
+.d1 { animation-delay:.05s; }
+.d2 { animation-delay:.15s; }
+.d3 { animation-delay:.25s; }
+.d4 { animation-delay:.35s; }
+.d5 { animation-delay:.45s; }
+.d6 { animation-delay:.55s; }
+.d7 { animation-delay:.65s; }
+.d8 { animation-delay:.75s; }
+.d9 { animation-delay:.85s; }
+.d10{ animation-delay:.95s; }
+.d11{ animation-delay:1.05s; }
+.d12{ animation-delay:1.15s; }
+
+/* ── Typography ── */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: #dfffea;
+  background: rgba(120,214,75,0.11);
+  border: 1px solid rgba(120,214,75,0.34);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  width: fit-content;
+}
+.eyebrow.red-ey { background:rgba(255,107,107,0.11); border-color:rgba(255,107,107,0.34); color:#ffe0e0; }
+
+h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(42px, 5.5vw, 72px);
+  font-weight: 900; letter-spacing: -.045em; line-height: .97;
+  margin: 18px 0 14px; max-width: 920px;
+}
+h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(30px, 4.2vw, 52px);
+  font-weight: 900; letter-spacing: -.04em; line-height: .97;
+  margin: 16px 0 12px; max-width: 920px;
+}
+h3 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 18px; font-weight: 800; line-height: 1.1;
+  margin-bottom: 8px; color: var(--text);
+}
+p.lead {
+  max-width: 860px; color: var(--muted);
+  font-size: clamp(16px,1.8vw,22px);
+  line-height: 1.38; font-weight: 500;
+  margin-bottom: 22px;
+}
+
+/* ── Cards ── */
+.card {
+  border: 1px solid var(--line); border-radius: 20px;
+  background: linear-gradient(160deg, rgba(20,36,53,.92), rgba(13,25,38,.94));
+  padding: 20px 22px;
+  transition: border-color .2s, transform .2s;
+}
+.card:hover { border-color: rgba(120,214,75,.35); transform: translateY(-2px); }
+.card p { color: var(--muted); font-size: 14px; line-height: 1.38; font-weight: 500; margin: 0; }
+.card.compact { padding: 16px 18px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+
+/* ── Badges ── */
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.badge {
+  border-radius: 999px; padding: 7px 13px;
+  color: #effff4; background: rgba(53,197,255,.12);
+  border: 1px solid rgba(53,197,255,.28);
+  font-size: 12px; font-weight: 800;
+}
+.badge.green { background:rgba(120,214,75,.13); border-color:rgba(120,214,75,.34); }
+.badge.yellow { background:rgba(255,209,102,.13); border-color:rgba(255,209,102,.34); color:#fff9e6; }
+.badge.red { background:rgba(255,107,107,.13); border-color:rgba(255,107,107,.34); color:#ffe0e0; }
+.badge.blue { background:rgba(53,197,255,.12); border-color:rgba(53,197,255,.34); }
+
+/* ── Stat row ── */
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 16px; }
+.stat {
+  border: 1px solid var(--line); border-radius: 20px;
+  background: rgba(20,36,53,.82); padding: 18px 20px;
+}
+.stat strong {
+  display: block; margin-bottom: 6px;
+  color: var(--green); font-size: 26px;
+  letter-spacing: -.04em; font-family: 'Bricolage Grotesque', sans-serif;
+}
+.stat span { color: var(--muted); font-size: 13px; line-height: 1.3; }
+
+/* ── Flow steps ── */
+.flow {
+  display: grid; grid-template-columns: repeat(5,1fr);
+  gap: 12px; margin-top: 22px; align-items: stretch;
+}
+.flow-step {
+  position: relative;
+  border: 1px solid var(--line); border-radius: 20px;
+  background: rgba(20,36,53,.9);
+  padding: 20px 16px;
+  transition: border-color .2s;
+}
+.flow-step:hover { border-color: rgba(53,197,255,.4); }
+.flow-step:not(:last-child)::after {
+  content: "";
+  position: absolute; top: 62px; right: -17px;
+  width: 24px; height: 14px;
+  background: linear-gradient(90deg, var(--blue), transparent);
+  clip-path: polygon(0 36%,60% 36%,60% 0,100% 50%,60% 100%,60% 64%,0 64%);
+  z-index: 3;
+  animation: arrowPulse 1.8s ease-in-out infinite;
+}
+.flow-step h3 { font-size: 16px; margin-bottom: 6px; }
+.flow-step p { color: var(--muted); font-size: 13px; line-height: 1.35; margin: 0; }
+.num {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  margin-bottom: 14px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--blue));
+  color: #07111f; font-weight: 900; font-size: 13px;
+}
+
+/* ── Gate flow ── */
+.gate-flow {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 16px; margin-top: 26px; align-items: stretch;
+}
+.gate-step {
+  position: relative;
+  border: 1px solid var(--line); border-radius: 20px;
+  background: rgba(20,36,53,.9); padding: 22px 18px;
+}
+.gate-step:not(:last-child)::after {
+  content: "";
+  position: absolute; top: 50%; right: -19px;
+  width: 24px; height: 14px;
+  background: linear-gradient(90deg, var(--red), transparent);
+  clip-path: polygon(0 36%,60% 36%,60% 0,100% 50%,60% 100%,60% 64%,0 64%);
+  z-index: 3; transform: translateY(-50%);
+  animation: arrowPulse 1.8s ease-in-out infinite;
+}
+.gate-icon {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  margin-bottom: 14px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--red), rgba(255,107,107,.4));
+  color: #fff; font-weight: 900; font-size: 17px;
+}
+.gate-step h3 { font-size: 18px; margin-bottom: 8px; }
+.gate-step p { color: var(--muted); font-size: 14px; line-height: 1.4; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  margin-top: 18px; border-left: 4px solid var(--green);
+  border-radius: 14px; background: rgba(120,214,75,.09);
+  padding: 16px 20px; color: #dcffe7;
+  font-size: 16px; line-height: 1.38; font-weight: 600;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+.callout.red-c { border-left-color:var(--red); background:rgba(255,107,107,.09); color:#ffe0e0; }
+
+/* ── Code block ── */
+pre.code {
+  border: 1px solid rgba(141,235,255,.18); border-radius: 20px;
+  background: #07111f; padding: 20px 22px;
+  font: 600 13px/1.55 'JetBrains Mono', monospace;
+  color: #d9fde6; white-space: pre-wrap; overflow: auto;
+}
+.warn { color: var(--yellow); }
+.ok   { color: var(--green); }
+.blue-t { color: var(--blue); }
+.red-t  { color: var(--red); }
+
+/* ── Split layout ── */
+.split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; align-items: start; }
+
+/* ── Slide 1 hero accent line ── */
+.hero-line {
+  height: 3px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--green), var(--blue), transparent);
+  margin-bottom: 18px;
+  animation: barGrow 1s ease both;
+  animation-delay: .3s;
+}
+
+/* ── Scrollable inner content ── */
+.inner-scroll {
+  flex: 1; overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* keyboard hint */
+#key-hint {
+  position: fixed; top: 20px; right: 24px;
+  font-size: 11px; color: rgba(183,199,212,.45);
+  font-weight: 600; letter-spacing: .08em;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar" style="width:10%"></div>
+<div id="key-hint">← → ARROW KEYS</div>
+
+<div id="viewport">
+
+<!-- ─── SLIDE 1: Hero ─── -->
+<section class="slide active" id="s0">
+  <span class="eyebrow anim-fadeup d1">Spring Buddy</span>
+  <div class="hero-line anim-fadein d2"></div>
+  <h1 class="anim-fadeup d3">The Spring plugin that makes invisible runtime behavior visible in the IDE.</h1>
+  <p class="lead anim-fadeup d4">Spring Buddy combines IntelliJ PSI analysis, Spring Java Format conventions, test migration support, transaction proxy pitfall detection, persistence performance checks, lifecycle checks, quick fixes, and inlay hints.</p>
+  <div class="badge-row anim-fadeup d5">
+    <span class="badge red">Pre-Commit Gate</span>
+    <span class="badge green">IDE-time feedback</span>
+    <span class="badge">Spring-aware inspections</span>
+    <span class="badge yellow">Transaction visualization</span>
+    <span class="badge">Safe quick fixes</span>
+    <span class="badge yellow">AI refactor safety net</span>
+    <span class="badge green">Before CI pipeline</span>
+    <span class="badge blue">DataFlow taint engine</span>
+  </div>
+  <div class="stat-row anim-fadeup d6">
+    <div class="stat"><strong>Single Plugin</strong><span>One unified plugin for style, tests, transactions, persistence, and runner actions.</span></div>
+    <div class="stat"><strong>In Your IDE</strong><span>Warnings appear directly where you're already working — no context switching needed.</span></div>
+    <div class="stat"><strong>PSI Analysis</strong><span>Leverages IntelliJ's code structure for deep, accurate analysis — not just text pattern matching.</span></div>
+    <div class="stat"><strong>Hidden Bugs</strong><span>Surfaces framework-level failures before they reach tests, CI, or production traffic.</span></div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 2: Why Unique ─── -->
+<section class="slide" id="s1">
+  <span class="eyebrow anim-fadeup d1">Why It Is Unique</span>
+  <h2 class="anim-fadeup d2">Most tools see syntax. Spring Buddy models Spring consequences.</h2>
+  <p class="lead anim-fadeup d3">The plugin focuses on bugs caused by framework behavior that is legal Java but wrong Spring: proxy bypasses, transaction boundaries, lifecycle timing, repository semantics, lazy loading, test false positives, and style drift.</p>
+  <div class="inner-scroll">
+    <div class="grid-3">
+      <article class="card anim-scalein d4"><h3>Spring proxy awareness</h3><p>Flags private, final, static, self-invoked, CGLIB-blocked, constructor-triggered, async, and interface transaction patterns that Spring AOP cannot apply.</p></article>
+      <article class="card anim-scalein d5"><h3>Runtime risk, editor timing</h3><p>Surfaces production-class issues while the file is open: missing transactions, ignored annotations, broken Mockito calls, and lifecycle traps.</p></article>
+      <article class="card anim-scalein d6"><h3>Developer-safe fixes</h3><p>Add @Transactional, remove final, add EnumType.STRING, add auditing listeners, move lifecycle work, and convert unsafe assertions.</p></article>
+      <article class="card anim-scalein d7"><h3>Transaction inlay hints</h3><p>Shows inline propagation behavior: starts transaction, starts new transaction, nested transaction, or ignored self-invocation.</p></article>
+      <article class="card anim-scalein d8"><h3>Inter-procedural taint analysis</h3><p>DataFlow engine tracks detached entities through aliases, Optional unwraps, casts, ternaries, for-each loops, stream lambdas, and private helpers — finding Ghost Saves and N+1 patterns.</p></article>
+      <article class="card anim-scalein d9"><h3>Test ecosystem support</h3><p>Understands AssertJ, Mockito, MockMvc, ArchUnit, and helper-method assertion patterns instead of applying a single naive assertion rule.</p></article>
+      <article class="card anim-scalein d10"><h3>Bundled inspection pass</h3><p>Runs Spring Buddy after large refactors, generated code changes, or AI-assisted rewrites to catch hidden framework regressions.</p></article>
+      <article class="card anim-scalein d11"><h3><span style="color:var(--red)">Pre-Commit Gate</span></h3><p>Git commit dialog blocks ERROR-level runtime-breaking Spring errors before they enter version control. No manual hooks, no CI delay.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 3: Pre-Commit Gate ─── -->
+<section class="slide blocker" id="s2">
+  <span class="eyebrow red-ey anim-fadeup d1">Pre-Commit Safety Gate</span>
+  <h2 class="anim-fadeup d2">Block commits that contain runtime-breaking Spring errors.</h2>
+  <p class="lead anim-fadeup d3">Spring Buddy registers a Git pre-commit handler that runs ERROR-level inspections synchronously before a commit is allowed. Proxy bypasses, transaction failures, and persistence crashes are surfaced as a file-oriented summary.</p>
+  <div class="gate-flow">
+    <div class="gate-step anim-slideright d4">
+      <div class="gate-icon">1</div>
+      <h3>Developer clicks Commit</h3>
+      <p>IntelliJ's Commit dialog triggers the Spring Buddy checkin handler automatically.</p>
+    </div>
+    <div class="gate-step anim-slideright d5">
+      <div class="gate-icon">2</div>
+      <h3>ERROR inspections run</h3>
+      <p>Every ERROR-level inspection is executed across the changed files in a read-action with progress.</p>
+    </div>
+    <div class="gate-step anim-slideright d6">
+      <div class="gate-icon">3</div>
+      <h3>File-oriented summary</h3>
+      <p>Violations are grouped by source file and inspection name, showing exactly what will break at runtime.</p>
+    </div>
+    <div class="gate-step anim-slideright d7">
+      <div class="gate-icon" style="background:linear-gradient(135deg,var(--green),var(--green-2));">OK</div>
+      <h3>Commit proceeds</h3>
+      <p>Only when no ERROR-level violations remain. Warnings are surfaced but never block.</p>
+    </div>
+  </div>
+  <div class="callout red-c anim-fadeup d8">Runtime-breaking Spring errors are caught at commit time, not during CI or production deployment. Zero configuration required.</div>
+</section>
+
+<!-- ─── SLIDE 4: How Analysis Runs ─── -->
+<section class="slide" id="s3">
+  <span class="eyebrow anim-fadeup d1">How The Analysis Runs</span>
+  <h2 class="anim-fadeup d2">From code edit to actionable feedback.</h2>
+  <p class="lead anim-fadeup d3">Spring Buddy plugs into IntelliJ's inspection infrastructure. Each inspection receives structured Java PSI, resolves relevant symbols, applies Spring-specific rules, and reports precise problems back to the editor.</p>
+  <div class="flow">
+    <div class="flow-step anim-fadeup d4"><div class="num">1</div><h3>Developer edits Java</h3><p>Spring services, controllers, repositories, tests, configuration, and entities.</p></div>
+    <div class="flow-step anim-fadeup d5"><div class="num">2</div><h3>IDE builds PSI</h3><p>IntelliJ exposes syntax nodes, annotations, modifiers, calls, classes, and references.</p></div>
+    <div class="flow-step anim-fadeup d6"><div class="num">3</div><h3>Rules inspect nodes</h3><p>Local inspections walk methods, fields, annotations, and call chains. DataFlow seeds taint and follows inter-procedural boundaries.</p></div>
+    <div class="flow-step anim-fadeup d7"><div class="num">4</div><h3>Spring semantics added</h3><p>Rules interpret proxy limits, transaction propagation, persistence access, lifecycle order, taint flow, and test intent.</p></div>
+    <div class="flow-step anim-fadeup d8"><div class="num">5</div><h3>Feedback appears</h3><p>Errors, warnings, quick fixes, tooltips, inlay hints, and runner output guide the developer.</p></div>
+  </div>
+  <div class="callout anim-fadeup d9">The key difference: the warning is connected to the Spring behavior that will happen at runtime, not only to how the Java code looks.</div>
+</section>
+
+<!-- ─── SLIDE 5: Inspection Coverage ─── -->
+<section class="slide" id="s4">
+  <span class="eyebrow anim-fadeup d1">Inspection Coverage</span>
+  <h2 class="anim-fadeup d2">One plugin, multiple Spring failure modes.</h2>
+  <p class="lead anim-fadeup d3">Style checks, test improvements, lifecycle traps, transaction failures, and Spring-specific persistence pitfalls — all flagged in the IDE, before they become real problems.</p>
+  <div class="inner-scroll">
+    <div class="grid-4">
+      <article class="card compact anim-scalein d4"><h3>Spring Java Format</h3><p>Imports, modifiers, method order, test names, utility constructors, visibility, and ternary style.</p></article>
+      <article class="card compact anim-scalein d5"><h3>Testing Style</h3><p>AssertJ migration, Mockito style, unused stubbing, matcher mixing, no-assertion and WebTestClient detection.</p></article>
+      <article class="card compact anim-scalein d6"><h3>Transactions</h3><p>Missing @Transactional on @Modifying, read-only write boundaries, self-invocation, final/private/static proxy failures, constructor traps.</p></article>
+      <article class="card compact anim-scalein d7"><h3>Persistence</h3><p>N+1 lazy access (PSI + DataFlow), OSIV, enum ordinal mapping, auditing listeners, OneToMany mappedBy, Ghost Save detection.</p></article>
+      <article class="card compact anim-scalein d8"><h3>DataFlow Taint</h3><p>Ghost Save, N+1 query prediction, LazyInitializationException prediction, transaction boundary escape, read-only mutation, and SQL injection flow.</p></article>
+      <article class="card compact anim-scalein d9"><h3>Lombok Pitfalls</h3><p>@Data on JPA entities, @Builder default value loss, missing @Builder.Default, equals/hashCode on generated IDs, and SuperBuilder gaps.</p></article>
+      <article class="card compact anim-scalein d10"><h3>Controllers &amp; Security</h3><p>Boundary rules, validation binding order, @RequestMapping without explicit HTTP method, Jackson serialization of lazy entities.</p></article>
+      <article class="card compact anim-scalein d11"><h3>Concurrency</h3><p>Stateful singleton fields, mutable bean caches, @Async shared state, @Async without explicit Executor, and AtomicReference/volatile fixes.</p></article>
+      <article class="card compact anim-scalein d12"><h3>SQL Injection</h3><p>@Query built with string concatenation or String.format instead of parameter placeholders — taint tracked from request parameters.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 6: Code Example ─── -->
+<section class="slide" id="s5">
+  <span class="eyebrow anim-fadeup d1">Concrete Example</span>
+  <h2 class="anim-fadeup d2">It catches valid Java that Spring will not execute the way it looks.</h2>
+  <div class="split anim-fadeup d3">
+    <div>
+      <p class="lead" style="font-size:17px;">A same-class call to a transactional method looks correct in Java, but bypasses the Spring proxy. Final classes, private methods, @PostConstruct, and missing @Transactional boundaries fail for the same reason.</p>
+      <div class="card anim-scalein d4">
+        <h3>What the developer sees</h3>
+        <p>Error or warning on the exact call, annotation, method, or class, plus a quick fix when Spring Buddy can apply one safely.</p>
+      </div>
+      <div class="callout anim-fadeup d5">This is unique because the plugin teaches the framework model while identifying the bug.</div>
+    </div>
+    <pre class="code anim-scalein d4">class OrderService {
+    void placeOrder() {
+        <span class="warn">this.persistOrder();</span>
+    }
+
+    @Transactional
+    void persistOrder() {
+        repository.save(order);
+    }
+}
+
+<span class="red-t">Error:</span> missing/ignored transaction boundary
+<span class="blue-t">Hint:</span> Ignored: Self-Invocation</pre>
+  </div>
+</section>
+
+<!-- ─── SLIDE 7: Test Intelligence ─── -->
+<section class="slide" id="s6">
+  <span class="eyebrow anim-fadeup d1">Test Intelligence</span>
+  <h2 class="anim-fadeup d2">It avoids naive test warnings by recognizing intent.</h2>
+  <p class="lead anim-fadeup d3">Spring Buddy treats common test frameworks as first-class patterns. It understands assertion-like calls, helper methods with assertions, MockMvc/WebTestClient response assertions, Mockito verification, ArchUnit rule checks, and @MockBean context-cache costs.</p>
+  <div class="split">
+    <pre class="code anim-scalein d4">@Test
+void givenClasses_whenRestControllerHasCorrectProduces_thenSuccess() {
+    ArchRuleDefinition.classes()
+        .that()
+        .areAnnotatedWith(RestController.class)
+        .should(PRODUCES_CLASS_CONDITION)
+        .check(CLASSES);
+}
+
+<span class="ok">Recognized:</span> ArchUnit check is the assertion.</pre>
+    <div class="grid-2 anim-fadeup d5">
+      <article class="card"><h3>AssertJ</h3><p>Detects fluent assertions and migrates common JUnit assertions.</p></article>
+      <article class="card"><h3>Mockito</h3><p>Detects verification, matcher mixing errors, style issues, and unsafe unused-stubbing fixes.</p></article>
+      <article class="card"><h3>HTTP Tests</h3><p>Recognizes MockMvc and WebTestClient expectations as real assertions.</p></article>
+      <article class="card"><h3>Spring Test Cache</h3><p>Flags @MockBean usage that fragments application-context reuse.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 8: Feedback Types ─── -->
+<section class="slide" id="s7">
+  <span class="eyebrow anim-fadeup d1">Feedback Types</span>
+  <h2 class="anim-fadeup d2">Different problems need different IDE feedback.</h2>
+  <p class="lead anim-fadeup d3">Spring Buddy uses <span style="color:var(--red)">errors</span> for definite runtime breakage, <span style="color:var(--yellow)">warnings</span> for likely design risks, quick fixes for safe edits, inlay hints for runtime explanation, and runner actions for broad sweeps.</p>
+  <div class="inner-scroll">
+    <div class="grid-2">
+      <article class="card anim-scalein d4"><h3><span style="color:var(--red)">Errors</span></h3><p>Mark definite runtime breakage: ignored proxy advice, @Transactional on private/final/static methods, self-invocation, readOnly transactions with writes, swallowed exceptions, unclosed Streams, SQL injection via @Query concatenation, and read-only entity mutation.</p></article>
+      <article class="card anim-scalein d5"><h3><span style="color:var(--yellow)">Warnings</span></h3><p>Flag likely design risks and style drift: import ordering, modifier placement, method visibility, test naming, TODO/FIXME without tickets, collection return nulls, @RequestMapping without HTTP method, fixedRate without initialDelay, and Ghost Save.</p></article>
+      <article class="card anim-scalein d6"><h3><span style="color:var(--green)">Quick Fixes</span></h3><p>Add @Transactional, choose REQUIRES_NEW, remove final, add EnumType.STRING, add auditing listeners, add mappedBy, wrap Stream in try-with-resources, convert to contextual orElseThrow, or replace string concatenation with parameter placeholders.</p></article>
+      <article class="card anim-scalein d7"><h3><span style="color:var(--blue)">Inlay Hints</span></h3><p>Show transaction behavior inline: starts transaction, starts new transaction, suspends transaction, nested transaction, or ignored boundary.</p></article>
+      <article class="card anim-scalein d8"><h3>Inspection Runner</h3><p>Runs the Spring Buddy inspection profile from a context menu action against the current scope.</p></article>
+      <article class="card anim-scalein d9"><h3>Pre-Commit Blocker</h3><p>Git commit dialog blocks ERROR-level violations and shows a file-oriented summary of runtime-breaking issues before code reaches the repository.</p></article>
+    </div>
+    <div class="badge-row" style="margin-top:14px;">
+      <span class="badge green anim-fadein d10">Precise location</span>
+      <span class="badge anim-fadein d11">Tooltip explanation</span>
+      <span class="badge yellow anim-fadein d12">Runtime errors vs risks</span>
+      <span class="badge anim-fadein d12">Project-level pass</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SLIDE 9: After Refactors ─── -->
+<section class="slide" id="s8">
+  <span class="eyebrow anim-fadeup d1">After Big Refactors</span>
+  <h2 class="anim-fadeup d2">Especially useful after broad AI-assisted rewrites.</h2>
+  <p class="lead anim-fadeup d3">Large refactors can keep Java compiling while silently changing Spring behavior. Spring Buddy gives you a second pass focused on the things compilers and ordinary linters miss.</p>
+  <div class="grid-3 anim-fadeup d4">
+    <article class="card anim-scalein d4"><h3>Proxy Semantics</h3><p>Catches final classes, final/private/static advised methods, self-invocation, and ignored @PostConstruct transactions introduced during cleanup.</p></article>
+    <article class="card anim-scalein d5"><h3>Repository Semantics</h3><p>Finds @Modifying without @Transactional, derived query explosions, Optional.get() without context, and projection methods that force full entity loads.</p></article>
+    <article class="card anim-scalein d6"><h3>Persistence Drift</h3><p>Flags enum ordinal mappings, missing auditing listeners, @OneToMany surprises, N+1 lazy access, OSIV risks, and Ghost Saves from detached entity mutations introduced by AI rewrites.</p></article>
+    <article class="card anim-scalein d7"><h3>Test Behavior</h3><p>Recognizes real assertions after test rewrites and catches @MockBean context fragmentation that makes suites slower after refactors.</p></article>
+    <article class="card anim-scalein d8"><h3>Concurrency Regressions</h3><p>Highlights singleton mutable state, shared caches, @Async writes, and suggests final, volatile, AtomicReference, or ConcurrentHashMap where appropriate.</p></article>
+    <article class="card anim-scalein d9"><h3>Fast Safety Gate</h3><p>Run the bundled inspection profile after a migration or generated patch to surface hidden framework bugs before review. DataFlow engine catches cross-method persistence issues.</p></article>
+  </div>
+  <div class="callout anim-fadeup d10">A compiling AI refactor is not necessarily a correct Spring refactor. Spring Buddy checks the framework contracts the compiler cannot see.</div>
+</section>
+
+<!-- ─── SLIDE 10: Value Summary ─── -->
+<section class="slide" id="s9">
+  <span class="eyebrow anim-fadeup d1">Value Summary</span>
+  <h2 class="anim-fadeup d2">Spring Buddy shortens the loop from hidden framework bug to visible code insight.</h2>
+  <div class="grid-3 anim-fadeup d3">
+    <article class="card anim-scalein d3"><h3>Before commit</h3><p>The Git pre-commit gate blocks ERROR-level runtime-breaking issues from ever entering version control.</p></article>
+    <article class="card anim-scalein d4"><h3>Before code review</h3><p>Style and test issues are cleaned while editing, reducing review noise.</p></article>
+    <article class="card anim-scalein d5"><h3>Before CI pipeline</h3><p>Format, assertion, and static analysis issues are caught locally.</p></article>
+    <article class="card anim-scalein d6"><h3>Before runtime</h3><p>Proxy, lifecycle, transaction, and persistence pitfalls are highlighted before they become integration or production bugs. DataFlow finds Ghost Saves and lazy-loading leaks.</p></article>
+    <article class="card anim-scalein d7"><h3>Before performance incidents</h3><p>N+1, OSIV, query explosion, projection full-load, and context-cache risks appear near the source code. DataFlow N+1 prediction tracks collection sources into loop sinks.</p></article>
+    <article class="card anim-scalein d8"><h3>Before transaction surprises</h3><p>Propagation and proxy behavior is explained in the editor with inlay hints and ERROR-level boundaries. Transaction boundary escape and read-only mutation caught via taint analysis.</p></article>
+  </div>
+  <div class="callout anim-fadeup d9">Unique positioning: Spring Buddy is a Spring correctness companion for IntelliJ, not just another lint profile.</div>
+</section>
+
+</div><!-- /viewport -->
+
+<!-- Navigation -->
+<nav>
+  <button class="nav-btn" id="btn-prev" disabled aria-label="Previous">&#8592;</button>
+  <div class="dot-row" id="dots"></div>
+  <span id="slide-counter">1 / 10</span>
+  <button class="nav-btn" id="btn-next" aria-label="Next">&#8594;</button>
+</nav>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+const progress = document.getElementById('progress-bar');
+const counter  = document.getElementById('slide-counter');
+const btnPrev  = document.getElementById('btn-prev');
+const btnNext  = document.getElementById('btn-next');
+const dotsEl   = document.getElementById('dots');
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  // reset animations by toggling active
+  slides[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  // force reflow to restart animations
+  slides[current].querySelectorAll('[class*="anim-"]').forEach(el => {
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  });
+  update();
+}
+
+function update() {
+  const pct = ((current + 1) / total) * 100;
+  progress.style.width = pct + '%';
+  counter.textContent  = (current + 1) + ' / ' + total;
+  btnPrev.disabled = current === 0;
+  btnNext.disabled = current === total - 1;
+  dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+}
+
+btnPrev.addEventListener('click', () => goTo(current - 1));
+btnNext.addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+});
+
+// Touch swipe
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) dx < 0 ? goTo(current+1) : goTo(current-1);
+}, {passive:true});
+
+update();
+</script>
+</body>
+</html>

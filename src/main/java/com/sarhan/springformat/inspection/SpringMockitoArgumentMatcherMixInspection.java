@@ -26,10 +26,13 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiClassType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiExpressionList;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiMethodCallExpression;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,7 +50,15 @@ public class SpringMockitoArgumentMatcherMixInspection extends AbstractBaseJavaL
             "anyBoolean", "anyString", "anyList", "anySet", "anyMap", "anyCollection", "anyIterable",
             "anyVararg", "eq", "same", "isA", "isNull", "isNotNull", "notNull", "nullable",
             "argThat", "longThat", "intThat", "booleanThat", "byteThat", "charThat", "doubleThat",
-            "floatThat", "shortThat", "matches", "contains", "endsWith", "startsWith", "refEq");
+            "floatThat", "shortThat", "matches", "contains", "endsWith", "startsWith", "refEq",
+            "anyIterator", "anyOptional", "anyStream",
+            // org.mockito.AdditionalMatchers
+            "gt", "geq", "lt", "leq", "and", "or", "not", "aryEq", "cmpEq", "find");
+
+    private static final Set<String> MATCHER_CLASS_NAMES = Set.of("org.mockito.ArgumentMatchers",
+            "org.mockito.Matchers", "org.mockito.AdditionalMatchers", "org.mockito.hamcrest.MockitoHamcrest");
+
+    private static final String ARGUMENT_CAPTOR_FQN = "org.mockito.ArgumentCaptor";
 
     private static final Set<String> STUBBING_ROOT_NAMES = Set.of("when", "verify", "doReturn",
             "doThrow", "doNothing", "doAnswer", "given");
@@ -98,7 +109,33 @@ public class SpringMockitoArgumentMatcherMixInspection extends AbstractBaseJavaL
             return false;
         }
         String name = call.getMethodExpression().getReferenceName();
-        return name != null && MATCHER_NAMES.contains(name);
+        if (name == null) {
+            return false;
+        }
+        // ArgumentCaptor.capture() registers a matcher just like any()/eq().
+        if ("capture".equals(name) && isArgumentCaptor(call.getMethodExpression().getQualifierExpression())) {
+            return true;
+        }
+        PsiMethod target = call.resolveMethod();
+        PsiClass containingClass = (target != null) ? target.getContainingClass() : null;
+        String containingName = (containingClass != null) ? containingClass.getQualifiedName() : null;
+        if (containingName != null && MATCHER_CLASS_NAMES.contains(containingName)) {
+            return true;
+        }
+        // Fallback for unresolved calls (missing classpath, light test fixtures).
+        return MATCHER_NAMES.contains(name);
+    }
+
+    private static boolean isArgumentCaptor(PsiExpression qualifier) {
+        if (qualifier == null || !(qualifier.getType() instanceof PsiClassType classType)) {
+            return false;
+        }
+        PsiClass captorClass = classType.resolve();
+        if (captorClass == null) {
+            return false;
+        }
+        String qualifiedName = captorClass.getQualifiedName();
+        return ARGUMENT_CAPTOR_FQN.equals(qualifiedName) || "ArgumentCaptor".equals(captorClass.getName());
     }
 
     private static String matcherQualifier(PsiMethodCallExpression call) {

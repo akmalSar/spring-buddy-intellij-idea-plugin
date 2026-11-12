@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.sarhan.springformat"
-version = "1.0.12"
+version = "1.0.14"
 
 repositories {
     mavenCentral()
@@ -44,7 +44,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = "Spring Buddy"
-        version = "1.0.12"
+        version = "1.0.14"
         description = """
             <h2>Make invisible Spring runtime behavior visible.</h2>
               <p>
@@ -72,6 +72,18 @@ intellijPlatform {
               </p>
         """.trimIndent()
         changeNotes = """
+            <h3>1.0.14</h3>
+            <ul>
+              <li><b>Fixed missed enum-typed query parameter bindings with dynamic entity names:</b> when the entity name is built at runtime (<code>"SELECT a FROM " + clazz + " a ..."</code>), the compared field was looked up across every module of the IDE project. In multi-project workspaces an unrelated entity with a same-named String field (for example <code>transferStatus</code> in another service) made the inspection give up silently. The lookup, and the lookup of the <code>FROM</code> entity name, now use the module's resolve scope: only entities the calling module can actually see are considered.</li>
+            </ul>
+            <h3>1.0.13</h3>
+            <ul>
+              <li><b>New ERROR-level Hibernate migration inspection: enum-typed query parameter binding.</b> Binding a String or number to a named parameter that the query compares against an enum field (for example an <code>@Enumerated(EnumType.STRING)</code> <code>transferStatus</code>) is legal JPQL, but Hibernate 6 fails the query at runtime with <code>Argument [W] of type [java.lang.String] did not match parameter type [TransferState]</code>. Hibernate 5 silently converted the value, so migrated applications typically discover this only after the upgrade, as 500s on requests that previously worked.</li>
+              <li>Also works when the entity name is built at runtime, such as <code>"SELECT a FROM " + clazz + " a WHERE a.transferStatus != :transferStatus"</code>: the compared field is looked up by name across all JPA entities in the project and reported only when every match has the same enum type. Native SQL queries are not checked.</li>
+              <li>A quick fix replaces a String literal that names an enum constant with the constant itself, for example <code>"W"</code> &rarr; <code>TransferState.W</code>, and adds the import.</li>
+              <li><b>Fixed a Mockito matcher-mix false positive that broke tests:</b> <code>ArgumentCaptor.capture()</code> was treated as a raw value, so calls such as <code>verify(mock).send(any(), captor.capture(), anyMap())</code> were reported. Applying the quick fix produced <code>eq(captor.capture())</code>, which registers one matcher too many and makes Mockito fail with <code>InvalidUseOfMatchersException</code>. <code>capture()</code> now counts as a matcher.</li>
+              <li><b>More matchers recognized:</b> <code>AdditionalMatchers</code> (<code>gt</code>, <code>geq</code>, <code>lt</code>, <code>leq</code>, <code>and</code>, <code>or</code>, <code>not</code>, <code>aryEq</code>, <code>cmpEq</code>, <code>find</code>) and <code>anyIterator</code>, <code>anyOptional</code>, <code>anyStream</code> are no longer reported as raw values. Calls that resolve to <code>ArgumentMatchers</code>, <code>Matchers</code>, <code>AdditionalMatchers</code> or <code>MockitoHamcrest</code> count as matchers whatever the method name.</li>
+            </ul>
             <h3>1.0.12</h3>
             <ul>
               <li><b>Fewer false positives for read-only transactions that fetch entities:</b> the warning is no longer shown when Hibernate is on the classpath and <code>spring.jpa.open-in-view</code> is set to <code>false</code>. In that setup Spring's <code>HibernateJpaDialect</code> runs each read-only transaction on a transaction-local session and calls <code>setDefaultReadOnly(true)</code>, so loaded entities keep no dirty-checking snapshot. The warning is still shown when any <code>application</code> config sets <code>open-in-view</code> to <code>true</code> or leaves it unset.</li>

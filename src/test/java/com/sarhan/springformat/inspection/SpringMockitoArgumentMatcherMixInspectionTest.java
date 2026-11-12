@@ -140,6 +140,41 @@ public class SpringMockitoArgumentMatcherMixInspectionTest extends BasePlatformT
         this.myFixture.checkHighlighting(false, false, true, true);
     }
 
+    public void testDoesNotFlagArgumentCaptorCapture() {
+        this.myFixture.enableInspections(new SpringMockitoArgumentMatcherMixInspection());
+        this.myFixture.configureByText("Sample.java", """
+                class Sample {
+                    static <T> T verify(T t) { return t; }
+                    static <T> T any() { return null; }
+                    static class ArgumentCaptor<T> { T capture() { return null; } }
+                    static class Url { }
+                    static class Service { void send(Url a, Url b, Url c) {} }
+                    void doIt(Service s, ArgumentCaptor<Url> urlCaptor) {
+                        verify(s).send(any(), urlCaptor.capture(), any());
+                    }
+                }
+                """);
+        this.myFixture.checkHighlighting(true, false, true, false);
+    }
+
+    public void testDoesNotFlagAdditionalMatchers() {
+        this.myFixture.enableInspections(new SpringMockitoArgumentMatcherMixInspection());
+        this.myFixture.configureByText("Sample.java", """
+                class Sample {
+                    static <T> T when(T t) { return t; }
+                    static <T> T any() { return null; }
+                    static int anyInt() { return 0; }
+                    static int gt(int v) { return 0; }
+                    static class Result { }
+                    static class Service { Result lookup(int a, int b) { return null; } }
+                    void doIt(Service s) {
+                        when(s.lookup(anyInt(), gt(5)));
+                    }
+                }
+                """);
+        this.myFixture.checkHighlighting(true, false, true, false);
+    }
+
     public void testDoesNotFlagAllMatchers() {
         this.myFixture.enableInspections(new SpringMockitoArgumentMatcherMixInspection());
         this.myFixture.configureByText("Sample.java", """
