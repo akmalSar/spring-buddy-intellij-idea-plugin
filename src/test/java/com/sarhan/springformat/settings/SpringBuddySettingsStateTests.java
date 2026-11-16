@@ -52,7 +52,8 @@ public class SpringBuddySettingsStateTests extends BasePlatformTestCase {
 
         Assertions.assertThat(settings.getEnabledGroups())
                 .as("legacy state adopts new group and keeps user-disabled groups disabled")
-                .containsExactly("spring-javaformat", SpringBuddySettingsUtil.MIGRATION_GROUP_ID);
+                .containsExactly("spring-javaformat", SpringBuddySettingsUtil.MIGRATION_GROUP_ID,
+                        SpringBuddySettingsUtil.ARCHITECTURE_GROUP_ID);
     }
 
     public void testLoadState_legacyStateWithNullKnownGroups_addsOnlyNewGroup() {
@@ -65,7 +66,8 @@ public class SpringBuddySettingsStateTests extends BasePlatformTestCase {
 
         Assertions.assertThat(settings.getEnabledGroups())
                 .as("null knownGroups treated as legacy state")
-                .containsExactly("pitfalls", SpringBuddySettingsUtil.MIGRATION_GROUP_ID);
+                .containsExactly("pitfalls", SpringBuddySettingsUtil.MIGRATION_GROUP_ID,
+                        SpringBuddySettingsUtil.ARCHITECTURE_GROUP_ID);
     }
 
     public void testLoadState_knownGroupsPresent_disabledGroupStaysDisabled() {
@@ -105,5 +107,19 @@ public class SpringBuddySettingsStateTests extends BasePlatformTestCase {
         Assertions.assertThat(reloaded.getEnabledGroups())
                 .as("saved state keeps user-disabled groups disabled")
                 .containsExactly("pitfalls");
+    }
+
+    public void testLoadState_stateFromPreviousVersion_adoptsArchitectureGroup() {
+        SpringBuddySettingsState settings = new SpringBuddySettingsState();
+        SpringBuddySettingsState.State state = new SpringBuddySettingsState.State();
+        state.enabledGroups = new ArrayList<>(List.of("pitfalls"));
+        state.knownGroups = new ArrayList<>(SpringBuddySettingsUtil.defaultGroupIds());
+        state.knownGroups.remove(SpringBuddySettingsUtil.ARCHITECTURE_GROUP_ID);
+
+        settings.loadState(state);
+
+        Assertions.assertThat(settings.getEnabledGroups())
+                .as("architecture group introduced by this version is enabled once")
+                .containsExactly("pitfalls", SpringBuddySettingsUtil.ARCHITECTURE_GROUP_ID);
     }
 }

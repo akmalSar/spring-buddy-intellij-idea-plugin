@@ -361,6 +361,7 @@ h2 .count {
 <span class="nav-title">Spring Buddy</span>
 <a href="index.html">Feature Tour</a>
 <a href="#top" class="active">All</a>
+<a href="#architecture">Architecture<span class="nav-count">8</span></a>
 <a href="#async-concurrency">Async & Concurrency<span class="nav-count">8</span></a>
 <a href="#lombok">Lombok<span class="nav-count">25</span></a>
 <a href="#misc">Miscellaneous<span class="nav-count">10</span></a>
@@ -368,7 +369,7 @@ h2 .count {
 <a href="#hiberante-migration">Hiberante Migration<span class="nav-count">51</span></a>
 <a href="#spring-2-3-migration">spring 2 -&gt; 3 migration<span class="nav-count">60</span></a>
 <a href="#spring-boot-4-migration">spring 3 -&gt; 4 migration<span class="nav-count">34</span></a>
-<a href="#pitfalls">Pitfalls<span class="nav-count">107</span></a>
+<a href="#pitfalls">Pitfalls<span class="nav-count">105</span></a>
 <a href="#spring-framework">Spring Framework<span class="nav-count">11</span></a>
 <a href="#spring-javaformat">Spring Java Format<span class="nav-count">59</span></a>
 </div>
@@ -381,11 +382,58 @@ h2 .count {
 
 <div class="stat-row">
 <div class="stat" data-filter="error" onclick="applyFilter('error')" style="cursor:pointer;"><strong>126</strong><span>ERROR</span></div>
-<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>229</strong><span>WARNING</span></div>
+<div class="stat" data-filter="warning" onclick="applyFilter('warning')" style="cursor:pointer;"><strong>235</strong><span>WARNING</span></div>
 <div class="stat" data-filter="weak" onclick="applyFilter('weak')" style="cursor:pointer;"><strong>9</strong><span>WEAK WARNING</span></div>
-<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>364</strong><span>Total Inspections</span></div>
+<div class="stat" data-filter="all" onclick="applyFilter('all')" style="cursor:pointer;"><strong>370</strong><span>Total Inspections</span></div>
 </div>
 <div id="filter-indicator" style="display:none; margin-bottom:20px; color:var(--muted); font-size:15px; font-weight:600;"></div>
+
+<div class="category-section">
+<div class="eyebrow">Architecture</div>
+<h2 id="architecture">Architecture<span class="count">8 inspections</span></h2>
+<div class="grid-list">
+<article class="card" data-level="warning">
+<div class="class-name">BannedApiInspection</div>
+<div class="display-name">Banned API used outside its allowed packages (architecture.json)<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-006</pre>. Reports PSI-resolved uses of classes, annotations and methods listed in <pre class="code"> bannedApis</pre> of <pre class="code"> .spring-buddy/architecture.json</pre> outside the packages in <pre class="code"> allowedIn</pre> (typically one wrapper package). Methods (<pre class="code"> Type#method</pre>) match all overloads, overrides and method references. Unresolved symbols are never reported. Severity per entry; ERROR findings block commits.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">DomainPurityInspection</div>
+<div class="display-name">Domain code depends on web, persistence or infrastructure<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-004</pre>, preset <pre class="code"> domainPurity</pre>. Reports domain classes (the <pre class="code"> domain</pre> layer, default <pre class="code"> ..domain..</pre>) that reference Spring Web, the Servlet API, JPA, Hibernate, Spring Data/JDBC/ORM or the configured infrastructure layer. A configurable allowlist accepts selected types. JPA/persistence bans apply only with <pre class="code"> "style": "hexagonal"</pre> (WARNING by default there); in the default <pre class="code"> layered</pre> style the preset is off unless configured and JPA entities are never reported.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">ForbiddenPackageDependencyInspection</div>
+<div class="display-name">Forbidden package dependency (architecture.json rule)<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-001</pre>. Reports PSI-resolved references (imports incl. wildcard, FQNs, annotations, field/parameter/return/generic types, extends/implements) that break a layer or package rule from <pre class="code"> .spring-buddy/architecture.json</pre>. Glob and <pre class="code"> regex:</pre> package patterns, layer names, <pre class="code"> except</pre> exemptions; the severity comes from each rule and ERROR findings block commits.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringConstructorInjectionInspection</div>
+<div class="display-name">Field injection in Spring component (prefer constructor injection)<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-005</pre>, preset <pre class="code"> constructorInjection</pre>, off by default. Reports <pre class="code"> @Autowired</pre>/<pre class="code"> @Inject</pre> fields in Spring stereotype classes; inject dependencies through the constructor instead.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringControllerEntityParameterInspection</div>
+<div class="display-name">Controller endpoint should not accept JPA entities<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-003</pre>, preset <pre class="code"> controllerBoundary</pre>. Reports request-mapped controller parameters whose type is (or contains) a JPA entity. Binding requests into entities allows mass assignment and couples the API to the schema; bind a request DTO instead.</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringControllerEntityReturnInspection</div>
+<div class="display-name">Controller should not return JPA entities directly<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-003</pre>, preset <pre class="code"> controllerBoundary</pre>. Reports controller methods that return JPA entities directly instead of DTOs or response models. Severity is configurable in <pre class="code"> .spring-buddy/architecture.json</pre> (WARNING by default, error or off).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SpringControllerRepositoryInjectionInspection</div>
+<div class="display-name">Controller should not inject repositories directly<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-002</pre>, preset <pre class="code"> controllerBoundary</pre>. Reports repositories injected into controllers through fields or constructors; controllers should delegate to a service boundary. Severity is configurable in <pre class="code"> .spring-buddy/architecture.json</pre> (WARNING by default, error or off).</div>
+</article>
+<article class="card" data-level="warning">
+<div class="class-name">SuppressionPolicyInspection</div>
+<div class="display-name">Architecture check suppressed without permission (SB-ARCH-*)<span class="badge yellow">WARNING</span></div>
+<div class="description"><pre class="code"> SB-ARCH-007</pre>, preset <pre class="code"> suppressionPolicy</pre>. Reports <pre class="code"> @SuppressWarnings</pre> values and <pre class="code"> //noinspection</pre> comments that switch off an architecture check (inspection short name or <pre class="code"> SB-ARCH-NNN</pre> code) unless every hidden rule or preset sets <pre class="code"> "allowSuppression": true</pre> in <pre class="code"> .spring-buddy/architecture.json</pre>. Cannot be suppressed itself.</div>
+</article>
+</div>
+</div>
 
 <div class="category-section">
 <div class="eyebrow">Async & Concurrency</div>
@@ -1067,7 +1115,7 @@ h2 .count {
 
 <div class="category-section">
 <div class="eyebrow pitfalls">Pitfalls</div>
-<h2 id="pitfalls">Pitfalls<span class="count">107 inspections</span></h2>
+<h2 id="pitfalls">Pitfalls<span class="count">105 inspections</span></h2>
 <div class="grid-list">
 <article class="card" data-level="error">
 <div class="class-name">SpringAsyncProxyPitfallInspection</div>
@@ -1133,16 +1181,6 @@ h2 .count {
 <div class="class-name">SpringConfigurationPropertiesNotRegisteredInspection</div>
 <div class="display-name">@ConfigurationProperties may not be registered<span class="badge yellow">WARNING</span></div>
 <div class="description">@ConfigurationProperties may not be registered</div>
-</article>
-<article class="card" data-level="warning">
-<div class="class-name">SpringControllerEntityReturnInspection</div>
-<div class="display-name">Controller should not return JPA entities directly<span class="badge yellow">WARNING</span></div>
-<div class="description">Controller should not return JPA entities directly</div>
-</article>
-<article class="card" data-level="warning">
-<div class="class-name">SpringControllerRepositoryInjectionInspection</div>
-<div class="display-name">Controller should not inject repositories directly<span class="badge yellow">WARNING</span></div>
-<div class="description">Controller should not inject repositories directly</div>
 </article>
 <article class="card" data-level="warning">
 <div class="class-name">SpringControllerTransactionalInspection</div>

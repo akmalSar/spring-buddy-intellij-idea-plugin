@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.sarhan.springformat"
-version = "1.0.14"
+version = "1.0.15"
 
 repositories {
     mavenCentral()
@@ -44,7 +44,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = "Spring Buddy"
-        version = "1.0.14"
+        version = "1.0.15"
         description = """
             <h2>Make invisible Spring runtime behavior visible.</h2>
               <p>
@@ -72,6 +72,15 @@ intellijPlatform {
               </p>
         """.trimIndent()
         changeNotes = """
+            <h3>1.0.15</h3>
+            <ul>
+              <li><b>New: architecture rules.</b> Put a <code>.spring-buddy/architecture.json</code> file in the project root to define layers (package patterns such as <code>com.acme.domain..</code> or <code>regex:...</code>) and rules such as "domain must not depend on web". Every reference that resolves to a forbidden type is reported: imports, including wildcard imports, fully-qualified names, annotations, field, parameter, return and generic types, and <code>extends</code>/<code>implements</code>. Unresolved types are never reported. Each rule sets its own severity, and ERROR findings block the Spring Buddy pre-commit check.</li>
+              <li><b>New presets:</b> <code>domainPurity</code> reports domain code that uses Spring Web, the Servlet API, JPA or persistence frameworks, with a configurable allowlist. <code>constructorInjection</code> reports <code>@Autowired</code>/<code>@Inject</code> fields in Spring components and is off by default. <code>SpringControllerEntityParameter</code> reports controller endpoints that accept a JPA entity as a parameter.</li>
+              <li><b>Configurable controller boundary checks:</b> the existing entity-return and repository-injection checks are now part of the <code>controllerBoundary</code> preset. They stay at WARNING without a config file and can be set to <code>error</code> or <code>off</code> per project. Their messages now start with the rule code, for example <code>[SB-ARCH-002 controller-repository-injection]</code>. Update any tooling that matches the old message text exactly.</li>
+              <li><b>Stable rule codes:</b> every architecture finding starts with <code>[SB-ARCH-NNN rule-id]</code>. The Markdown export has a new <code>## Architecture Violations</code> section with one line per finding: <code>SB-ARCH-NNN | SEVERITY | path:LINE | rule-id | message</code>.</li>
+              <li>Without a config file only the presets run, and never above WARNING. A malformed file falls back to the presets and shows one notification.</li>
+              <li><b>Fixed the pre-commit check on 2026.3:</b> since 2026.3 the VCS API lives in the bundled Version Control plugin. Spring Buddy now declares <code>com.intellij.modules.vcs</code>, so the commit handler loads instead of failing with <code>NoClassDefFoundError</code>.</li>
+            </ul>
             <h3>1.0.14</h3>
             <ul>
               <li><b>Fixed missed enum-typed query parameter bindings with dynamic entity names:</b> when the entity name is built at runtime (<code>"SELECT a FROM " + clazz + " a ..."</code>), the compared field was looked up across every module of the IDE project. In multi-project workspaces an unrelated entity with a same-named String field (for example <code>transferStatus</code> in another service) made the inspection give up silently. The lookup, and the lookup of the <code>FROM</code> entity name, now use the module's resolve scope: only entities the calling module can actually see are considered.</li>

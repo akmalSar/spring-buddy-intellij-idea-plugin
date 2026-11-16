@@ -1,0 +1,20 @@
+<html>
+<body>
+Reports fields annotated with <code>@Autowired</code> or <code>@Inject</code> in Spring stereotype classes
+(code <code>SB-ARCH-005</code>, preset <code>constructorInjection</code>).
+<p>
+    Field injection hides a class's dependencies, prevents <code>final</code> fields, and makes the class
+    impossible to create in a plain unit test without reflection or a Spring context. Inject dependencies
+    through a constructor instead (a single constructor needs no <code>@Autowired</code>):
+</p>
+<pre><code>@Service
+class OrderService {
+    private final OrderRepository repository;
+    OrderService(OrderRepository repository) { this.repository = repository; }
+}</code></pre>
+<p>
+    This preset is <b>off by default</b>. Enable it in <code>.spring-buddy/architecture.json</code> with
+    <code>"presets": { "constructorInjection": "warning" }</code> (or <code>"error"</code>).
+</p>
+</body>
+</html>

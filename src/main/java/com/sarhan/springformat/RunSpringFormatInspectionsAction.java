@@ -27,6 +27,7 @@ import com.intellij.codeHighlighting.HighlightDisplayLevel;
 import com.intellij.codeInspection.InspectionEngine;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ex.GlobalInspectionContextBase;
 import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.InspectionProfileImpl;
@@ -163,7 +164,10 @@ public class RunSpringFormatInspectionsAction extends AnAction {
                     continue;
                 }
                 InspectionToolWrapper<?, ?> wrapper = state.getTool();
-                if (!isConfiguredErrorTool(wrapper)) {
+                boolean errorTool = isConfiguredErrorTool(wrapper);
+                boolean architectureTool = !errorTool
+                        && SpringBuddySettingsUtil.isArchitectureTool(wrapper.getShortName());
+                if (!errorTool && !architectureTool) {
                     continue;
                 }
                 if (!(wrapper instanceof LocalInspectionToolWrapper localWrapper)) {
@@ -171,7 +175,9 @@ public class RunSpringFormatInspectionsAction extends AnAction {
                 }
 
                 for (ProblemDescriptor problem : inspectFile(psiFile, localWrapper, context)) {
-                    fileErrors.add(problem.getDescriptionTemplate());
+                    if (errorTool || isErrorProblem(problem)) {
+                        fileErrors.add(problem.getDescriptionTemplate());
+                    }
                 }
             }
             if (!fileErrors.isEmpty()) {
@@ -179,6 +185,16 @@ public class RunSpringFormatInspectionsAction extends AnAction {
             }
         }
         return errorsByFile;
+    }
+
+    /**
+     * Architecture tools are registered at WARNING; only the problems they
+     * report with ERROR severity (opted in via {@code architecture.json})
+     * block the commit.
+     */
+    private static boolean isErrorProblem(ProblemDescriptor problem) {
+        ProblemHighlightType type = problem.getHighlightType();
+        return type == ProblemHighlightType.ERROR || type == ProblemHighlightType.GENERIC_ERROR;
     }
 
     private static boolean isConfiguredErrorTool(InspectionToolWrapper<?, ?> wrapper) {

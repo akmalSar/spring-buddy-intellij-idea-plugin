@@ -91,10 +91,16 @@
                      enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringConfigurationPropertiesNotRegistered" enabled="true" level="WARNING"
                      enabled_by_default="true" groups="pitfalls"/>
-    <inspection_tool class="SpringControllerEntityReturn" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
+    <inspection_tool class="SpringControllerEntityReturn" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls,architecture"/>
+    <inspection_tool class="SpringControllerEntityParameter" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls,architecture"/>
     <inspection_tool class="SpringRequestMappingMissingMethod" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringControllerRepositoryInjection" enabled="true" level="WARNING"
-                     enabled_by_default="true" groups="pitfalls"/>
+                     enabled_by_default="true" groups="pitfalls,architecture"/>
+    <inspection_tool class="BannedApi" enabled="true" level="WARNING" enabled_by_default="true" groups="architecture"/>
+    <inspection_tool class="SuppressionPolicy" enabled="true" level="WARNING" enabled_by_default="true" groups="architecture"/>
+    <inspection_tool class="ForbiddenPackageDependency" enabled="true" level="WARNING" enabled_by_default="true" groups="architecture"/>
+    <inspection_tool class="DomainPurity" enabled="true" level="WARNING" enabled_by_default="true" groups="architecture"/>
+    <inspection_tool class="SpringConstructorInjection" enabled="true" level="WARNING" enabled_by_default="true" groups="architecture"/>
     <inspection_tool class="SpringControllerTransactional" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringMultipartFileUploadMissingValidation" enabled="true" level="WARNING" enabled_by_default="true" groups="pitfalls"/>
     <inspection_tool class="SpringJacksonLazyEntitySerialization" enabled="true" level="ERROR" enabled_by_default="true" groups="pitfalls"/>

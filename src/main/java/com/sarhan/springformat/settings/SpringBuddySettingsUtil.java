@@ -44,6 +44,15 @@ public final class SpringBuddySettingsUtil {
      */
     public static final String MIGRATION_GROUP_ID = "spring-boot 3 -> 4 migration";
 
+    /**
+     * Architecture rules ({@code SB-ARCH-*}). Tools in this group are registered
+     * at WARNING but report per-problem severities from
+     * {@code .spring-buddy/architecture.json}, so they are exempt from the
+     * minimum-level filter and the commit gate inspects their problems
+     * individually.
+     */
+    public static final String ARCHITECTURE_GROUP_ID = "architecture";
+
     private static final String PROFILE_RESOURCE = "/inspection/spring-format-builtin.xml";
 
     public static final List<String> LEVELS = List.of("ERROR", "WARNING", "WEAK WARNING", "INFO", "INFORMATION");
@@ -57,7 +66,8 @@ public final class SpringBuddySettingsUtil {
             new InspectionGroup("hibernate migration", "hibernate migration", "hibernate migration"),
             new InspectionGroup("spring-boot 2 -> 3 migration", "spring-boot 2 -> 3 migration", "spring-boot 2 -> 3 migration"),
             new InspectionGroup(MIGRATION_GROUP_ID, MIGRATION_GROUP_ID, MIGRATION_GROUP_ID),
-            new InspectionGroup("async-concurrency", "Async / concurrency", "Async / concurrency"));
+            new InspectionGroup("async-concurrency", "Async / concurrency", "Async / concurrency"),
+            new InspectionGroup(ARCHITECTURE_GROUP_ID, "Architecture", "Architecture"));
 
     private SpringBuddySettingsUtil() {
     }
@@ -91,6 +101,41 @@ public final class SpringBuddySettingsUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} when the bundled profile entry belongs to the architecture group.
+     */
+    public static boolean isArchitectureTool(Element tool) {
+        return splitGroups(tool.getAttributeValue("groups")).contains(ARCHITECTURE_GROUP_ID);
+    }
+
+    /**
+     * Returns {@code true} when the inspection with the given short name is an
+     * architecture tool in the bundled profile.
+     */
+    public static boolean isArchitectureTool(String shortName) {
+        return ArchitectureTools.NAMES.contains(shortName);
+    }
+
+    /**
+     * Lazily computed short names of the bundled architecture tools; the
+     * bundled profile is a read-only resource, so it is parsed only once.
+     */
+    private static final class ArchitectureTools {
+
+        private static final Set<String> NAMES = load();
+
+        private static Set<String> load() {
+            Set<String> names = new LinkedHashSet<>();
+            for (Element tool : loadBundledProfileTools()) {
+                String name = tool.getAttributeValue("class");
+                if (name != null && isArchitectureTool(tool)) {
+                    names.add(name);
+                }
+            }
+            return Set.copyOf(names);
+        }
     }
 
     public static HighlightDisplayLevel level(String levelName) {

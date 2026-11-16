@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "style": "hexagonal",
+  "includeTests": false,
+  "baselinedSeverity": "weak_warning",
+  "presets": {
+    "controllerBoundary": "error",
+    "domainPurity": "error",
+    "constructorInjection": {
+      "severity": "warning",
+      "allowSuppression": true
+    },
+    "suppressionPolicy": "error"
+  },
+  "layers": {
+    "domain": [
+      "com.acme.shop.domain.."
+    ],
+    "application": [
+      "com.acme.shop.application.."
+    ],
+    "web": [
+      "com.acme.shop.adapter.web.."
+    ],
+    "persistence": [
+      "com.acme.shop.adapter.persistence.."
+    ],
+    "infrastructure": [
+      "com.acme.shop.adapter..",
+      "com.acme.shop.config.."
+    ]
+  },
+  "domainPurityAllow": [],
+  "rules": [
+    {
+      "id": "domain-independent",
+      "from": "domain",
+      "mustNotDependOn": [
+        "application",
+        "infrastructure"
+      ],
+      "severity": "error",
+      "message": "Domain must not depend on application services or adapters",
+      "fixHint": "Move the type into the domain or depend on a port interface owned by the domain"
+    },
+    {
+      "id": "application-no-adapters",
+      "from": "application",
+      "mustNotDependOn": "infrastructure",
+      "severity": "error",
+      "message": "Application services use ports, not adapters"
+    },
+    {
+      "id": "web-no-persistence",
+      "from": "web",
+      "mustNotDependOn": "persistence",
+      "severity": "error",
+      "message": "Web adapters must go through application services, not persistence adapters"
+    },
+    {
+      "id": "persistence-no-web",
+      "from": "persistence",
+      "mustNotDependOn": [
+        "web",
+        "org.springframework.web.."
+      ],
+      "severity": "error",
+      "message": "Persistence adapters must not know the web layer"
+    },
+    {
+      "id": "no-legacy-utils",
+      "from": "com.acme.shop..",
+      "mustNotDependOn": "regex:com\\.acme\\.legacy(\\..*)?",
+      "severity": "warning",
+      "message": "Legacy utilities are being phased out",
+      "except": [
+        "com.acme.legacy.money.."
+      ]
+    }
+  ],
+  "bannedApis": [
+    {
+      "id": "no-legacy-date",
+      "symbol": "java.util.Date",
+      "allowedIn": [
+        "com.acme.shop.support.time.."
+      ],
+      "severity": "error",
+      "message": "Use the Clock wrapper instead of java.util.Date",
+      "fixHint": "Inject com.acme.shop.support.time.Clock and use java.time.Instant"
+    },
+    {
+      "id": "no-system-exit",
+      "symbol": "java.lang.System#exit",
+      "severity": "error",
+      "message": "Never terminate the JVM from application code",
+      "fixHint": "Throw an exception and let Spring Boot shut down"
+    }
+  ]
+}

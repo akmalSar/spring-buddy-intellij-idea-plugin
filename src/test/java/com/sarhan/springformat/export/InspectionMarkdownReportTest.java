@@ -65,6 +65,12 @@ public class InspectionMarkdownReportTest {
         assertTrue(report.contains("state the reason"));
         assertTrue(report.contains("flip that row's Done cell from '- [ ]' to '- [x]'"));
         assertTrue(report.contains("leave the box unchecked and state the reason in the Message cell"));
+        assertTrue(report.contains("False positives: if a finding does not hold because the inspection itself is wrong"));
+        assertTrue(report.contains("usually a directory named 'spring-buddy-intellij-idea-plugin'"));
+        assertTrue(report.contains("fork https://github.com/akmalSar/spring-buddy-intellij-idea-plugin"));
+        assertTrue(report.contains("submit a pull request"));
+        int commentEnd = report.indexOf("-->");
+        assertTrue(report.indexOf("False positives:") < commentEnd);
         assertTrue(report.contains("- Generated: 2026-10-23 18:00"));
         assertTrue(report.contains("- Project root: /Users/dev/project"));
         assertTrue(report.contains("- Scope: Spring Buddy"));
@@ -142,5 +148,58 @@ public class InspectionMarkdownReportTest {
         assertEquals("a \\| b text", InspectionMarkdownReport.cell("a | b\ntext"));
         assertEquals("unknown", InspectionMarkdownReport.cell(null));
         assertEquals("unknown", InspectionMarkdownReport.cell("   "));
+    }
+
+    @Test
+    public void listsArchitectureViolationsInStableFormat() {
+        InspectionMarkdownReport.InspectionSection rules = new InspectionMarkdownReport.InspectionSection(
+                "ForbiddenPackageDependency", "Forbidden package dependency", "WARNING", "Spring Buddy > Architecture",
+                "Custom rules.", List.of(
+                new InspectionMarkdownReport.Problem("src/main/java/com/acme/domain/Order.java", 7,
+                        "[SB-ARCH-001 domain-no-web] Forbidden dependency on com.acme.web.Api. Why: Domain must not "
+                                + "depend on web. Fix: Depend on a port. Suppressing or working around this check is "
+                                + "not a fix.",
+                        "ERROR"),
+                new InspectionMarkdownReport.Problem("src/main/java/com/acme/domain/Order.java", 3,
+                        "[SB-ARCH-001 domain-no-web] Forbidden dependency on com.acme.web.X | really. Fix: a | b. "
+                                + "Suppressing or working around this check is not a fix. [baselined]",
+                        "WEAK WARNING")));
+        InspectionMarkdownReport.InspectionSection controller = new InspectionMarkdownReport.InspectionSection(
+                "SpringControllerRepositoryInjection", "Controller injects repository", "WARNING",
+                "Spring Buddy > Architecture", "", List.of(
+                new InspectionMarkdownReport.Problem("src/main/java/com/acme/web/OrderController.java", 12,
+                        "[SB-ARCH-002 controller-repository-injection] Controller should not inject repositories",
+                        "WARNING")));
+        InspectionMarkdownReport.InspectionSection other = new InspectionMarkdownReport.InspectionSection(
+                "SpringAsyncWithoutExecutor", "Async", "ERROR", "", "", List.of(
+                new InspectionMarkdownReport.Problem("src/main/java/Foo.java", 1, "@Async default executor")));
+
+        String report = InspectionMarkdownReport.build("Spring Buddy", "/p", "2026-11-15 10:00",
+                List.of(controller, other, rules));
+
+        String expected = """
+                ## Architecture Violations
+
+                <!-- Format: SB-ARCH-NNN | SEVERITY | path/to/File.java:LINE | rule-id | message | fix | STATUS -->
+
+                SB-ARCH-001 | WEAK WARNING | src/main/java/com/acme/domain/Order.java:3 | domain-no-web | Forbidden dependency on com.acme.web.X \\| really | a \\| b | baselined
+                SB-ARCH-001 | ERROR | src/main/java/com/acme/domain/Order.java:7 | domain-no-web | Forbidden dependency on com.acme.web.Api. Why: Domain must not depend on web | Depend on a port | new
+                SB-ARCH-002 | WARNING | src/main/java/com/acme/web/OrderController.java:12 | controller-repository-injection | Controller should not inject repositories | - | new
+                """;
+        assertTrue(report, report.contains(expected));
+        assertTrue(report.indexOf("## Architecture Violations") < report.indexOf("## SpringControllerRepositoryInjection"));
+        assertFalse(report.contains("src/main/java/Foo.java:1"));
+        assertEquals(4, countUncheckedTasks(report));
+    }
+
+    @Test
+    public void omitsArchitectureSectionWithoutArchitectureFindings() {
+        InspectionMarkdownReport.InspectionSection other = new InspectionMarkdownReport.InspectionSection(
+                "SpringAsyncWithoutExecutor", "Async", "ERROR", "", "", List.of(
+                new InspectionMarkdownReport.Problem("src/main/java/Foo.java", 1, "@Async default executor")));
+        String report = InspectionMarkdownReport.build("Spring Buddy", "/p", "2026-11-15 10:00", List.of(other));
+        assertFalse(report.contains("## Architecture Violations"));
+        String empty = InspectionMarkdownReport.build("Spring Buddy", "/p", "2026-11-15 10:00", List.of());
+        assertFalse(empty.contains("## Architecture Violations"));
     }
 }
