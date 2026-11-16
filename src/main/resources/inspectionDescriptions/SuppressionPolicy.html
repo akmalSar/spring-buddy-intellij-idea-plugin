@@ -1,0 +1,26 @@
+<html>
+<body>
+Reports <code>@SuppressWarnings</code> values and <code>//noinspection</code> comments that switch off a Spring Buddy
+architecture check (code <code>SB-ARCH-007</code>).
+<p>
+    A suppressed architecture finding disappears from the editor, the pre-commit check and the Markdown export, but
+    the violation stays in the code. Coding agents in particular tend to suppress a failing check instead of fixing
+    the cause. This inspection reports every token that targets an architecture check: an inspection short name such as
+    <code>DomainPurity</code>, <code>BannedApi</code> or <code>ForbiddenPackageDependency</code>, or a code such as
+    <code>SB-ARCH-004</code>.
+</p>
+<p>
+    A suppression is accepted only when every rule or preset it hides has <code>"allowSuppression": true</code> in
+    <code>.spring-buddy/architecture.json</code> (on a rule, a <code>bannedApis</code> entry, or a preset object).
+    This inspection cannot be suppressed itself. Severity comes from the <code>suppressionPolicy</code> preset
+    (WARNING by default, <code>error</code> to block commits, <code>off</code> to disable).
+</p>
+<p>
+    Fix: remove the suppression and fix the violation. For an intended exception, add it to the rule's
+    <code>except</code> or the banned API's <code>allowedIn</code>, or accept existing violations with
+    <em>Tools | Spring Buddy Architecture | Generate / Refresh Architecture Baseline</em>.
+</p>
+<pre><code>"presets": { "suppressionPolicy": "error",
+             "constructorInjection": { "severity": "warning", "allowSuppression": true } }</code></pre>
+</body>
+</html>

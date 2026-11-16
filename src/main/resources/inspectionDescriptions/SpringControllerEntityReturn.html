@@ -2,5 +2,7 @@
 <body><h2>Controller returns JPA entity</h2>
 <p>Reports Spring MVC controller methods that return likely JPA entity types directly. Returning entities from
     controllers leaks persistence models, couples API shape to database state, and often relies on lazy loading or Open
-    Session In View. Prefer DTOs or response models.</p></body>
+    Session In View. Prefer DTOs or response models.</p>
+<p>Code <code>SB-ARCH-003</code>, preset <code>controllerBoundary</code>: the severity follows <code>.spring-buddy/architecture.json</code>
+    (WARNING by default, <code>error</code> or <code>off</code> when configured).</p></body>
 </html>

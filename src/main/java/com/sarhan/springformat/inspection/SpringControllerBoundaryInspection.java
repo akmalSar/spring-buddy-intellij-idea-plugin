@@ -37,15 +37,26 @@ import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiReturnStatement;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeElement;
+import com.sarhan.springformat.architecture.ArchitectureConfig;
+import com.sarhan.springformat.architecture.ArchitectureConfigService;
+import com.sarhan.springformat.architecture.ArchitecturePresets;
+import com.sarhan.springformat.architecture.ArchitectureProblem;
+import com.sarhan.springformat.architecture.ArchitectureReporter;
+import com.sarhan.springformat.architecture.ArchitectureSeverity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Base inspection for controller-layer boundary violations:
  * <ul>
- *   <li>Returning JPA entities directly from REST endpoints</li>
- *   <li>Injecting repositories directly into controllers</li>
+ *   <li>Returning JPA entities directly from REST endpoints ({@code SB-ARCH-003})</li>
+ *   <li>Accepting JPA entities as request-mapped method parameters ({@code SB-ARCH-003})</li>
+ *   <li>Injecting repositories directly into controllers ({@code SB-ARCH-002})</li>
  *   <li>Defining {@code @Transactional} boundaries on controllers</li>
  * </ul>
+ * The entity and repository checks belong to the {@code controllerBoundary}
+ * architecture preset: their severity (or {@code off}) comes from
+ * {@code .spring-buddy/architecture.json}, defaulting to WARNING.
  *
  * @author Akmal Sarhan
  */
@@ -58,13 +69,14 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
         if (!SpringInspectionUtil.isInJavaFile(holder.getFile())) {
             return PsiElementVisitor.EMPTY_VISITOR;
         }
+        ArchitectureReporter reporter = ArchitectureReporter.create(holder);
         return new JavaElementVisitor() {
             @Override
             public void visitClass(@NotNull PsiClass psiClass) {
                 if (!isController(psiClass)) {
                     return;
                 }
-                inspectClass(psiClass, holder);
+                inspectClass(psiClass, holder, reporter);
             }
 
             @Override
@@ -73,7 +85,7 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
                 if (psiClass == null || !isController(psiClass)) {
                     return;
                 }
-                inspectMethod(method, holder);
+                inspectMethod(method, holder, reporter);
             }
         };
     }
@@ -81,7 +93,38 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
     protected void inspectClass(PsiClass psiClass, ProblemsHolder holder) {
     }
 
+    /**
+     * Architecture checks override this variant to report through the
+     * baseline-aware reporter of the inspected file.
+     */
+    protected void inspectClass(PsiClass psiClass, ProblemsHolder holder, ArchitectureReporter reporter) {
+        inspectClass(psiClass, holder);
+    }
+
+    /**
+     * Severity of the {@code controllerBoundary} preset for the file being inspected.
+     */
+    static ArchitectureSeverity controllerBoundarySeverity(ProblemsHolder holder) {
+        ArchitectureConfig config = ArchitectureConfigService.getInstance(holder.getProject()).getConfig();
+        return config.presetSeverity(ArchitectureConfig.PRESET_CONTROLLER_BOUNDARY);
+    }
+
+    /**
+     * Reports a {@code controllerBoundary} finding through the baseline-aware reporter.
+     */
+    static void reportBoundary(ProblemsHolder holder, ArchitectureReporter reporter, PsiElement anchor,
+                               ArchitectureSeverity severity, String code,
+                               String ruleId, String what, String why, String builtInFix) {
+        ArchitectureConfig config = ArchitectureConfigService.getInstance(holder.getProject()).getConfig();
+        String fix = ArchitecturePresets.fixHint(config, ArchitectureConfig.PRESET_CONTROLLER_BOUNDARY, builtInFix);
+        reporter.report(anchor, null, code, ruleId, severity, ArchitectureProblem.text(what, why, fix));
+    }
+
     protected void inspectMethod(PsiMethod method, ProblemsHolder holder) {
+    }
+
+    protected void inspectMethod(PsiMethod method, ProblemsHolder holder, ArchitectureReporter reporter) {
+        inspectMethod(method, holder);
     }
 
     private static boolean isController(PsiClass psiClass) {
@@ -297,9 +340,43 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
                 || "created".equals(name) || "accepted".equals(name));
     }
 
+    private static final String[] REQUEST_MAPPINGS = {
+            "org.springframework.web.bind.annotation.RequestMapping",
+            "org.springframework.web.bind.annotation.GetMapping",
+            "org.springframework.web.bind.annotation.PostMapping",
+            "org.springframework.web.bind.annotation.PutMapping",
+            "org.springframework.web.bind.annotation.PatchMapping",
+            "org.springframework.web.bind.annotation.DeleteMapping" };
+
+    private static boolean isRequestMapped(PsiMethod method) {
+        return SpringInspectionUtil.findAnyAnnotation(method.getModifierList(), REQUEST_MAPPINGS) != null;
+    }
+
+    /**
+     * Returns {@code true} when the type is a JPA entity or a generic type
+     * whose (nested) type arguments contain one, e.g. {@code List<User>}.
+     */
+    private static boolean containsJpaEntityType(PsiType type) {
+        if (isJpaEntityType(type)) {
+            return true;
+        }
+        if (type instanceof PsiClassType classType) {
+            for (PsiType parameter : classType.getParameters()) {
+                if (containsJpaEntityType(parameter)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static class EntityReturn extends SpringControllerBoundaryInspection {
         @Override
-        protected void inspectMethod(PsiMethod method, ProblemsHolder holder) {
+        protected void inspectMethod(PsiMethod method, ProblemsHolder holder, ArchitectureReporter reporter) {
+            ArchitectureSeverity severity = controllerBoundarySeverity(holder);
+            if (severity.isOff()) {
+                return;
+            }
             if (!returnsLikelyEntity(method)) {
                 return;
             }
@@ -310,22 +387,53 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
                 return;
             }
             PsiIdentifier nameIdentifier = method.getNameIdentifier();
-            holder.registerProblem((nameIdentifier != null) ? nameIdentifier : method,
-                    "Controller returns a JPA entity directly; return a DTO or response model instead",
-                    ProblemHighlightType.WARNING);
+            reportBoundary(holder, reporter, (nameIdentifier != null) ? nameIdentifier : method, severity,
+                    ArchitecturePresets.CODE_CONTROLLER_ENTITY, ArchitecturePresets.RULE_CONTROLLER_ENTITY_RETURN,
+                    "Controller returns a JPA entity directly",
+                    "serializing entities leaks the persistence model and can trigger lazy loading outside the "
+                            + "transaction",
+                    "Map the entity to a response DTO in the service or a mapper and return the DTO");
+        }
+    }
+
+    public static class EntityParameter extends SpringControllerBoundaryInspection {
+        @Override
+        protected void inspectMethod(PsiMethod method, ProblemsHolder holder, ArchitectureReporter reporter) {
+            if (!isRequestMapped(method)) {
+                return;
+            }
+            ArchitectureSeverity severity = controllerBoundarySeverity(holder);
+            if (severity.isOff()) {
+                return;
+            }
+            for (PsiParameter parameter : method.getParameterList().getParameters()) {
+                if (!containsJpaEntityType(parameter.getType())) {
+                    continue;
+                }
+                PsiElement anchor = parameterAnchor(parameter);
+                if (anchor != null) {
+                    reportBoundary(holder, reporter, anchor, severity, ArchitecturePresets.CODE_CONTROLLER_ENTITY,
+                            ArchitecturePresets.RULE_CONTROLLER_ENTITY_PARAMETER,
+                            "Controller endpoint accepts a JPA entity",
+                            "binding request data onto entities allows mass assignment of persistent fields",
+                            "Bind a request DTO and let the service map it onto the entity");
+                }
+            }
         }
     }
 
     public static class RepositoryInjection extends SpringControllerBoundaryInspection {
         @Override
-        protected void inspectClass(PsiClass psiClass, ProblemsHolder holder) {
+        protected void inspectClass(PsiClass psiClass, ProblemsHolder holder, ArchitectureReporter reporter) {
+            ArchitectureSeverity severity = controllerBoundarySeverity(holder);
+            if (severity.isOff()) {
+                return;
+            }
             for (PsiField field : psiClass.getFields()) {
                 if (isRepositoryType(field.getType())) {
                     PsiElement anchor = fieldAnchor(field);
                     if (anchor != null) {
-                        holder.registerProblem(anchor,
-                                "Controller should not inject repositories directly; use a service boundary",
-                                ProblemHighlightType.WARNING);
+                        reportRepository(holder, reporter, anchor, severity);
                     }
                 }
             }
@@ -334,14 +442,20 @@ public abstract class SpringControllerBoundaryInspection extends AbstractBaseJav
                     if (isRepositoryType(parameter.getType())) {
                         PsiElement anchor = parameterAnchor(parameter);
                         if (anchor != null) {
-                            holder.registerProblem(anchor,
-                                    "Controller should not inject repositories directly; use a service boundary",
-                                    ProblemHighlightType.WARNING);
+                            reportRepository(holder, reporter, anchor, severity);
                         }
                     }
                 }
             }
         }
+    }
+
+    private static void reportRepository(ProblemsHolder holder, ArchitectureReporter reporter, PsiElement anchor,
+                                         ArchitectureSeverity severity) {
+        reportBoundary(holder, reporter, anchor, severity, ArchitecturePresets.CODE_CONTROLLER_REPOSITORY,
+                ArchitecturePresets.RULE_CONTROLLER_REPOSITORY, "Controller injects a repository directly",
+                "business rules and transaction boundaries belong in the service layer",
+                "Move the repository access into a service method and inject that service");
     }
 
     public static class TransactionalController extends SpringControllerBoundaryInspection {

@@ -1,0 +1,34 @@
+<html>
+<body>
+Reports domain classes that depend on Spring Web, the Servlet API, JPA and persistence frameworks, or the
+infrastructure layer (code <code>SB-ARCH-004</code>, preset <code>domainPurity</code>).
+<p>
+    Domain classes are those in the <code>domain</code> layer of <code>.spring-buddy/architecture.json</code>,
+    or in any <code>..domain..</code> package when no layer is defined. Forbidden:
+</p>
+<ul>
+    <li><code>domain-no-web</code>: <code>org.springframework.web..</code>, <code>org.springframework.http..</code>,
+        <code>jakarta.servlet..</code>, <code>javax.servlet..</code></li>
+    <li><code>domain-no-persistence</code> (<code>"style": "hexagonal"</code> only): <code>jakarta.persistence..</code>,
+        <code>javax.persistence..</code>, <code>org.hibernate..</code>, <code>org.springframework.data..</code>,
+        <code>org.springframework.jdbc..</code>, <code>org.springframework.orm..</code></li>
+    <li><code>domain-no-infrastructure</code>: the <code>infrastructure</code> layer, when it is defined</li>
+</ul>
+<p>
+    The checks depend on the declared <code>"style"</code>:
+</p>
+<ul>
+    <li><code>layered</code> (default): the usual JHipster / Spring Initializr layout where the <code>domain</code>
+        or <code>entity</code> package holds JPA entities. The preset is off unless configured explicitly, JPA
+        types are allowed, and classes annotated <code>@Entity</code>, <code>@Embeddable</code> or
+        <code>@MappedSuperclass</code> are never reported.</li>
+    <li><code>hexagonal</code>: ports and adapters. The preset runs at WARNING by default and the domain must
+        not know JPA either. A domain that knows HTTP or the ORM cannot be tested or reused without them.
+        To accept selected types, use
+        <code>"domainPurityAllow": ["jakarta.persistence.Embeddable", "jakarta.persistence.Id"]</code>.</li>
+</ul>
+<p>
+    Set <code>"presets": { "domainPurity": "error" }</code> to block commits, or <code>"off"</code> to disable it.
+</p>
+</body>
+</html>

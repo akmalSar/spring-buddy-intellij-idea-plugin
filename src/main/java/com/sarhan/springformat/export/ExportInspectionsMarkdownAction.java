@@ -32,6 +32,7 @@ import com.intellij.codeInsight.daemon.HighlightDisplayKey;
 import com.intellij.codeInspection.CommonProblemDescriptor;
 import com.intellij.codeInspection.InspectionProfile;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ex.InspectionToolWrapper;
 import com.intellij.codeInspection.ui.InspectionResultsView;
 import com.intellij.codeInspection.ui.InspectionTreeNode;
@@ -258,7 +259,29 @@ public class ExportInspectionsMarkdownAction extends AnAction {
         }
         Location location = resolveLocation(project, node);
         String message = messageText(node, descriptor);
-        return new InspectionMarkdownReport.Problem(location.filePath(), location.line(), message);
+        return new InspectionMarkdownReport.Problem(location.filePath(), location.line(), message,
+                severityOf(descriptor));
+    }
+
+    /**
+     * Severity a problem was registered with when it is explicit (architecture
+     * rules set it per problem); {@code null} means "the inspection's level".
+     */
+    private static String severityOf(CommonProblemDescriptor descriptor) {
+        if (!(descriptor instanceof ProblemDescriptor problemDescriptor)) {
+            return null;
+        }
+        ProblemHighlightType type = problemDescriptor.getHighlightType();
+        if (type == ProblemHighlightType.ERROR || type == ProblemHighlightType.GENERIC_ERROR) {
+            return HighlightDisplayLevel.ERROR.getName();
+        }
+        if (type == ProblemHighlightType.WARNING) {
+            return HighlightDisplayLevel.WARNING.getName();
+        }
+        if (type == ProblemHighlightType.WEAK_WARNING) {
+            return HighlightDisplayLevel.WEAK_WARNING.getName();
+        }
+        return null;
     }
 
     private static Location resolveLocation(Project project, ProblemDescriptionNode node) {

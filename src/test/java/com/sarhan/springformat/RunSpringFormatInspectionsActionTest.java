@@ -24,6 +24,7 @@ import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
 import com.intellij.codeInspection.ex.ScopeToolState;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
+import com.sarhan.springformat.inspection.ForbiddenPackageDependencyInspection;
 import com.sarhan.springformat.inspection.SpringJpaEntityMissingIdInspection;
 
 /**
@@ -37,6 +38,43 @@ public class RunSpringFormatInspectionsActionTest extends BasePlatformTestCase {
 
     public void testCollectErrorInspectionsUsesBundledLevelWhenProfileLevelIsOverridden() {
         assertCollectsJpaEntityMissingId(HighlightDisplayLevel.WARNING);
+    }
+
+    public void testCollectErrorInspectionsBlocksArchitectureErrorFromConfig() {
+        this.myFixture.addFileToProject(".spring-buddy/architecture.json", """
+                { "version": 1, "rules": [ { "id": "domain-no-web", "from": "com.acme.domain..",
+                  "mustNotDependOn": "com.acme.web..", "severity": "error" } ] }
+                """);
+        Map<String, List<String>> errors = collectArchitecture();
+        assertContainsElements(errors.get("Order.java"),
+                "[SB-ARCH-001 domain-no-web] Forbidden dependency on com.acme.web.Api. Fix: Move this code into a layer "
+                        + "that may use the dependency, or depend on an interface owned by this layer and implement "
+                        + "it in the layer that may. Suppressing or working around this check is not a fix.");
+    }
+
+    public void testCollectErrorInspectionsIgnoresArchitectureWarnings() {
+        this.myFixture.addFileToProject(".spring-buddy/architecture.json", """
+                { "version": 1, "rules": [ { "id": "domain-no-web", "from": "com.acme.domain..",
+                  "mustNotDependOn": "com.acme.web..", "severity": "warning" } ] }
+                """);
+        assertTrue(collectArchitecture().isEmpty());
+    }
+
+    private Map<String, List<String>> collectArchitecture() {
+        this.myFixture.addFileToProject("com/acme/web/Api.java", """
+                package com.acme.web;
+                public class Api { }
+                """);
+        VirtualFile file = this.myFixture.addFileToProject("com/acme/domain/Order.java", """
+                package com.acme.domain;
+                import com.acme.web.Api;
+                public class Order { Api api; }
+                """).getVirtualFile();
+        ScopeToolState state = new ScopeToolState("Test",
+                new LocalInspectionToolWrapper(new ForbiddenPackageDependencyInspection()), true,
+                HighlightDisplayLevel.WARNING);
+        return RunSpringFormatInspectionsAction.collectErrorInspections(getProject(), new VirtualFile[] { file },
+                List.of(state));
     }
 
     private void assertCollectsJpaEntityMissingId(HighlightDisplayLevel profileLevel) {

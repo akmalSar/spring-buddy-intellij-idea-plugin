@@ -28,6 +28,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager;
+import com.sarhan.springformat.architecture.ArchitectureConfigService;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,6 +61,7 @@ public final class SpringBuddySettingsSynchronizer {
         SpringBuddySettingsState settings = SpringBuddySettingsState.getInstance();
         HighlightDisplayLevel minimumLevel = SpringBuddySettingsUtil.level(settings.getInspectionLevel());
         Set<String> enabledGroups = settings.getEnabledGroups();
+        boolean architectureConfigured = ArchitectureConfigService.getInstance(project).getConfig().fromFile();
         for (Element tool : SpringBuddySettingsUtil.loadBundledProfileTools()) {
             String toolName = tool.getAttributeValue("class");
             if (toolName == null) {
@@ -70,8 +72,9 @@ public final class SpringBuddySettingsSynchronizer {
                 continue;
             }
             HighlightDisplayLevel toolLevel = SpringBuddySettingsUtil.toolLevel(tool);
-            boolean enabled = SpringBuddySettingsUtil.isEnabled(toolGroups(tool), enabledGroups)
-                    && toolLevel.getSeverity().compareTo(minimumLevel.getSeverity()) >= 0;
+            boolean levelAllowed = toolLevel.getSeverity().compareTo(minimumLevel.getSeverity()) >= 0
+                    || (architectureConfigured && SpringBuddySettingsUtil.isArchitectureTool(tool));
+            boolean enabled = SpringBuddySettingsUtil.isEnabled(toolGroups(tool), enabledGroups) && levelAllowed;
             state.setEnabled(enabled);
             state.setLevel(toolLevel);
             ToolsImpl tools = profile.getToolsOrNull(toolName, project);

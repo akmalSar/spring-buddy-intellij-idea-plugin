@@ -1,0 +1,28 @@
+<html>
+<body>
+Reports uses of a banned class, annotation or method from the <code>bannedApis</code> section of
+<code>.spring-buddy/architecture.json</code> outside the packages where it is allowed (code <code>SB-ARCH-006</code>).
+<p>
+    Teams often route a risky or legacy API through one wrapper package (a clock abstraction instead of
+    <code>java.util.Date</code>, a mail gateway instead of a raw client). Uses outside that package bypass
+    the wrapper's policy: time zones, retries, auditing or tenant handling silently stop applying.
+</p>
+<p>
+    <code>symbol</code> is a fully-qualified type or annotation (<code>java.util.Date</code>) or a method written
+    as <code>Type#method</code> (all overloads). The symbol is matched against the PSI-resolved target, so
+    lookalike names and unresolved references are never reported. Banned types are reported once per file, at
+    the import or the first use. Banned methods are reported at every call and method reference, including
+    calls through subclasses that override the method. <code>allowedIn</code> accepts package patterns or layer
+    names. Test sources are skipped unless <code>includeTests</code> is <code>true</code>.
+</p>
+<p>
+    The severity comes from each entry (<code>error</code>, <code>warning</code>, <code>weak_warning</code>,
+    <code>off</code>). ERROR findings block the Spring Buddy pre-commit check. Fix the finding by calling the
+    wrapper from the allowed package instead; <code>fixHint</code> names the replacement.
+</p>
+<p>Example entry:</p>
+<pre><code>{ "id": "no-legacy-date", "symbol": "java.util.Date", "allowedIn": ["com.acme.support.time.."],
+  "severity": "error", "message": "Use the Clock wrapper",
+  "fixHint": "inject com.acme.support.time.Clock and use Instant" }</code></pre>
+</body>
+</html>

@@ -11,6 +11,12 @@
          no intellij.platform.ui.jcef parent and JBCef* classes throw
          NoClassDefFoundError. -->
     <depends>com.intellij.modules.jcef</depends>
+    <!-- Since 2026.3 the VCS API (CheckinHandlerFactory, CheckinProjectPanel,
+         RefreshableOnComponent) lives in the bundled Version Control plugin
+         (com.intellij.platform.vcs). Its com.intellij.modules.vcs alias also
+         exists on 261/262, so this keeps the 261+ range and gives the
+         pre-commit handler its classloader parent on 263. -->
+    <depends>com.intellij.modules.vcs</depends>
     <depends>com.intellij.java</depends>
     <depends>com.intellij.spring</depends>
     <depends>com.intellij.spring.data</depends>
@@ -29,6 +35,7 @@
                 instance="com.sarhan.springformat.settings.SpringBuddyProjectConfigurable"
         />
         <checkinHandlerFactory implementation="com.sarhan.springformat.git.SpringBuddyCheckinHandlerFactory"/>
+        <notificationGroup id="Spring Buddy" displayType="BALLOON"/>
         <!-- ──────────────────────────────────────────────────────────────
                      Transaction Flow Diagram — Project-Level Service
                      Service.Level.PROJECT light service; no ProjectComponent.
@@ -1838,18 +1845,78 @@
                 language="JAVA"
                 shortName="SpringControllerEntityReturn"
                 displayName="Controller should not return JPA entities directly"
-                groupName="Controller boundary"
-                groupPath="Spring Buddy,2. pitfalls"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
                 enabledByDefault="true"
                 level="WARNING"
                 implementationClass="com.sarhan.springformat.inspection.SpringControllerBoundaryInspection$EntityReturn"
         />
         <localInspection
                 language="JAVA"
+                shortName="SpringControllerEntityParameter"
+                displayName="Controller endpoint should not accept JPA entities"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringControllerBoundaryInspection$EntityParameter"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="BannedApi"
+                displayName="Banned API used outside its allowed packages (architecture.json)"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.BannedApiInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SuppressionPolicy"
+                displayName="Architecture check suppressed without permission (SB-ARCH-*)"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SuppressionPolicyInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="ForbiddenPackageDependency"
+                displayName="Forbidden package dependency (architecture.json rule)"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.ForbiddenPackageDependencyInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="DomainPurity"
+                displayName="Domain code depends on web, persistence or infrastructure"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.DomainPurityInspection"
+        />
+        <localInspection
+                language="JAVA"
+                shortName="SpringConstructorInjection"
+                displayName="Field injection in Spring component (prefer constructor injection)"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
+                enabledByDefault="true"
+                level="WARNING"
+                implementationClass="com.sarhan.springformat.inspection.SpringConstructorInjectionInspection"
+        />
+        <localInspection
+                language="JAVA"
                 shortName="SpringControllerRepositoryInjection"
                 displayName="Controller should not inject repositories directly"
-                groupName="Controller boundary"
-                groupPath="Spring Buddy,2. pitfalls"
+                groupName="Architecture"
+                groupPath="Spring Buddy"
                 enabledByDefault="true"
                 level="WARNING"
                 implementationClass="com.sarhan.springformat.inspection.SpringControllerBoundaryInspection$RepositoryInjection"
@@ -2452,5 +2519,20 @@
         >
             <add-to-group group-id="InspectionToolWindow.TreePopup" anchor="last"/>
         </action>
+        <group id="SpringBuddy.ArchitectureBaseline" text="Spring Buddy Architecture" popup="true">
+            <action
+                    id="SpringBuddy.ArchitectureBaseline.Update"
+                    class="com.sarhan.springformat.architecture.ArchitectureBaselineAction"
+                    text="Generate / Refresh Architecture Baseline"
+                    description="Write all current architecture violations to .spring-buddy/architecture-baseline.json so that only new violations keep their severity"
+            />
+            <action
+                    id="SpringBuddy.ArchitectureBaseline.Check"
+                    class="com.sarhan.springformat.architecture.ArchitectureBaselineAction$Check"
+                    text="Check Architecture Baseline"
+                    description="Report new architecture violations and stale entries of .spring-buddy/architecture-baseline.json"
+            />
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
     </actions>
 </idea-plugin>

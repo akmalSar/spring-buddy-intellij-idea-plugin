@@ -1,0 +1,12 @@
+<html>
+<body><h2>Controller endpoint accepts JPA entity</h2>
+<p>Reports parameters of request-mapped controller methods (<code>@RequestMapping</code>, <code>@GetMapping</code>,
+    <code>@PostMapping</code>, ...) whose type is a JPA entity or contains one, such as <code>List&lt;User&gt;</code>
+    (code <code>SB-ARCH-003</code>, preset <code>controllerBoundary</code>).</p>
+<p>Binding request data straight into an entity lets clients set any mapped field (mass assignment), couples the API
+    contract to the database schema, and tempts code to save a detached object built from the request. Bind a request
+    DTO and map it to the entity in the service layer.</p>
+<p>The severity follows the <code>controllerBoundary</code> preset of <code>.spring-buddy/architecture.json</code>
+    (WARNING by default, <code>error</code> or <code>off</code> when configured).</p>
+</body>
+</html>

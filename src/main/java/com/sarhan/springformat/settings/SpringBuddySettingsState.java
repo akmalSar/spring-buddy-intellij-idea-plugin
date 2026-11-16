@@ -67,7 +67,8 @@ public final class SpringBuddySettingsState implements PersistentStateComponent<
      * silently disable the new group. {@code knownGroups} records which group ids the
      * plugin version that wrote the state already knew; any default group missing from
      * that list is newly introduced and gets adopted once. Legacy state written before
-     * {@code knownGroups} existed knew every default group except the migration group.
+     * {@code knownGroups} existed knew every default group except the migration and
+     * architecture groups.
      */
     private void migrateGroupIds() {
         List<String> defaultIds = new ArrayList<>(SpringBuddySettingsUtil.defaultGroupIds());
@@ -75,6 +76,7 @@ public final class SpringBuddySettingsState implements PersistentStateComponent<
         if (knownGroups == null || knownGroups.isEmpty()) {
             knownGroups = new ArrayList<>(defaultIds);
             knownGroups.remove(SpringBuddySettingsUtil.MIGRATION_GROUP_ID);
+            knownGroups.remove(SpringBuddySettingsUtil.ARCHITECTURE_GROUP_ID);
         }
         for (String groupId : defaultIds) {
             if (!knownGroups.contains(groupId) && !this.state.enabledGroups.contains(groupId)) {

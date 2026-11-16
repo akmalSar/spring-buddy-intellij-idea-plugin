@@ -1,0 +1,28 @@
+<html>
+<body>
+Reports references that break a custom dependency rule from <code>.spring-buddy/architecture.json</code>
+(code <code>SB-ARCH-001</code>).
+<p>
+    Each rule names the packages it constrains (<code>from</code>) and the packages they must not use
+    (<code>mustNotDependOn</code>). Both accept layer names from <code>layers</code> or package patterns:
+    <code>com.acme.domain..</code> (package and subpackages), <code>..domain..</code>, <code>com.acme.*</code>,
+    or <code>regex:...</code>. <code>except</code> patterns exempt a target type or a source class.
+</p>
+<p>
+    A dependency is any resolved reference: imports (including wildcard imports), fully-qualified names,
+    annotations, field, parameter, return and generic types, <code>extends</code>/<code>implements</code>,
+    <code>new</code> and static calls. Unresolved types are never reported. Each forbidden type is reported once
+    per file, at its import or otherwise at its first use. Test sources are skipped unless
+    <code>includeTests</code> is <code>true</code>.
+</p>
+<p>
+    The severity comes from the rule (<code>error</code>, <code>warning</code>, <code>weak_warning</code>,
+    <code>off</code>). ERROR findings block the Spring Buddy pre-commit check. Without a config file this
+    inspection reports nothing. Fix the finding by moving the code to the right layer or by depending on an
+    abstraction owned by the source layer, for example a port interface.
+</p>
+<p>Example rule:</p>
+<pre><code>{ "id": "domain-no-web", "from": "domain", "mustNotDependOn": "web",
+  "severity": "error", "message": "Domain must not know the web layer" }</code></pre>
+</body>
+</html>

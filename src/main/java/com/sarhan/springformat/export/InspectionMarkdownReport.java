@@ -24,6 +24,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sarhan.springformat.architecture.ArchitectureProblem;
+
 /**
  * Builds a Markdown report from inspection results, formatted for machine
  * consumption by an AI agent: stable inspection IDs, a metadata header, and a
@@ -38,15 +40,31 @@ public final class InspectionMarkdownReport {
 
     private static final String UNKNOWN_CELL = "unknown";
 
+    static final String PLUGIN_REPOSITORY_URL = "https://github.com/akmalSar/spring-buddy-intellij-idea-plugin";
+
+    static final String FALSE_POSITIVE_NOTE = "False positives: if a finding does not hold because the inspection "
+            + "itself is wrong (not because the code is an exception), fix the inspection, not the project code. "
+            + "First check whether the workspace contains the Spring Buddy plugin source, usually a directory named "
+            + "'spring-buddy-intellij-idea-plugin'. If it does, fix the false positive there: adjust the inspection, "
+            + "add a negative test that reproduces the finding, and run the plugin test suite. Otherwise, tell the "
+            + "user to fork " + PLUGIN_REPOSITORY_URL + ", fix the inspection with a reproducing test, and submit a "
+            + "pull request. In both cases leave the task unchecked and note 'false positive' and the reason in the "
+            + "Message cell.\n";
+
     private InspectionMarkdownReport() {
     }
 
     /**
      * A single problem occurrence: the file it belongs to (path relative to
      * the project root), the one-based line number ({@code -1} when unknown),
-     * and the problem message.
+     * the problem message, and the severity the problem was reported with
+     * ({@code null} when it is the inspection's level).
      */
-    public record Problem(String filePath, int line, String message) {
+    public record Problem(String filePath, int line, String message, String severity) {
+
+        public Problem(String filePath, int line, String message) {
+            this(filePath, line, message, null);
+        }
     }
 
     /**
@@ -94,6 +112,11 @@ public final class InspectionMarkdownReport {
         sb.append("Verify a finding by opening the listed file at the listed 1-based line number. ");
         sb.append("Line 'unknown' means the platform could not resolve a line for the descriptor.\n");
         sb.append("\n");
+        sb.append("Architecture rule findings are additionally listed in the 'Architecture Violations' section, ");
+        sb.append("one per line: '" + ARCHITECTURE_FORMAT + "'. STATUS is 'new' (blocks the commit when ");
+        sb.append("SEVERITY is ERROR) or 'baselined' (accepted in .spring-buddy/architecture-baseline.json). ");
+        sb.append("Apply the root-cause fix from the fix field; suppressing or working around a check is not a fix.\n");
+        sb.append("\n");
         sb.append("Every row in an Occurrences table is a task with a Done checkbox ('- [ ]'). ");
         sb.append("Verify the finding first, fix it second: a task is only marked done after the fix ");
         sb.append("was applied and verified. Mark a task finished by changing its Done cell from ");
@@ -109,6 +132,8 @@ public final class InspectionMarkdownReport {
         sb.append("tests pass, then flip that row's Done cell from '- [ ]' to '- [x]'. If you cannot ");
         sb.append("safely fix a task, leave the box unchecked and state the reason in the Message cell ");
         sb.append("instead.\" Substitute the actual report file name before sending.\n");
+        sb.append("\n");
+        sb.append(FALSE_POSITIVE_NOTE);
         sb.append("-->\n\n");
 
         sb.append("## Metadata\n");
@@ -123,6 +148,8 @@ public final class InspectionMarkdownReport {
             sb.append("\nNo problems were reported.\n");
             return sb.toString();
         }
+
+        appendArchitectureViolations(sb, sections);
 
         for (InspectionSection section : sections) {
             if (section.problems().isEmpty()) {
@@ -160,6 +187,61 @@ public final class InspectionMarkdownReport {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Renders the {@code ## Architecture Violations} section: one line per
+     * problem whose message carries an architecture code, in the stable format
+     * {@code SB-ARCH-NNN | SEVERITY | path/to/File.java:LINE | rule-id | message | fix | STATUS},
+     * sorted by code, path and line. A {@code |} inside a field is written
+     * as {@code \|}, so splitting a line on {@code " | "} always yields seven
+     * fields. {@code fix} is {@code -} when the finding has no fix hint. Nothing is written when there are no
+     * architecture problems. The problems also stay in their inspection
+     * sections, where they are tracked as tasks.
+     */
+    static final String ARCHITECTURE_FORMAT =
+            "SB-ARCH-NNN | SEVERITY | path/to/File.java:LINE | rule-id | message | fix | STATUS";
+
+    static void appendArchitectureViolations(StringBuilder sb, List<InspectionSection> sections) {
+        List<String[]> rows = new ArrayList<>();
+        for (InspectionSection section : sections) {
+            for (Problem problem : section.problems()) {
+                ArchitectureProblem parsed = ArchitectureProblem.parse(problem.message());
+                if (parsed == null) {
+                    continue;
+                }
+                String severity = (problem.severity() != null && !problem.severity().isBlank()) ? problem.severity()
+                        : section.level();
+                String path = (problem.filePath() == null || problem.filePath().isBlank()) ? UNKNOWN_CELL
+                        : problem.filePath();
+                String line = (problem.line() <= 0) ? UNKNOWN_CELL : String.valueOf(problem.line());
+                String fix = parsed.fixHint();
+                rows.add(new String[] { parsed.code(), oneLine(severity, "unspecified"), oneLine(path, UNKNOWN_CELL),
+                        line, parsed.ruleId(), oneLine(parsed.summary(), UNKNOWN_CELL).replace("|", "\\|"),
+                        oneLine(fix, "-").replace("|", "\\|"), parsed.baselined() ? "baselined" : "new" });
+            }
+        }
+        if (rows.isEmpty()) {
+            return;
+        }
+        rows.sort(Comparator.comparing((String[] row) -> row[0]).thenComparing((String[] row) -> row[2])
+                .thenComparingInt((String[] row) -> UNKNOWN_CELL.equals(row[3]) ? -1 : Integer.parseInt(row[3]))
+                .thenComparing((String[] row) -> row[4]));
+        sb.append("\n---\n\n");
+        sb.append("## Architecture Violations\n\n");
+        sb.append("<!-- Format: ").append(ARCHITECTURE_FORMAT).append(" -->\n\n");
+        for (String[] row : rows) {
+            sb.append(row[0]).append(" | ").append(row[1]).append(" | ").append(row[2]).append(':').append(row[3])
+                    .append(" | ").append(row[4]).append(" | ").append(row[5]).append(" | ").append(row[6])
+                    .append(" | ").append(row[7]).append('\n');
+        }
+    }
+
+    private static String oneLine(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        return value.trim().replaceAll("\\s+", " ");
     }
 
     /**

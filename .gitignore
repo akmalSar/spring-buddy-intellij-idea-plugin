@@ -25,3 +25,9 @@ out/
 /.junie/
 /.opencode/
 /.windsurf/
+/AGENTS.md
+/docs/architecture.md
+/AUDIT.md
+/specs/intellij-2026-3-eap-compatibility.md
+/specs/spring-boot-4-support.md
+/TODO.md

@@ -29,7 +29,7 @@ public class SpringControllerBoundaryInspectionTest extends BasePlatformTestCase
                 @RestController
                 @RestController
                 class SampleController {
-                    User <warning descr="Controller returns a JPA entity directly; return a DTO or response model instead">get</warning>() { return new User(); }
+                    User <warning descr="[SB-ARCH-003 controller-entity-return] Controller returns a JPA entity directly. Why: serializing entities leaks the persistence model and can trigger lazy loading outside the transaction. Fix: Map the entity to a response DTO in the service or a mapper and return the DTO. Suppressing or working around this check is not a fix.">get</warning>() { return new User(); }
                 }
                 @Entity
                 class User { }
@@ -115,7 +115,7 @@ public class SpringControllerBoundaryInspectionTest extends BasePlatformTestCase
         this.myFixture.configureByText("Sample.java", """
                 @RestController
                 class SampleController {
-                    UserRepository <warning descr="Controller should not inject repositories directly; use a service boundary">repository</warning>;
+                    UserRepository <warning descr="[SB-ARCH-002 controller-repository-injection] Controller injects a repository directly. Why: business rules and transaction boundaries belong in the service layer. Fix: Move the repository access into a service method and inject that service. Suppressing or working around this check is not a fix.">repository</warning>;
                 }
                 interface UserRepository { }
                 """);
@@ -127,7 +127,7 @@ public class SpringControllerBoundaryInspectionTest extends BasePlatformTestCase
         this.myFixture.configureByText("Sample.java", """
                 @RestController
                 class SampleController {
-                    SampleController(UserRepository <warning descr="Controller should not inject repositories directly; use a service boundary">repository</warning>) { }
+                    SampleController(UserRepository <warning descr="[SB-ARCH-002 controller-repository-injection] Controller injects a repository directly. Why: business rules and transaction boundaries belong in the service layer. Fix: Move the repository access into a service method and inject that service. Suppressing or working around this check is not a fix.">repository</warning>) { }
                 }
                 interface UserRepository { }
                 """);
@@ -144,6 +144,103 @@ public class SpringControllerBoundaryInspectionTest extends BasePlatformTestCase
                 }
                 """);
         this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testReportsEntityRequestBodyAndCollectionParameter() {
+        this.myFixture.enableInspections(new SpringControllerBoundaryInspection.EntityParameter());
+        this.myFixture.configureByText("Sample.java", """
+                @interface RestController { }
+                @interface PostMapping { }
+                @interface RequestBody { }
+                @interface Entity { }
+                interface Box<T> { }
+                @RestController
+                class SampleController {
+                    @PostMapping
+                    void create(@RequestBody User <warning descr="[SB-ARCH-003 controller-entity-parameter] Controller endpoint accepts a JPA entity. Why: binding request data onto entities allows mass assignment of persistent fields. Fix: Bind a request DTO and let the service map it onto the entity. Suppressing or working around this check is not a fix.">user</warning>) { }
+                    @PostMapping
+                    void createAll(@RequestBody Box<User> <warning descr="[SB-ARCH-003 controller-entity-parameter] Controller endpoint accepts a JPA entity. Why: binding request data onto entities allows mass assignment of persistent fields. Fix: Bind a request DTO and let the service map it onto the entity. Suppressing or working around this check is not a fix.">users</warning>) { }
+                }
+                @Entity
+                class User { }
+                """);
+        this.myFixture.checkHighlighting(true, false, true, true);
+    }
+
+    public void testDoesNotReportDtoParameterOrNonMappedMethod() {
+        this.myFixture.enableInspections(new SpringControllerBoundaryInspection.EntityParameter());
+        this.myFixture.configureByText("Sample.java", """
+                @interface RestController { }
+                @interface PostMapping { }
+                @interface Entity { }
+                @RestController
+                class SampleController {
+                    @PostMapping
+                    void create(UserDto dto) { }
+                    void helper(User user) { }
+                }
+                @Entity
+                class User { }
+                class UserDto { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+        assertEmpty(this.myFixture.doHighlighting().stream()
+                .filter(info -> info.getDescription() != null && info.getDescription().startsWith("[SB-ARCH-"))
+                .toList());
+    }
+
+    public void testDoesNotReportEntityParameterOutsideController() {
+        this.myFixture.enableInspections(new SpringControllerBoundaryInspection.EntityParameter());
+        this.myFixture.configureByText("Sample.java", """
+                @interface PostMapping { }
+                @interface Entity { }
+                class SampleService {
+                    @PostMapping
+                    void create(User user) { }
+                }
+                @Entity
+                class User { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+        assertEmpty(this.myFixture.doHighlighting().stream()
+                .filter(info -> info.getDescription() != null && info.getDescription().startsWith("[SB-ARCH-"))
+                .toList());
+    }
+
+    public void testControllerBoundaryPresetCanBeRaisedToError() {
+        this.myFixture.addFileToProject(".spring-buddy/architecture.json", """
+                { "version": 1, "presets": { "controllerBoundary": "error" } }
+                """);
+        this.myFixture.enableInspections(new SpringControllerBoundaryInspection.RepositoryInjection());
+        this.myFixture.configureByText("Sample.java", """
+                @RestController
+                class SampleController {
+                    UserRepository <error descr="[SB-ARCH-002 controller-repository-injection] Controller injects a repository directly. Why: business rules and transaction boundaries belong in the service layer. Fix: Move the repository access into a service method and inject that service. Suppressing or working around this check is not a fix.">repository</error>;
+                }
+                interface UserRepository { }
+                """);
+        this.myFixture.checkHighlighting(false, false, true, true);
+    }
+
+    public void testControllerBoundaryPresetCanBeTurnedOff() {
+        this.myFixture.addFileToProject(".spring-buddy/architecture.json", """
+                { "version": 1, "presets": { "controllerBoundary": "off" } }
+                """);
+        this.myFixture.enableInspections(new SpringControllerBoundaryInspection.RepositoryInjection(),
+                new SpringControllerBoundaryInspection.EntityReturn());
+        this.myFixture.configureByText("Sample.java", """
+                @RestController
+                class SampleController {
+                    UserRepository repository;
+                    User get() { return new User(); }
+                }
+                @Entity
+                class User { }
+                interface UserRepository { }
+                """);
+        assertEmpty(this.myFixture.doHighlighting().stream()
+                .filter(info -> info.getDescription() != null && info.getDescription().startsWith("[SB-ARCH-"))
+                .toList());
     }
 
     public void testDoesNotTreatUnrelatedOkFactoryAsResponseWrapper() {
